@@ -57,18 +57,25 @@ export const PRICES: Record<string, PriceValue> = {
   "fici-bira": [{ label: "50 CL", amount: 190 }],
   "sise-bira": [{ label: "33 CL", amount: 180 }],
 
-  // Şaraplar / Wines — bottle then glass (legacy MenuCardWines order)
+  // Şaraplar / Wines — BOTTLE then GLASS labels (legacy MenuCardWines: English
+  // "BOTTLE"/"GLASS", bottle first).
   "kirmizi-sarap-ev": [
-    { label: "Şişe", amount: 1100 },
-    { label: "Kadeh", amount: 320 },
+    { label: "BOTTLE", amount: 1100 },
+    { label: "GLASS", amount: 320 },
   ],
   "beyaz-sarap-ev": [
-    { label: "Şişe", amount: 1000 },
-    { label: "Kadeh", amount: 300 },
+    { label: "BOTTLE", amount: 1000 },
+    { label: "GLASS", amount: 300 },
   ],
-  "kirmizi-sarap-sise": [{ label: "Şişe", amount: 1800 }],
+  "kirmizi-sarap-sise": [{ label: "BOTTLE", amount: 1800 }],
 
-  // Alkollü İçecekler / Spirits (grouped by tag; multi-cl)
+  // Alkollü İçecekler / Spirits (grouped by tag; multi-cl).
+  // The table renders two groups (legacy MenuItemHardDrinks): a GLASS column for
+  // small pours (4/5/8 CL) and a BOTTLE column for bottle sizes. To show bottle
+  // prices, add labels ≥30 CL (or "Şişe") — e.g. `{ label: "35 CL", amount: … },
+  // { label: "50 CL", amount: … }, { label: "70 CL", amount: … }` — and the
+  // BOTTLE column appears automatically. Bottle prices below are TODO (real
+  // values pending from the owner).
   "viski-standart": [
     { label: "4 CL", amount: 340 },
     { label: "8 CL", amount: 620 },

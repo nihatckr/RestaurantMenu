@@ -16,19 +16,21 @@ const BUSINESS_ID = "mono";
 
 type Tr = { tr: string; en?: string; ru?: string };
 
-const CATEGORIES: { slug: string; name: Tr }[] = [
+// `columns` overrides the photo-grid column count (legacy per-category layout:
+// desserts/breakfast rendered 2-up; other food 3-up). Omit = kind default.
+const CATEGORIES: { slug: string; name: Tr; columns?: number }[] = [
   { slug: "starters", name: { tr: "Başlangıçlar", en: "Starters", ru: "Закуски" } },
   { slug: "salads", name: { tr: "Salatalar", en: "Salads", ru: "Салаты" } },
   { slug: "pastas", name: { tr: "Makarnalar", en: "Pastas", ru: "Паста" } },
   { slug: "wraps-burgers", name: { tr: "Sandviç & Burger", en: "Wraps & Burgers", ru: "Сэндвичи и бургеры" } },
   { slug: "main-courses", name: { tr: "Ana Yemekler", en: "Main Courses", ru: "Основные блюда" } },
-  { slug: "desserts", name: { tr: "Tatlılar", en: "Desserts", ru: "Десерты" } },
+  { slug: "desserts", name: { tr: "Tatlılar", en: "Desserts", ru: "Десерты" }, columns: 2 },
   { slug: "cocktails", name: { tr: "Kokteyller", en: "Cocktails", ru: "Коктейли" } },
   { slug: "beers", name: { tr: "Biralar", en: "Beers", ru: "Пиво" } },
   { slug: "wines", name: { tr: "Şaraplar", en: "Wines", ru: "Вина" } },
   { slug: "hard-drinks", name: { tr: "Alkollü İçecekler", en: "Spirits", ru: "Крепкие напитки" } },
   { slug: "soft-drinks", name: { tr: "Soft İçecekler", en: "Soft Drinks", ru: "Безалкогольные" } },
-  { slug: "breakfast", name: { tr: "Kahvaltı", en: "Breakfast", ru: "Завтрак" } },
+  { slug: "breakfast", name: { tr: "Kahvaltı", en: "Breakfast", ru: "Завтрак" }, columns: 2 },
 ];
 
 // Products carry identity only (name, kind, category, tag). Prices come from
@@ -236,8 +238,8 @@ async function main() {
   for (const c of CATEGORIES) {
     const cat = await prisma.category.upsert({
       where: { businessId_slug: { businessId: business.id, slug: c.slug } },
-      update: {},
-      create: { businessId: business.id, slug: c.slug },
+      update: { columns: c.columns ?? null },
+      create: { businessId: business.id, slug: c.slug, columns: c.columns ?? null },
     });
     categoryIdBySlug.set(c.slug, cat.id);
     for (const [locale, name] of Object.entries(c.name)) {
@@ -328,6 +330,15 @@ async function main() {
           });
         }
       }
+      // Reconcile: the PRICES map is authoritative — drop any stale measure rows
+      // whose label is no longer listed (e.g. after renaming Şişe→BOTTLE), so
+      // re-seeding never leaves duplicate/old measures behind.
+      await prisma.menuItemPrice.deleteMany({
+        where: {
+          menuItemId: menuItem.id,
+          label: { notIn: options ? options.map((o) => o.label) : [] },
+        },
+      });
     }
   }
 

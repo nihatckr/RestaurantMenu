@@ -86,6 +86,17 @@ export async function listVenueCategories(
 
 export type PriceOption = { label: string; amount: number };
 
+// Lightweight EN translation of the controlled hard-drink `tag` vocabulary so the
+// sub-category header can read English-big + Turkish-small like the legacy
+// HeaderSubCenter (and the EN-primary category headers). This is label i18n for a
+// closed set, not menu content. Tags without an entry fall back to Turkish-only.
+const TAG_EN: Record<string, string> = {
+  Viski: "Whisky",
+  Rakı: "Rakı",
+  Votka: "Vodka",
+  Cin: "Gin",
+};
+
 export type MenuItemView = {
   id: string;
   title: string;
@@ -98,6 +109,7 @@ export type MenuItemView = {
   color: string | null; // drink colour chip (legacy) — used by imageless drink rows
   kind: "FOOD" | "DRINK";
   tag: string | null;
+  tagAlt: string | null; // EN name of the tag (hard-drink sub-header EN+TR)
   dlc: boolean; // wine has a valid label (legacy "DLC" badge)
   featured: boolean; // spans full width in its category (legacy featured breakfast)
 };
@@ -106,6 +118,7 @@ export type MenuCategoryView = {
   slug: string;
   name: string;
   nameAlt: string | null;
+  columns: number | null; // grid column override for photo cards (null = default)
   items: MenuItemView[];
 };
 
@@ -133,6 +146,7 @@ export async function getVenueMenu(
               category: {
                 select: {
                   slug: true,
+                  columns: true,
                   translations: { select: { locale: true, name: true } },
                 },
               },
@@ -187,6 +201,7 @@ export async function getVenueMenu(
       color: item.product.color,
       kind: item.product.kind,
       tag: item.product.tag,
+      tagAlt: item.product.tag ? (TAG_EN[item.product.tag] ?? null) : null,
       dlc: item.product.dlc,
       featured: item.featured,
     };
@@ -201,6 +216,7 @@ export async function getVenueMenu(
       slug: mc.category.slug,
       name: name.primary || mc.category.slug,
       nameAlt: name.secondary,
+      columns: mc.category.columns,
       items: itemsByCategory.get(mc.categoryId) ?? [],
     };
   });

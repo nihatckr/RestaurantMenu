@@ -61,6 +61,9 @@ model Category {
   businessId   String
   business     Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
   slug         String
+  // Optional grid column count for this category's photo cards (legacy per-category
+  // layout: desserts/breakfast = 2, most food = 3). Null → the kind default.
+  columns      Int?
   parentId     String?
   parent       Category?             @relation("CategoryChildren", fields: [parentId], references: [id])
   children     Category[]            @relation("CategoryChildren")
