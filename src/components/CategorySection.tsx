@@ -84,17 +84,18 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
       <div className="flex flex-col">
         {items.map((item) => (
           <div key={item.id} className="flex items-baseline gap-4 py-1.5">
-            <div className="min-w-0 flex-1">
-              <span className="type-item text-sm">{item.title}</span>
-              {item.dlc && (
-                <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[9px] text-muted">
-                  DLC
-                </span>
-              )}
+            {/* TR name stacked over the EN name (alt alta). */}
+            <div className="min-w-0 flex-1 leading-tight">
+              <span className="type-item text-sm">
+                {item.title}
+                {item.dlc && (
+                  <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[9px] text-muted">
+                    DLC
+                  </span>
+                )}
+              </span>
               {item.titleAlt && (
-                <span className="type-desc ml-2 text-xs">
-                  {item.titleAlt}
-                </span>
+                <span className="type-desc block text-xs">{item.titleAlt}</span>
               )}
             </div>
             <span className="type-price w-20 text-right text-sm sm:w-28">
