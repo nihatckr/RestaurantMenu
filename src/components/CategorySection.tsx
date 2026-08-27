@@ -14,16 +14,17 @@ function ItemGrid({
   columns?: number | null;
 }) {
   const nonEmpty = items.length > 0;
-  // Compact imageless drinks (beers/softs/wines) → legacy 3-up.
+  // Grids are mobile-first responsive (1/2/3 up) so nothing is cramped on a phone.
+  // Compact imageless drinks (beers/softs/wines): 1 → 2 → 3.
   const allCompact = nonEmpty && items.every((i) => i.kind === "DRINK" && !i.image);
-  // Cocktails (DRINK + photo) → Figma 5-up tall-portrait tiles.
+  // Cocktails (DRINK + photo): 3 → 4 → 5 (Figma 5-up on desktop, readable on phone).
   const allCocktail = nonEmpty && items.every((i) => i.kind === "DRINK" && !!i.image);
   // Food photo grid: category `columns` override (desserts/breakfast = 2), else 3.
   const foodCols = columns === 2 ? "grid-cols-2" : "grid-cols-3 lg:grid-cols-4";
   const cls = allCompact
-    ? "grid grid-cols-3 gap-x-6 gap-y-2"
+    ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
     : allCocktail
-      ? "grid grid-cols-5 gap-x-1.5 gap-y-3 sm:gap-x-3"
+      ? "grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-4 sm:gap-x-3 lg:grid-cols-5"
       : `grid gap-x-3 gap-y-6 sm:gap-x-6 ${foodCols}`;
   return (
     <div className={cls}>
@@ -61,54 +62,78 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
     }
   const hasBottle = bottleLabels.length > 0;
 
-  // Join a product's prices for the measures in a group, slash-separated.
-  const groupPrices = (item: MenuItemView, group: string[]) =>
-    group
-      .map((l) => item.prices.find((p) => p.label === l))
-      .filter((p): p is NonNullable<typeof p> => !!p)
-      .map((p) => formatPriceTRY(p.amount))
-      .join(" / ");
+  const priceOf = (item: MenuItemView, label: string) => {
+    const p = item.prices.find((x) => x.label === label);
+    return p ? formatPriceTRY(p.amount) : "";
+  };
+
+  // One grid column per measure (auto-sized), shared by the header and every row
+  // so each CL label sits exactly above its price. A narrow gap column separates
+  // the GLASS group from the BOTTLE group. The name takes the remaining space.
+  const gridTemplateColumns = [
+    "minmax(0,1fr)",
+    ...glassLabels.map(() => "auto"),
+    ...(hasBottle ? ["0.75rem", ...bottleLabels.map(() => "auto")] : []),
+  ].join(" ");
+
+  const priceCell = "type-price text-right text-[11px] sm:text-sm";
 
   return (
     <div className="w-full">
-      {/* Header: the CL labels for each group (no product label, no dividers —
-          matches the original design). */}
-      <div className="type-label flex items-baseline gap-4 pb-1">
-        <span className="flex-1" aria-hidden />
-        <span className="w-20 text-right sm:w-28">{glassLabels.join(" / ")}</span>
-        {hasBottle && (
-          <span className="w-28 text-right sm:w-40">{bottleLabels.join(" / ")}</span>
-        )}
+      {/* Header: CL labels, one per column, aligned above the prices. */}
+      <div
+        className="grid items-baseline gap-x-2 pb-1 sm:gap-x-3"
+        style={{ gridTemplateColumns }}
+      >
+        <span aria-hidden />
+        {glassLabels.map((l) => (
+          <span key={l} className="type-label whitespace-nowrap text-right">
+            {l}
+          </span>
+        ))}
+        {hasBottle && <span aria-hidden />}
+        {hasBottle &&
+          bottleLabels.map((l) => (
+            <span key={l} className="type-label whitespace-nowrap text-right">
+              {l}
+            </span>
+          ))}
       </div>
 
-      <div className="flex flex-col">
-        {items.map((item) => (
-          <div key={item.id} className="flex items-baseline gap-4 py-1.5">
-            {/* TR name stacked over the EN name (alt alta). */}
-            <div className="min-w-0 flex-1 leading-tight">
-              <span className="type-item text-sm">
-                {item.title}
-                {item.dlc && (
-                  <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[9px] text-muted">
-                    DLC
-                  </span>
-                )}
-              </span>
-              {item.titleAlt && (
-                <span className="type-desc block text-xs">{item.titleAlt}</span>
+      {items.map((item) => (
+        <div
+          key={item.id}
+          className="grid items-baseline gap-x-2 py-1.5 sm:gap-x-3"
+          style={{ gridTemplateColumns }}
+        >
+          {/* TR name stacked over the EN name (alt alta). */}
+          <div className="min-w-0 leading-tight">
+            <span className="type-item text-sm">
+              {item.title}
+              {item.dlc && (
+                <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[9px] text-muted">
+                  DLC
+                </span>
               )}
-            </div>
-            <span className="type-price w-20 text-right text-sm sm:w-28">
-              {groupPrices(item, glassLabels)}
             </span>
-            {hasBottle && (
-              <span className="type-price w-28 text-right text-sm sm:w-40">
-                {groupPrices(item, bottleLabels)}
-              </span>
+            {item.titleAlt && (
+              <span className="type-desc block text-xs">{item.titleAlt}</span>
             )}
           </div>
-        ))}
-      </div>
+          {glassLabels.map((l) => (
+            <span key={l} className={priceCell}>
+              {priceOf(item, l)}
+            </span>
+          ))}
+          {hasBottle && <span aria-hidden />}
+          {hasBottle &&
+            bottleLabels.map((l) => (
+              <span key={l} className={priceCell}>
+                {priceOf(item, l)}
+              </span>
+            ))}
+        </div>
+      ))}
     </div>
   );
 }
