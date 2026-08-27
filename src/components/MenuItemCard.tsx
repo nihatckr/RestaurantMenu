@@ -2,14 +2,14 @@ import { formatPriceTRY } from "@/lib/format";
 import { ImageWithPlaceholder } from "@/components/ImageWithPlaceholder";
 import type { MenuItemView } from "@/lib/data/menu";
 
-// One card that adapts by item kind (DESIGN.md): drinks are a compact
-// title/price row; food shows an image (or placeholder), title, price, and
-// bilingual copy. Card variant comes from structured data (`kind`), never from a
-// category name string.
+// One card, two layouts (DESIGN.md): imageless measure/price drinks (beers,
+// wines, spirits, soft) render as a compact title/price row; everything with a
+// photo — food AND cocktails — renders as an image card. The variant is driven
+// by the data (image + measures), never a category name string.
 export function MenuItemCard({ item }: { item: MenuItemView }) {
   const price = formatPriceTRY(item.price);
 
-  if (item.kind === "DRINK") {
+  if (item.kind === "DRINK" && !item.image) {
     return (
       <div className="flex items-baseline justify-between gap-3 border-b border-muted/10 py-2">
         <div className="min-w-0">

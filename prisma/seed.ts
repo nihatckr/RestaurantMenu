@@ -119,6 +119,11 @@ const IMAGE_BY_SLUG: Record<string, string> = {
   "san-sebastian": "/products/san-sebastian.jpg",
   "baileys-tiramisu": "/products/baileys-tiramisu.jpg",
   "meyve-tabagi": "/products/meyve-tabagi.jpg",
+  // Cocktails had their own photos in the legacy menu — keep that.
+  "aperol-spritz": "/products/aperol-spritz.jpg",
+  mojito: "/products/mojito.jpg",
+  negroni: "/products/negroni.jpg",
+  margarita: "/products/margarita.jpg",
   "serpme-kahvalti": "/products/serpme-kahvalti.png",
   "mono-kahvalti": "/products/mono-kahvalti.png",
   pankek: "/products/pankek.png",

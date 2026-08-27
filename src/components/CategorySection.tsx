@@ -4,9 +4,11 @@ import type { MenuCategoryView } from "@/lib/data/menu";
 // A category heading + its items. Drink-only categories render as a single
 // column (compact rows); food/mixed render as a grid (DESIGN.md).
 export function CategorySection({ category }: { category: MenuCategoryView }) {
+  // Compact single-column only for imageless measure/price drinks (beers, wines,
+  // spirits, soft). Categories with photos — food and cocktails — use the grid.
   const allDrinks =
     category.items.length > 0 &&
-    category.items.every((i) => i.kind === "DRINK");
+    category.items.every((i) => i.kind === "DRINK" && !i.image);
 
   return (
     <section className="w-full scroll-mt-4">
