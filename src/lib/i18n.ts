@@ -18,3 +18,23 @@ export function pickLocalized<T extends { locale: string }>(
     rows[0]
   );
 }
+
+/**
+ * Bilingual value: the primary text (in `locale`) plus an alternate-language
+ * line — legacy showed both languages together. The alternate is English (or
+ * Turkish when the primary is English). `secondary` is null when the alternate
+ * is missing or identical (avoids a redundant line).
+ */
+export function bilingual<T extends { locale: string }>(
+  rows: T[],
+  getValue: (row: T) => string | null | undefined,
+  locale: string = DEFAULT_LOCALE,
+): { primary: string; secondary: string | null } {
+  const primaryRow = pickLocalized(rows, locale);
+  const primary = (primaryRow && getValue(primaryRow)) || "";
+  const altLocale = locale === "en" ? "tr" : "en";
+  const altRow = rows.find((r) => r.locale === altLocale);
+  const altValue = altRow ? getValue(altRow) : null;
+  const secondary = altValue && altValue !== primary ? altValue : null;
+  return { primary, secondary };
+}

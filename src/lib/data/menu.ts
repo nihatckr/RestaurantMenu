@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db";
-import { DEFAULT_LOCALE, pickLocalized } from "@/lib/i18n";
+import { bilingual, DEFAULT_LOCALE, pickLocalized } from "@/lib/i18n";
 
 // Thin, typed data-access layer (ARCHITECTURE.md). Components/pages call these
 // functions; they never touch `prisma.*` directly. Reads are venue-scoped by
@@ -12,7 +12,9 @@ import { DEFAULT_LOCALE, pickLocalized } from "@/lib/i18n";
 // the cache boundary and decoupled from Prisma types.
 
 export type VenueSummary = { slug: string; name: string };
-export type CategoryLink = { slug: string; name: string };
+// `nameAlt` is the alternate-language name shown alongside the primary one
+// (legacy showed both). Null when absent or identical.
+export type CategoryLink = { slug: string; name: string; nameAlt: string | null };
 
 /** All venue slugs, ordered — for generateStaticParams. */
 export async function listVenueSlugs(): Promise<string[]> {
@@ -72,10 +74,14 @@ export async function listVenueCategories(
   });
 
   const cats = venue?.menu?.categories ?? [];
-  return cats.map((mc) => ({
-    slug: mc.category.slug,
-    name: pickLocalized(mc.category.translations, locale)?.name ?? mc.category.slug,
-  }));
+  return cats.map((mc) => {
+    const { primary, secondary } = bilingual(mc.category.translations, (r) => r.name, locale);
+    return {
+      slug: mc.category.slug,
+      name: primary || mc.category.slug,
+      nameAlt: secondary,
+    };
+  });
 }
 
 export type PriceOption = { label: string; amount: number };
@@ -83,6 +89,7 @@ export type PriceOption = { label: string; amount: number };
 export type MenuItemView = {
   id: string;
   title: string;
+  titleAlt: string | null; // alternate-language title (legacy showed both)
   subtitle: string | null;
   description: string | null;
   price: number | null;
@@ -95,6 +102,7 @@ export type MenuItemView = {
 export type MenuCategoryView = {
   slug: string;
   name: string;
+  nameAlt: string | null;
   items: MenuItemView[];
 };
 
@@ -160,9 +168,11 @@ export async function getVenueMenu(
   const itemsByCategory = new Map<string, MenuItemView[]>();
   for (const item of venue.menu.items) {
     const t = pickLocalized(item.product.translations, locale);
+    const title = bilingual(item.product.translations, (r) => r.title, locale);
     const view: MenuItemView = {
       id: item.id,
-      title: t?.title ?? "",
+      title: title.primary,
+      titleAlt: title.secondary,
       subtitle: t?.subtitle ?? null,
       description: t?.description ?? null,
       price: item.price === null ? null : Number(item.price),
@@ -176,9 +186,13 @@ export async function getVenueMenu(
     itemsByCategory.set(item.categoryId, bucket);
   }
 
-  return venue.menu.categories.map((mc) => ({
-    slug: mc.category.slug,
-    name: pickLocalized(mc.category.translations, locale)?.name ?? mc.category.slug,
-    items: itemsByCategory.get(mc.categoryId) ?? [],
-  }));
+  return venue.menu.categories.map((mc) => {
+    const name = bilingual(mc.category.translations, (r) => r.name, locale);
+    return {
+      slug: mc.category.slug,
+      name: name.primary || mc.category.slug,
+      nameAlt: name.secondary,
+      items: itemsByCategory.get(mc.categoryId) ?? [],
+    };
+  });
 }

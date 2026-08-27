@@ -22,9 +22,14 @@ export function CategoryNav({
           <li key={c.slug} className="border-b border-muted/15">
             <Link
               href={`/${venueSlug}/${c.slug}`}
-              className="flex items-center justify-between py-4 font-brand text-sm tracking-[0.15em] uppercase text-foreground transition-colors hover:text-muted"
+              className="flex items-center justify-between py-4 font-brand tracking-[0.15em] uppercase text-foreground transition-colors hover:text-muted"
             >
-              <span>{c.name}</span>
+              <span className="flex flex-col">
+                <span className="text-sm">{c.name}</span>
+                {c.nameAlt && (
+                  <span className="text-[10px] text-muted">{c.nameAlt}</span>
+                )}
+              </span>
               <span aria-hidden className="text-muted">
                 &rsaquo;
               </span>

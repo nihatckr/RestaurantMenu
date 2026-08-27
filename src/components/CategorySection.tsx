@@ -10,9 +10,16 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
 
   return (
     <section className="w-full scroll-mt-4">
-      <h2 className="py-4 text-center font-brand text-base uppercase tracking-[0.2em] sm:text-lg">
-        {category.name}
-      </h2>
+      <div className="py-4 text-center">
+        <h2 className="font-brand text-base uppercase tracking-[0.2em] sm:text-lg">
+          {category.name}
+        </h2>
+        {category.nameAlt && (
+          <p className="font-body text-xs uppercase tracking-[0.2em] text-muted">
+            {category.nameAlt}
+          </p>
+        )}
+      </div>
       {category.items.length === 0 ? (
         <p className="text-center font-body text-xs text-muted">—</p>
       ) : (

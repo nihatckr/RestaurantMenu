@@ -14,6 +14,9 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
       <div className="flex items-baseline justify-between gap-3 border-b border-muted/10 py-2">
         <div className="min-w-0">
           <p className="truncate font-brand text-sm">{item.title}</p>
+          {item.titleAlt && (
+            <p className="truncate font-body text-xs text-muted">{item.titleAlt}</p>
+          )}
           {item.tag && (
             <p className="font-body text-xs text-muted">{item.tag}</p>
           )}
@@ -38,7 +41,12 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
     <article className="flex flex-col gap-1.5">
       <ImageWithPlaceholder src={item.image} alt={item.title} />
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="font-brand text-sm">{item.title}</h3>
+        <div className="min-w-0">
+          <h3 className="font-brand text-sm">{item.title}</h3>
+          {item.titleAlt && (
+            <p className="font-body text-xs text-muted">{item.titleAlt}</p>
+          )}
+        </div>
         {price && (
           <span className="whitespace-nowrap font-brand text-sm">{price}</span>
         )}
