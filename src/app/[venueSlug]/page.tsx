@@ -7,9 +7,11 @@ import { CategoryNav } from "@/components/CategoryNav";
 import { Spinner } from "@/components/Spinner";
 import {
   getVenueBySlug,
+  getVenueMenu,
   listVenueCategories,
   listVenueSlugs,
 } from "@/lib/data/menu";
+import { buildMenuJsonLd } from "@/lib/jsonld";
 
 // Known venues are prerendered; unknown slugs render on request and call
 // notFound(). This is the Cache Components pattern (dynamicParams is removed
@@ -66,9 +68,19 @@ async function VenueLanding({
   const venue = await getVenueBySlug(venueSlug);
   if (!venue) notFound();
 
-  const categories = await listVenueCategories(venueSlug);
+  const [categories, menu] = await Promise.all([
+    listVenueCategories(venueSlug),
+    getVenueMenu(venueSlug),
+  ]);
+  const jsonLd = menu ? buildMenuJsonLd(venue.name, menu) : null;
   return (
     <>
+      {/* SEO structured data (schema.org Restaurant/Menu) — invisible; a data
+          block, not executable JS, and rendered via React children (no
+          dangerouslySetInnerHTML). */}
+      {jsonLd && (
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      )}
       <VenueHeader name={venue.name} />
       <CategoryNav venueSlug={venueSlug} categories={categories} />
       {/* Figma: MONO TERRACE wordmark anchored at the bottom of the landing. */}
