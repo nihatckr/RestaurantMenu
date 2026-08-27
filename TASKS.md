@@ -236,7 +236,16 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **Acceptance:** suite covers venue-visibility and Product/MenuItem split;
   green in CI.
 
-### T16 — Production readiness
+### T16 — Production readiness — ◐ READINESS DONE (2026-08-27)
+- **Result:** Ship-ready. Strict **static CSP** (no nonce — keeps PPR static;
+  documented in SECURITY.md) + full security header set (verified 6/6 at
+  runtime). `/api/health` liveness route (JSON), `robots.ts`, `metadataBase`
+  (env `NEXT_PUBLIC_SITE_URL`). `db:deploy` script (`prisma migrate deploy`).
+  **`DEPLOY.md`** runbook: env vars, first deploy, and the SaaS→our-app domain
+  cutover for `menu.monohotelantalya.com`. Gates green (typecheck/lint/test 13/
+  test/build). **Pending (needs owner accounts, not codeable):** provision managed
+  Postgres, connect host, DNS cutover — see DEPLOY.md. Launch blockers to confirm
+  first: real prices (U5), alcohol/allergen legal display (U12).
 - **Objective:** Ship-ready build & deploy.
 - **Scope:** env/secret config (`DATABASE_URL`, Auth secrets if used),
   migrations in deploy, error/not-found pages, performance pass, remove dead

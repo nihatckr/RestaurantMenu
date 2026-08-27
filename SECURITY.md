@@ -75,10 +75,16 @@
 - **Migrations** → run in deploy pipeline, not from the running app process.
 
 ### 4. Application & dependency hygiene
-- **Security headers** → set via `next.config`/middleware: a **Content-Security
-  -Policy** (scripts/styles/img/connect allowlists), `X-Content-Type-Options:
-  nosniff`, `Referrer-Policy`, `X-Frame-Options: DENY` (or CSP `frame-ancestors`),
-  `Permissions-Policy`. No inline scripts beyond what Next needs.
+- **Security headers** → set via `next.config` (implemented): a **static
+  Content-Security-Policy** plus `X-Content-Type-Options: nosniff`,
+  `Referrer-Policy`, `X-Frame-Options: DENY`, `Permissions-Policy`, HSTS.
+  **CSP decision:** static (no nonce). A nonce requires per-request **dynamic
+  rendering** (Next docs), which would defeat the static/PPR menu shell. Given a
+  read-only menu with no user input and no `dangerouslySetInnerHTML`, the XSS
+  surface is minimal, so a static policy is the right trade. `'unsafe-inline'`
+  is required for Next's hydration/streaming; `'unsafe-eval'` is dev-only.
+  Revisit (nonce + dynamic) only if user-generated content or an authed admin is
+  added.
 - **Third-party scripts** → analytics/trackers (GA, Clarity) are **opt-in
   decisions**, not defaults; each must be justified and reflected in CSP + a
   privacy note. Default MVP ships **none**.

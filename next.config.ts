@@ -17,14 +17,34 @@ const nextConfig: NextConfig = {
     browserToTerminal: "error",
   },
 
-  // Baseline security headers (SECURITY.md §4). A strict, nonce-based
-  // Content-Security-Policy is deferred to T16 hardening (needs middleware to
-  // emit per-request nonces for Next's streaming inline scripts).
+  // Security headers (SECURITY.md §4).
+  //
+  // CSP is intentionally **static (no nonce)**: a nonce requires per-request
+  // dynamic rendering (Next docs), which would defeat this menu's static/PPR
+  // shell. The XSS surface is minimal — a read-only menu with no user input and
+  // no `dangerouslySetInnerHTML` — so a static policy is the right trade.
+  // `'unsafe-inline'` is required for Next's hydration/streaming inline
+  // script/style; `'unsafe-eval'` is dev-only (React uses eval for debugging).
   async headers() {
+    const isDev = process.env.NODE_ENV !== "production";
+    const csp = [
+      "default-src 'self'",
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "upgrade-insecure-requests",
+    ].join("; ");
+
     return [
       {
         source: "/:path*",
         headers: [
+          { key: "Content-Security-Policy", value: csp },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
