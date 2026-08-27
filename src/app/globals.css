@@ -56,3 +56,27 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/*
+ * Centralized typography — one place, used consistently across the menu so the
+ * heading/label styles never drift. Size (text-*) stays at the call site.
+ *   .type-heading    — section title (brand, wide-tracked caps)
+ *   .type-subheading — the secondary line under a title (muted caps)
+ *   .type-tag        — a sub-category label (brand, medium track)
+ *   .type-label      — tiny column/measure labels (muted caps)
+ */
+@layer components {
+  .type-heading {
+    @apply font-brand uppercase tracking-[0.2em];
+  }
+  .type-subheading {
+    @apply font-body uppercase tracking-[0.2em] text-muted;
+  }
+  .type-tag {
+    /* uppercase (not the font's own caps) so lang=en yields a dotless I. */
+    @apply font-brand uppercase tracking-[0.1em];
+  }
+  .type-label {
+    @apply font-body text-[10px] uppercase tracking-wider text-muted;
+  }
+}

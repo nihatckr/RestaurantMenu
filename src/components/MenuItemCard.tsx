@@ -74,9 +74,7 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
                 key={po.label}
                 className="flex flex-col border-l border-foreground/25 pl-2 leading-tight"
               >
-                <span className="text-[10px] uppercase tracking-wider text-muted">
-                  {po.label}
-                </span>
+                <span className="type-label">{po.label}</span>
                 <span className="font-brand text-sm">{formatPriceTRY(po.amount)}</span>
               </div>
             ))

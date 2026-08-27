@@ -11,7 +11,9 @@
  */
 export function formatPriceTRY(amount: number | null | undefined): string {
   if (amount == null || Number.isNaN(amount)) return "";
+  // No thousands separator (design shows plain "1400", not "1.400").
   return new Intl.NumberFormat("tr-TR", {
     maximumFractionDigits: 0,
+    useGrouping: false,
   }).format(amount);
 }

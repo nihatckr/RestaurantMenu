@@ -71,8 +71,9 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
 
   return (
     <div className="w-full">
-      {/* Header: the CL labels for each group (no product label — Figma hides it). */}
-      <div className="flex items-baseline gap-4 border-b border-muted/20 pb-1 font-body text-[10px] uppercase tracking-wider text-muted">
+      {/* Header: the CL labels for each group (no product label, no dividers —
+          matches the original design). */}
+      <div className="type-label flex items-baseline gap-4 pb-1">
         <span className="flex-1" aria-hidden />
         <span className="w-20 text-right sm:w-28">{glassLabels.join(" / ")}</span>
         {hasBottle && (
@@ -80,7 +81,7 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
         )}
       </div>
 
-      <div className="flex flex-col divide-y divide-muted/10">
+      <div className="flex flex-col">
         {items.map((item) => (
           <div key={item.id} className="flex items-baseline gap-4 py-1.5">
             <div className="min-w-0 flex-1">
@@ -141,14 +142,14 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
   return (
     <section className="w-full scroll-mt-4">
       <div className="py-4 text-center">
-        <h2 className="font-brand text-base uppercase tracking-[0.2em] sm:text-lg">
+        {/* lang=en so the uppercase EN title uses dotless I (SPIRITS, not SPİRİTS). */}
+        <h2
+          lang={category.nameAlt ? "en" : undefined}
+          className="type-heading text-base sm:text-lg"
+        >
           {heading}
         </h2>
-        {subheading && (
-          <p className="font-body text-xs uppercase tracking-[0.2em] text-muted">
-            {subheading}
-          </p>
-        )}
+        {subheading && <p className="type-subheading text-xs">{subheading}</p>}
       </div>
 
       {items.length === 0 ? (
@@ -163,13 +164,11 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
             const subheading = alt ? tag : null;
             return (
               <div key={tag}>
-                <h3 className="font-brand text-base tracking-[0.1em] text-foreground">
+                <h3 lang={alt ? "en" : undefined} className="type-tag text-base">
                   {heading}
                 </h3>
                 {subheading && (
-                  <p className="mb-1 font-body text-[10px] uppercase tracking-[0.2em] text-muted">
-                    {subheading}
-                  </p>
+                  <p className="type-subheading mb-1 text-[10px]">{subheading}</p>
                 )}
                 <TagGroup items={items.filter((i) => i.tag === tag)} />
               </div>

@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { formatPriceTRY } from "./format";
 
 describe("formatPriceTRY", () => {
-  it("formats a number as a plain grouped price (no currency symbol)", () => {
-    // Figma shows plain numbers; tr-TR groups thousands with a dot.
+  it("formats a number as a plain price (no separator, no currency symbol)", () => {
+    // Design shows plain numbers with no thousands separator.
     expect(formatPriceTRY(250)).toBe("250");
-    expect(formatPriceTRY(1400)).toBe("1.400");
+    expect(formatPriceTRY(1400)).toBe("1400");
     // no ₺ sign (brand Mono font lacks the glyph; currency stated in the footer)
     expect(formatPriceTRY(250)).not.toContain("₺");
   });

@@ -22,12 +22,15 @@ export function CategoryNav({
           <li key={c.slug}>
             <Link
               href={`/${venueSlug}/${c.slug}`}
-              className="flex items-center justify-between py-3 font-brand tracking-[0.15em] uppercase text-foreground transition-colors hover:text-muted"
+              className="type-heading flex items-center justify-between py-3 text-foreground transition-colors hover:text-muted"
             >
               <span className="flex flex-col">
                 <span className="text-sm">{c.name}</span>
+                {/* lang=en so the EN line uppercases with dotless I. */}
                 {c.nameAlt && (
-                  <span className="text-[10px] text-muted">{c.nameAlt}</span>
+                  <span lang="en" className="text-[10px] text-muted">
+                    {c.nameAlt}
+                  </span>
                 )}
               </span>
               <span aria-hidden className="text-muted">
