@@ -129,6 +129,20 @@ const IMAGE_BY_SLUG: Record<string, string> = {
   pankek: "/products/pankek.png",
 };
 
+// Drink colour chips (legacy MenuCardSoft/Wines used the product `color` field as
+// a translucent background). Cosmetic; imageless drink rows only. DEMO colours.
+const COLOR_BY_SLUG: Record<string, string> = {
+  efes: "#e0a83e",
+  bomonti: "#c88a2e",
+  "ev-sarabi-kirmizi": "#7b1e2b",
+  "ev-sarabi-beyaz": "#e6dfa8",
+  raki: "#dfe6ec",
+  viski: "#b5651d",
+  cola: "#3b2417",
+  ayran: "#eef2f4",
+  su: "#cfe8f3",
+};
+
 // Per-item, per-venue availability (legacy mn_show_content / mngarden_show_content):
 // a shared product can be hidden in one venue's menu. Slugs listed are HIDDEN in
 // that venue.
@@ -214,10 +228,11 @@ async function main() {
   const productIdBySlug = new Map<string, string>();
   for (const p of PRODUCTS) {
     const image = IMAGE_BY_SLUG[p.slug] ?? null;
+    const color = COLOR_BY_SLUG[p.slug] ?? null;
     const prod = await prisma.product.upsert({
       where: { businessId_slug: { businessId: business.id, slug: p.slug } },
-      update: { kind: p.kind, tag: p.tag ?? null, image },
-      create: { businessId: business.id, slug: p.slug, kind: p.kind, tag: p.tag ?? null, image },
+      update: { kind: p.kind, tag: p.tag ?? null, image, color },
+      create: { businessId: business.id, slug: p.slug, kind: p.kind, tag: p.tag ?? null, image, color },
     });
     productIdBySlug.set(p.slug, prod.id);
     for (const [locale, title] of Object.entries(p.title)) {

@@ -95,6 +95,7 @@ export type MenuItemView = {
   price: number | null;
   prices: PriceOption[]; // labelled measures (e.g. 4 CL / Kadeh); empty = single price
   image: string | null;
+  color: string | null; // drink colour chip (legacy) — used by imageless drink rows
   kind: "FOOD" | "DRINK";
   tag: string | null;
 };
@@ -151,6 +152,7 @@ export async function getVenueMenu(
                   image: true,
                   kind: true,
                   tag: true,
+                  color: true,
                   translations: {
                     select: { locale: true, title: true, subtitle: true, description: true },
                   },
@@ -178,6 +180,7 @@ export async function getVenueMenu(
       price: item.price === null ? null : Number(item.price),
       prices: item.prices.map((po) => ({ label: po.label, amount: Number(po.amount) })),
       image: item.product.image,
+      color: item.product.color,
       kind: item.product.kind,
       tag: item.product.tag,
     };

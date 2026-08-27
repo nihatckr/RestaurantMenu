@@ -28,7 +28,7 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
         <div
           className={
             allDrinks
-              ? "grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2"
+              ? "grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2"
               : "grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4"
           }
         >
