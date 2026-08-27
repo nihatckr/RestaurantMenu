@@ -308,7 +308,10 @@ HTML; no writes). Findings:
 - **U12** Alcohol (beer/wine/spirits/cocktails) + allergen display: are there
   Turkish legal/regulatory constraints on showing an alcohol menu/prices, and is
   allergen disclosure required? Potential launch blocker. (See
-  `DATA_SOURCING.md`.)
+  `DATA_SOURCING.md`.) → **RESOLVED (2026-08-27):** price-label obligations
+  documented and partly implemented — see `COMPLIANCE.md` (VAT-included notice +
+  no-service-charge shown in-app; physical-menu-on-request, discount display, and
+  Ministry price-data filing are the business's operational duties).
 
 ## Migration Risks
 - **R1** Content lives in an external WordPress that the new app must either keep

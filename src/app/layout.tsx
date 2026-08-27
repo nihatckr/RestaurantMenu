@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
+import { MenuFooter } from "@/components/MenuFooter";
 import "./globals.css";
 
 // Brand display font ported from the legacy apps (MonoTRegular).
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-body">
         {children}
+        <MenuFooter />
       </body>
     </html>
   );
