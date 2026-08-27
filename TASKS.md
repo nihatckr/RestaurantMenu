@@ -48,7 +48,17 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
   empty app; brand font + wordmarks render on a placeholder page; security
   headers present in responses and CI audit runs.
 
-### T2 — Database model
+### T2 — Database model — ✅ DONE (2026-08-27)
+- **Result:** Prisma **6.19.3** (pinned; avoided the v8 RC) on local Docker
+  Postgres (port 5433). `schema.prisma` models Business, Venue, Menu, Category
+  (+CategoryTranslation), Product (+ProductTranslation), MenuCategory, MenuItem —
+  Product/MenuItem split intact, `@@unique([menuId, productId])` /
+  `([productId, locale])` etc., i18n tr/en/ru. Migration `init` applied; Prisma
+  client singleton (`src/lib/db.ts`); data-access (`src/lib/data/menu.ts`,
+  server-only); idempotent seed (`prisma/seed.ts`) → **2 venues, 9 categories,
+  7 products, 14 menu items**. Verified from DB: Terrace hides Breakfast + drink
+  order Beer→Wines; Garden shows Breakfast + Wines→Beer — **all data-driven, no
+  venue code**. Decision U11 = two venues. Gates green (typecheck/lint/test/build).
 - **Objective:** Prisma schema for `Business`, `Venue`, `Menu`, `Category`,
   `Product`, `MenuItem` per `PRODUCT.md`.
 - **Scope:** models + relations + migration. `Venue`/`Category` have stable

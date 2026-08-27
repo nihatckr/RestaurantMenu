@@ -1,0 +1,144 @@
+// RestaurantMenu data model — see PRODUCT.md (domain) + I18N.md (translations).
+// Invariants (AGENTS.md 10–12): shared Product catalog; venues are data;
+// Product = venue-independent identity, MenuItem = venue/menu-specific facts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL") // serverless: unpooled URL for migrations (OPS.md)
+}
+
+enum ProductKind {
+  FOOD
+  DRINK
+}
+
+model Business {
+  id            String     @id @default(cuid())
+  name          String
+  currency      String     @default("TRY")
+  defaultLocale String     @default("tr")
+  locales       String[]   @default(["tr", "en", "ru"])
+  venues        Venue[]
+  categories    Category[]
+  products      Product[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Venue {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  slug       String   @unique // drives /[venueSlug]; venue identity is data, not code
+  name       String
+  sortOrder  Int      @default(0)
+  menu       Menu?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// One menu per venue. Categories/items are attached per venue so ordering and
+// visibility can differ between venues (evidenced: Terrace vs Garden).
+model Menu {
+  id         String         @id @default(cuid())
+  venueId    String         @unique
+  venue      Venue          @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  categories MenuCategory[]
+  items      MenuItem[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+}
+
+// Shared taxonomy (Starters, Salads, ...). Hierarchy-capable (live SaaS parentId).
+model Category {
+  id           String                @id @default(cuid())
+  businessId   String
+  business     Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  slug         String
+  parentId     String?
+  parent       Category?             @relation("CategoryChildren", fields: [parentId], references: [id])
+  children     Category[]            @relation("CategoryChildren")
+  translations CategoryTranslation[]
+  menuLinks    MenuCategory[]
+  items        MenuItem[]
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  @@unique([businessId, slug])
+}
+
+model CategoryTranslation {
+  id         String   @id @default(cuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  locale     String
+  name       String
+
+  @@unique([categoryId, locale])
+}
+
+// Venue-independent identity. No price/visibility/order here (AGENTS.md 12).
+model Product {
+  id           String               @id @default(cuid())
+  businessId   String
+  business     Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  slug         String
+  kind         ProductKind          @default(FOOD)
+  image        String?
+  color        String? // drink colour chip (legacy)
+  tag          String? // drink family/tag (legacy)
+  translations ProductTranslation[]
+  menuItems    MenuItem[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@unique([businessId, slug])
+}
+
+model ProductTranslation {
+  id          String  @id @default(cuid())
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  locale      String
+  title       String
+  subtitle    String?
+  description String?
+
+  @@unique([productId, locale])
+}
+
+// Per-venue category placement: which categories show, in what order.
+model MenuCategory {
+  id         String   @id @default(cuid())
+  menuId     String
+  menu       Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  sortOrder  Int      @default(0)
+  visible    Boolean  @default(true) // e.g. Breakfast hidden on Terrace
+
+  @@unique([menuId, categoryId])
+}
+
+// The Product↔Menu join. Venue/menu-specific: price, availability, order, category.
+model MenuItem {
+  id         String   @id @default(cuid())
+  menuId     String
+  menu       Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  price      Decimal? @db.Decimal(10, 2) // nullable: unknown prices flagged, never invented
+  available  Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([menuId, productId])
+}
