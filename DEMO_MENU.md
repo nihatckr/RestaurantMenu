@@ -1,7 +1,7 @@
 # Mono — Demo Menü & Fiyat Listesi
 
-> **DEMO fiyatlar** — gerçek işletme fiyatları değildir; `prisma/seed.ts` içinden gelir.
-> İki mekânda aynıdır. **Terrace** *Kahvaltı*'yı gizler; **Garden** gösterir. Bazı içkiler çok-ölçülüdür (kadeh/şişe, cl).
+> **DEMO fiyatlar** — `prisma/data/prices.ts` içinden gelir; oradan güncelle, `npm run db:seed` çalıştır.
+> İki mekânda aynıdır. **Terrace** *Kahvaltı*'yı gizler; **Garden** gösterir.
 
 ## Başlangıçlar
 
