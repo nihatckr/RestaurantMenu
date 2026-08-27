@@ -146,11 +146,13 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
         {/* lang=en so the uppercase EN title uses dotless I (SPIRITS, not SPİRİTS). */}
         <h2
           lang={category.nameAlt ? "en" : undefined}
-          className="type-heading text-base sm:text-lg"
+          className="type-heading text-base tracking-[0.125em] sm:text-lg"
         >
           {heading}
         </h2>
-        {subheading && <p className="type-subheading text-xs">{subheading}</p>}
+        {subheading && (
+          <p className="type-subheading text-xs tracking-[0.2em]">{subheading}</p>
+        )}
       </div>
 
       {items.length === 0 ? (
@@ -165,11 +167,16 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
             const subheading = alt ? tag : null;
             return (
               <div key={tag}>
-                <h3 lang={alt ? "en" : undefined} className="type-tag text-base">
+                <h3
+                  lang={alt ? "en" : undefined}
+                  className="type-tag text-base tracking-[0.125em]"
+                >
                   {heading}
                 </h3>
                 {subheading && (
-                  <p className="type-subheading mb-1 text-[10px]">{subheading}</p>
+                  <p className="type-subheading mb-1 text-[10px] tracking-[0.2em]">
+                    {subheading}
+                  </p>
                 )}
                 <TagGroup items={items.filter((i) => i.tag === tag)} />
               </div>

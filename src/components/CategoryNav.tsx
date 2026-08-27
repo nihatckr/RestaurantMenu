@@ -22,7 +22,7 @@ export function CategoryNav({
           <li key={c.slug}>
             <Link
               href={`/${venueSlug}/${c.slug}`}
-              className="type-heading flex items-center justify-between py-3 text-foreground transition-colors hover:text-muted"
+              className="type-heading flex items-center justify-between py-3 tracking-[0.6em] text-foreground transition-colors hover:text-muted"
             >
               <span className="flex flex-col">
                 <span className="text-sm">{c.name}</span>

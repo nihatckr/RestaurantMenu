@@ -65,22 +65,27 @@ body {
  *   .type-tag        — a sub-category label (brand, medium track)
  *   .type-label      — tiny column/measure labels (muted caps)
  */
+/*
+ * Font + case here; letter-spacing is set at each call site because legacy
+ * theme.js uses a DIFFERENT tracking per context (category header 0.125em, nav
+ * 0.6em, …). uppercase (not the font's own caps) is kept so lang=en yields a
+ * dotless I.
+ */
 @layer components {
   .type-heading {
-    @apply font-brand uppercase tracking-[0.2em];
+    @apply font-brand uppercase;
   }
   .type-subheading {
-    @apply font-body uppercase tracking-[0.2em] text-muted;
+    @apply font-body uppercase text-muted;
   }
   .type-tag {
-    /* uppercase (not the font's own caps) so lang=en yields a dotless I. */
-    @apply font-brand uppercase tracking-[0.1em];
+    @apply font-brand uppercase;
   }
   /* Legacy theme.js font map (Garden/Terrace): price + cl = Mono (brand);
      title = Inter 700; subtitle/desc = Inter. Headings above are Mono. */
   .type-label {
-    /* legacy `cl` — Mono */
-    @apply font-brand text-[10px] uppercase tracking-wider text-muted;
+    /* legacy `cl` — Mono, ls 0 */
+    @apply font-brand text-[10px] uppercase text-muted;
   }
   .type-item {
     /* legacy `title` — Inter bold */
