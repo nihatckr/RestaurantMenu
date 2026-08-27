@@ -1,31 +1,31 @@
 import Image from "next/image";
 
-// Product image, or the brand's translucent placeholder box when absent (PR11 —
-// never a broken image). Remote hosts must be allowlisted in next.config
-// (SECURITY.md §1); seeded products currently have no image, so the placeholder
-// shows.
+// Product image, or the brand's placeholder box when absent (PR11 — never a
+// broken image). Remote hosts must be allowlisted in next.config (SECURITY.md
+// §1). Figma card image box has only the TOP corners rounded; food is ~square
+// (110×100) and cocktails are a tall portrait tile (5-up grid).
 export function ImageWithPlaceholder({
   src,
   alt,
+  portrait = false,
 }: {
   src: string | null;
   alt: string;
+  portrait?: boolean;
 }) {
+  const aspect = portrait ? "aspect-[4/9]" : "aspect-[11/10]";
   if (!src) {
     return (
-      <div
-        className="aspect-[4/3] w-full rounded-md bg-placeholder/20"
-        aria-hidden
-      />
+      <div className={`${aspect} w-full rounded-t-md bg-placeholder`} aria-hidden />
     );
   }
   return (
     <Image
       src={src}
       alt={alt}
-      width={400}
-      height={300}
-      className="aspect-[4/3] w-full rounded-md object-cover"
+      width={portrait ? 160 : 330}
+      height={portrait ? 360 : 300}
+      className={`${aspect} w-full rounded-t-md object-cover`}
     />
   );
 }
