@@ -30,8 +30,6 @@ const CATEGORIES: { slug: string; name: Tr; columns?: number }[] = [
   { slug: "wines", name: { tr: "Şaraplar", en: "Wines", ru: "Вина" } },
   { slug: "hard-drinks", name: { tr: "Alkollü İçecekler", en: "Spirits", ru: "Крепкие напитки" } },
   { slug: "soft-drinks", name: { tr: "Soft İçecekler", en: "Soft Drinks", ru: "Безалкогольные" } },
-  { slug: "snacks", name: { tr: "Çerezler", en: "Snacks", ru: "Закуски к напиткам" } },
-  { slug: "hookah", name: { tr: "Nargile", en: "Hookah", ru: "Кальян" } },
   { slug: "breakfast", name: { tr: "Kahvaltı", en: "Breakfast", ru: "Завтрак" }, columns: 2 },
 ];
 
@@ -209,10 +207,7 @@ const VENUES: VenueSeed[] = [
       { category: "wines", sortOrder: 9 },
       { category: "hard-drinks", sortOrder: 10 },
       { category: "soft-drinks", sortOrder: 11 },
-      // Terrace-only categories (Garden's menu omits them entirely).
-      { category: "snacks", sortOrder: 12 },
-      { category: "hookah", sortOrder: 13 },
-      { category: "breakfast", sortOrder: 14, visible: true }, // breakfast = Terrace only
+      { category: "breakfast", sortOrder: 12, visible: true }, // breakfast = Terrace only
     ],
   },
   {
@@ -255,6 +250,16 @@ async function main() {
       });
     }
   }
+
+  // Reconcile: CATEGORIES is authoritative — remove any category no longer listed
+  // (cascades to its translations + per-venue MenuCategory links). Safe as long as
+  // the dropped category has no MenuItems (products are reconciled just below).
+  await prisma.category.deleteMany({
+    where: {
+      businessId: business.id,
+      slug: { notIn: CATEGORIES.map((c) => c.slug) },
+    },
+  });
 
   const productIdBySlug = new Map<string, string>();
   for (const p of PRODUCTS) {
