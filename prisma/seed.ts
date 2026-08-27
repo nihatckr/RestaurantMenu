@@ -168,10 +168,10 @@ const DLC = new Set(["kirmizi-sarap-sise"]);
 // Per-item, per-venue availability (legacy mn_show_content / mngarden_show_content):
 // a shared product can be hidden in one venue's menu. Slugs listed are HIDDEN in
 // that venue.
-const HIDDEN_BY_VENUE: Record<string, string[]> = {
-  terrace: ["vegan-wrap"], //  Vegan Wrap only on Garden's menu
-  garden: ["cheeseburger"], // Cheeseburger only on Terrace's menu
-};
+// Per-item, per-venue hiding (legacy mn_show_content / mngarden_show_content).
+// Mechanism kept, but no items are hidden — the real per-venue product list is
+// unknown (dead backend), and the shared catalog shows in full in both venues.
+const HIDDEN_BY_VENUE: Record<string, string[]> = {};
 
 // Featured items span the full category width (legacy featured the first two
 // breakfast spreads). Data-driven — no category name is hard-coded.

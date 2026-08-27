@@ -57,16 +57,16 @@ describe("data-access: per-venue visibility & ordering", () => {
     expect((terrace ?? []).some((c) => c.slug === "breakfast")).toBe(false);
   });
 
-  it("per-item visibility: a product can be hidden in one venue only", async () => {
+  it("shared catalog: products show in both venues (no per-item hiding)", async () => {
     const titles = async (slug: string) =>
       ((await getVenueMenu(slug)) ?? []).flatMap((c) => c.items.map((i) => i.title));
     const terrace = await titles("terrace");
     const garden = await titles("garden");
-    // Vegan Wrap: Garden only. Cheeseburger: Terrace only.
-    expect(garden).toContain("Vegan Wrap");
-    expect(terrace).not.toContain("Vegan Wrap");
-    expect(terrace).toContain("Cheeseburger");
-    expect(garden).not.toContain("Cheeseburger");
+    // No per-item venue hiding is configured → shared products appear in both.
+    for (const name of ["Vegan Wrap", "Cheeseburger"]) {
+      expect(terrace).toContain(name);
+      expect(garden).toContain(name);
+    }
   });
 });
 
