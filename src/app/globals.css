@@ -76,18 +76,22 @@ body {
     /* uppercase (not the font's own caps) so lang=en yields a dotless I. */
     @apply font-brand uppercase tracking-[0.1em];
   }
+  /* Legacy theme.js font map (Garden/Terrace): price + cl = Mono (brand);
+     title = Inter 700; subtitle/desc = Inter. Headings above are Mono. */
   .type-label {
-    @apply font-body text-[10px] uppercase tracking-wider text-muted;
+    /* legacy `cl` — Mono */
+    @apply font-brand text-[10px] uppercase tracking-wider text-muted;
   }
-  /* Item name, price and description share ONE family (Inter) so the numbers
-     match the titles/subtitles. Prices are tabular for column alignment. */
   .type-item {
+    /* legacy `title` — Inter bold */
     @apply font-body font-bold;
   }
   .type-price {
-    @apply font-body font-bold tabular-nums;
+    /* legacy `price` — Mono (regular) */
+    @apply font-brand;
   }
   .type-desc {
+    /* legacy `desc` — Inter */
     @apply font-body text-muted;
   }
 }
