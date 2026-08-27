@@ -78,12 +78,15 @@ export async function listVenueCategories(
   }));
 }
 
+export type PriceOption = { label: string; amount: number };
+
 export type MenuItemView = {
   id: string;
   title: string;
   subtitle: string | null;
   description: string | null;
   price: number | null;
+  prices: PriceOption[]; // labelled measures (e.g. 4 CL / Kadeh); empty = single price
   image: string | null;
   kind: "FOOD" | "DRINK";
   tag: string | null;
@@ -131,6 +134,10 @@ export async function getVenueMenu(
               id: true,
               price: true,
               categoryId: true,
+              prices: {
+                orderBy: { sortOrder: "asc" },
+                select: { label: true, amount: true },
+              },
               product: {
                 select: {
                   image: true,
@@ -159,6 +166,7 @@ export async function getVenueMenu(
       subtitle: t?.subtitle ?? null,
       description: t?.description ?? null,
       price: item.price === null ? null : Number(item.price),
+      prices: item.prices.map((po) => ({ label: po.label, amount: Number(po.amount) })),
       image: item.product.image,
       kind: item.product.kind,
       tag: item.product.tag,

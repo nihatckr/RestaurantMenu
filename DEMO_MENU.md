@@ -1,8 +1,7 @@
 # Mono — Demo Menü & Fiyat Listesi
 
 > **DEMO fiyatlar** — gerçek işletme fiyatları değildir; `prisma/seed.ts` içinden gelir.
-> Fiyatlar iki mekânda da aynıdır. **Terrace** menüsünde *Kahvaltı* gizlidir; **Garden** gösterir.
-
+> İki mekânda aynıdır. **Terrace** *Kahvaltı*'yı gizler; **Garden** gösterir. Bazı içkiler çok-ölçülüdür (kadeh/şişe, cl).
 
 ## Başlangıçlar
 
@@ -53,8 +52,8 @@
 
 ## Şaraplar
 
-- Ev Şarabı (Kırmızı) — **₺320**
-- Ev Şarabı (Beyaz) — **₺320**
+- Ev Şarabı (Kırmızı) — Kadeh ₺320 · Şişe ₺1.100
+- Ev Şarabı (Beyaz) — Kadeh ₺320 · Şişe ₺1.100
 
 ## Soft İçecekler
 
@@ -69,15 +68,11 @@
 
 ## Alkollü İçecekler
 
-- Rakı — **₺260**
-- Viski — **₺340**
+- Rakı — 5 CL ₺260 · Şişe ₺1.400
+- Viski — 4 CL ₺340 · 8 CL ₺620
 
 ## Kahvaltı
 
 - Serpme Kahvaltı — **₺650**
 - Mono Kahvaltı — **₺480**
 - Pankek — **₺220**
-
----
-
-_38 ürün · ortalama ₺338_

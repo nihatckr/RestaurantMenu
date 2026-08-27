@@ -127,18 +127,35 @@ model MenuCategory {
 
 // The Product↔Menu join. Venue/menu-specific: price, availability, order, category.
 model MenuItem {
-  id         String   @id @default(cuid())
+  id         String          @id @default(cuid())
   menuId     String
-  menu       Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  menu       Menu            @relation(fields: [menuId], references: [id], onDelete: Cascade)
   productId  String
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
   categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-  price      Decimal? @db.Decimal(10, 2) // nullable: unknown prices flagged, never invented
-  available  Boolean  @default(true)
-  sortOrder  Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  category   Category        @relation(fields: [categoryId], references: [id])
+  // Single price for simple items. For multi-measure items (spirits by cl,
+  // wines by glass/bottle — legacy Hard Drinks) leave null and use `prices`.
+  price      Decimal?        @db.Decimal(10, 2) // nullable: unknown prices flagged, never invented
+  prices     MenuItemPrice[]
+  available  Boolean         @default(true)
+  sortOrder  Int             @default(0)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 
   @@unique([menuId, productId])
+}
+
+// Optional labelled price measures for a menu item (e.g. "4 CL", "8 CL",
+// "Kadeh", "Şişe"). Reproduces the legacy multi-column drink pricing without a
+// wall of nullable columns.
+model MenuItemPrice {
+  id         String   @id @default(cuid())
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  label      String
+  amount     Decimal  @db.Decimal(10, 2)
+  sortOrder  Int      @default(0)
+
+  @@unique([menuItemId, label])
 }

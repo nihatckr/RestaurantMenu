@@ -57,6 +57,26 @@ describe("data-access: per-venue visibility & ordering", () => {
   });
 });
 
+describe("data-access: multi-measure drink pricing", () => {
+  it("spirits carry labelled price measures instead of a single price", async () => {
+    const menu = await getVenueMenu("garden");
+    const items = (menu ?? []).flatMap((c) => c.items);
+    const viski = items.find((i) => i.title === "Viski");
+    expect(viski).toBeDefined();
+    expect(viski!.price).toBeNull();
+    expect(viski!.prices.map((p) => p.label)).toEqual(["4 CL", "8 CL"]);
+    expect(viski!.prices.every((p) => p.amount > 0)).toBe(true);
+  });
+
+  it("simple items keep a single price and no measures", async () => {
+    const menu = await getVenueMenu("garden");
+    const items = (menu ?? []).flatMap((c) => c.items);
+    const burger = items.find((i) => i.title === "Mono Burger");
+    expect(burger!.prices).toEqual([]);
+    expect(burger!.price).not.toBeNull();
+  });
+});
+
 describe("data-access: localization", () => {
   it("localizes category names with tr default and en override", async () => {
     const tr = await listVenueCategories("terrace", "tr");

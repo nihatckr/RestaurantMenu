@@ -124,6 +124,27 @@ const IMAGE_BY_SLUG: Record<string, string> = {
   pankek: "/products/pankek.png",
 };
 
+// Multi-measure pricing (legacy Hard Drinks / wine glass-bottle). Items listed
+// here use these labelled measures instead of a single price. DEMO amounts (U5).
+const PRICE_OPTIONS_BY_SLUG: Record<string, { label: string; amount: number }[]> = {
+  raki: [
+    { label: "5 CL", amount: 260 },
+    { label: "Şişe", amount: 1400 },
+  ],
+  viski: [
+    { label: "4 CL", amount: 340 },
+    { label: "8 CL", amount: 620 },
+  ],
+  "ev-sarabi-kirmizi": [
+    { label: "Kadeh", amount: 320 },
+    { label: "Şişe", amount: 1100 },
+  ],
+  "ev-sarabi-beyaz": [
+    { label: "Kadeh", amount: 320 },
+    { label: "Şişe", amount: 1100 },
+  ],
+};
+
 // Per-venue category order + visibility. Terrace hides Breakfast; drink order
 // differs (Terrace: Beers→Wines; Garden: Wines→…→Beers).
 type VenueSeed = {
@@ -244,11 +265,25 @@ async function main() {
       const categoryId = categoryIdBySlug.get(p.category)!;
       const order = orderByCategory.get(p.category) ?? 0;
       orderByCategory.set(p.category, order + 1);
-      await prisma.menuItem.upsert({
+      const options = PRICE_OPTIONS_BY_SLUG[p.slug];
+      // Multi-measure items carry their prices in MenuItemPrice; leave the single
+      // price null so there is one source of truth.
+      const price = options ? null : p.price;
+      const menuItem = await prisma.menuItem.upsert({
         where: { menuId_productId: { menuId: menu.id, productId } },
-        update: { categoryId, price: p.price, sortOrder: order },
-        create: { menuId: menu.id, productId, categoryId, price: p.price, sortOrder: order },
+        update: { categoryId, price, sortOrder: order },
+        create: { menuId: menu.id, productId, categoryId, price, sortOrder: order },
       });
+      if (options) {
+        for (let i = 0; i < options.length; i++) {
+          const o = options[i];
+          await prisma.menuItemPrice.upsert({
+            where: { menuItemId_label: { menuItemId: menuItem.id, label: o.label } },
+            update: { amount: o.amount, sortOrder: i },
+            create: { menuItemId: menuItem.id, label: o.label, amount: o.amount, sortOrder: i },
+          });
+        }
+      }
     }
   }
 

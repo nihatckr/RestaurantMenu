@@ -148,9 +148,12 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
   `public/products/<slug>`, set via `Product.image` in the seed; `next/image`
   optimizes them (local, no remote allowlist). After a re-seed, a clean local
   build is needed (`use cache` persists in `.next`); prod builds start clean.
-  **Deferred:** multi-measure spirit pricing (4/8cl, bottle/glass columns) — the
-  legacy Hard-Drinks complexity — pending field semantics (U4) and a real data
-  source; current `MenuItem.price` is a single value.
+  **Multi-measure pricing DONE (2026-08-27, U4):** added `MenuItemPrice` child
+  table (labelled measures, `@@unique([menuItemId, label])`); multi-measure items
+  (spirits by cl, wine glass/bottle) leave `MenuItem.price` null and carry
+  `prices[]`. Card renders the labelled measures; simple items keep a single
+  price. Verified: Rakı 5 CL / Şişe, Viski 4 CL / 8 CL, wines Kadeh / Şişe.
+  DEMO amounts (U5). This closes the largest legacy-parity gap.
 - **Objective:** Product/MenuItem card rendering with bilingual text, price,
   image + placeholder, and structured drink attributes (PR6, PR9, PR11).
 - **Scope:** a small set of presentation components covering food and drink

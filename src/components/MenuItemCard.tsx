@@ -18,7 +18,18 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
             <p className="font-body text-xs text-muted">{item.tag}</p>
           )}
         </div>
-        {price && <p className="whitespace-nowrap font-brand text-sm">{price}</p>}
+        {item.prices.length > 0 ? (
+          <div className="flex shrink-0 flex-wrap justify-end gap-x-3 gap-y-0.5">
+            {item.prices.map((po) => (
+              <span key={po.label} className="whitespace-nowrap font-brand text-sm">
+                <span className="text-xs text-muted">{po.label}</span>{" "}
+                {formatPriceTRY(po.amount)}
+              </span>
+            ))}
+          </div>
+        ) : (
+          price && <p className="whitespace-nowrap font-brand text-sm">{price}</p>
+        )}
       </div>
     );
   }
