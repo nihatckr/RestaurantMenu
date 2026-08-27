@@ -178,7 +178,13 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **Acceptance:** documented parity check passes; deviations are intentional and
   recorded.
 
-### T11 — Admin need assessment (decision gate)
+### T11 — Admin need assessment — ✅ DECIDED: NO ADMIN (2026-08-27)
+- **Decision (user):** Admin is **not needed**. Content is managed via **seed
+  data** (`prisma/seed.ts`). **T12 (Auth), T13 (Product management), T14 (Menu
+  assignment) are deferred / out of MVP.** Revisit only if ongoing self-service
+  editing becomes a real need. The seed is now the canonical content source
+  (12 categories, 38 real-named products across both venues; prices placeholder
+  pending U5).
 - **Objective:** Decide whether an admin/authoring UI is in scope now, or seed
   data suffices for launch (A3).
 - **Scope:** short written decision; if "no", stop here for content management.

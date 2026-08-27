@@ -137,8 +137,9 @@ venue, never as `if (venue === 'terrace')`.
   (Legacy used one shared backend; per-venue price is not proven.)
 - **ASSUMPTION A2** A single Business with venues Terrace and Garden is the MVP
   scope; the schema is built for N venues but only these two are seeded.
-- **ASSUMPTION A3** An admin/authoring UI is eventually wanted but is **not** in
-  the first shippable slice; MVP content can come from **seed data**.
+- **~~ASSUMPTION A3~~ → DECIDED (2026-08-27):** No admin/authoring UI. Content is
+  managed via **seed data** (`prisma/seed.ts`); Auth.js + admin CRUD (T12–T14)
+  are out of MVP. Revisit only if self-service editing becomes a real need.
 - **ASSUMPTION A4** Hard Drinks and Soft Drinks become ordinary Categories in
   the unified model (legacy stored them as separate taxonomies); their
   multi-measure pricing is preserved as structured fields, not free text.
