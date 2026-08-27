@@ -207,7 +207,7 @@ const VENUES: VenueSeed[] = [
       { category: "wines", sortOrder: 9 },
       { category: "hard-drinks", sortOrder: 10 },
       { category: "soft-drinks", sortOrder: 11 },
-      { category: "breakfast", sortOrder: 12, visible: false },
+      { category: "breakfast", sortOrder: 12, visible: true }, // breakfast = Terrace only
     ],
   },
   {
@@ -222,7 +222,7 @@ const VENUES: VenueSeed[] = [
       { category: "soft-drinks", sortOrder: 9 },
       { category: "beers", sortOrder: 10 },
       { category: "hard-drinks", sortOrder: 11 },
-      { category: "breakfast", sortOrder: 12, visible: true },
+      { category: "breakfast", sortOrder: 12, visible: false }, // Garden has no breakfast
     ],
   },
 ];

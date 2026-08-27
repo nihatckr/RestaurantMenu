@@ -37,11 +37,12 @@ describe("data-access: venues & shared catalog", () => {
 });
 
 describe("data-access: per-venue visibility & ordering", () => {
-  it("Terrace hides Breakfast; Garden shows it", async () => {
+  it("Garden hides Breakfast; Terrace shows it", async () => {
+    // Breakfast is a Terrace-only service; Garden does not serve it.
     const terrace = slugs(await listVenueCategories("terrace"));
     const garden = slugs(await listVenueCategories("garden"));
-    expect(terrace).not.toContain("breakfast");
-    expect(garden).toContain("breakfast");
+    expect(terrace).toContain("breakfast");
+    expect(garden).not.toContain("breakfast");
   });
 
   it("drink order differs per venue (data-driven)", async () => {
@@ -52,8 +53,8 @@ describe("data-access: per-venue visibility & ordering", () => {
   });
 
   it("hidden category has no items in the venue menu", async () => {
-    const terrace = await getVenueMenu("terrace");
-    expect((terrace ?? []).some((c) => c.slug === "breakfast")).toBe(false);
+    const garden = await getVenueMenu("garden");
+    expect((garden ?? []).some((c) => c.slug === "breakfast")).toBe(false);
   });
 
   it("per-item visibility: a product can be hidden in one venue only", async () => {
