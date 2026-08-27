@@ -9,14 +9,20 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
     category.items.every((i) => i.kind === "DRINK");
 
   return (
-    <section className="w-full max-w-md">
-      <h2 className="py-4 text-center font-brand text-base uppercase tracking-[0.2em]">
+    <section className="w-full scroll-mt-4">
+      <h2 className="py-4 text-center font-brand text-base uppercase tracking-[0.2em] sm:text-lg">
         {category.name}
       </h2>
       {category.items.length === 0 ? (
         <p className="text-center font-body text-xs text-muted">—</p>
       ) : (
-        <div className={allDrinks ? "flex flex-col" : "grid grid-cols-2 gap-x-4 gap-y-6"}>
+        <div
+          className={
+            allDrinks
+              ? "grid grid-cols-1 gap-x-10 gap-y-1 sm:grid-cols-2"
+              : "grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4"
+          }
+        >
           {category.items.map((item) => (
             <MenuItemCard key={item.id} item={item} />
           ))}

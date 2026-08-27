@@ -157,7 +157,12 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **Acceptance:** food and drink items render correctly incl. multi-measure drink
   pricing; missing image shows placeholder; both languages shown together.
 
-### T9 — Responsive behavior
+### T9 — Responsive behavior — ✅ DONE (2026-08-27)
+- **Result:** Mobile-first, fluid layout (no fixed 390px, no `!important`).
+  Category page container `max-w-md → sm:max-w-2xl → lg:max-w-4xl`; food grid
+  `grid-cols-2 → sm:3 → lg:4`; drink rows `grid-cols-1 → sm:2`; responsive
+  heading sizes. Verified: responsive classes emitted in HTML + build green.
+  (Visual screenshot pending — Chrome extension not connected this session.)
 - **Objective:** Fluid, mobile-first layout (replace legacy fixed 390px frame).
 - **Scope:** Tailwind responsive layout across landing, category, cards.
 - **Dependencies:** T6–T8.

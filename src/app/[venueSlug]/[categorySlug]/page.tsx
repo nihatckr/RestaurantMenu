@@ -31,7 +31,7 @@ export default async function CategoryPage({
   params: Promise<{ venueSlug: string; categorySlug: string }>;
 }) {
   return (
-    <main className="flex flex-1 flex-col items-center gap-4 p-6">
+    <main className="flex flex-1 flex-col items-center px-4 py-6 sm:px-6">
       <Suspense fallback={<Spinner />}>
         <CategoryView params={params} />
       </Suspense>
@@ -58,16 +58,16 @@ async function CategoryView({
   const ordered = [chosen, ...menu.filter((c) => c.slug !== categorySlug)];
 
   return (
-    <>
+    <div className="flex w-full max-w-md flex-col gap-6 sm:max-w-2xl lg:max-w-4xl">
       <Link
         href={`/${venueSlug}`}
-        className="self-start font-body text-xs text-muted underline"
+        className="font-body text-xs text-muted underline"
       >
         &lsaquo; {venue.name}
       </Link>
       {ordered.map((category) => (
         <CategorySection key={category.slug} category={category} />
       ))}
-    </>
+    </div>
   );
 }
