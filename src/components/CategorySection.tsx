@@ -33,7 +33,9 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
           }
         >
           {category.items.map((item) => (
-            <MenuItemCard key={item.id} item={item} />
+            <div key={item.id} className={item.featured ? "col-span-full" : ""}>
+              <MenuItemCard item={item} />
+            </div>
           ))}
         </div>
       )}

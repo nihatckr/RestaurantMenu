@@ -98,6 +98,7 @@ export type MenuItemView = {
   color: string | null; // drink colour chip (legacy) — used by imageless drink rows
   kind: "FOOD" | "DRINK";
   tag: string | null;
+  featured: boolean; // spans full width in its category (legacy featured breakfast)
 };
 
 export type MenuCategoryView = {
@@ -143,6 +144,7 @@ export async function getVenueMenu(
               id: true,
               price: true,
               categoryId: true,
+              featured: true,
               prices: {
                 orderBy: { sortOrder: "asc" },
                 select: { label: true, amount: true },
@@ -183,6 +185,7 @@ export async function getVenueMenu(
       color: item.product.color,
       kind: item.product.kind,
       tag: item.product.tag,
+      featured: item.featured,
     };
     const bucket = itemsByCategory.get(item.categoryId) ?? [];
     bucket.push(view);

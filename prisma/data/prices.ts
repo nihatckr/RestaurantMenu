@@ -53,9 +53,9 @@ export const PRICES: Record<string, PriceValue> = {
   negroni: 440,
   margarita: 420,
 
-  // Biralar / Beers
-  efes: 180,
-  bomonti: 190,
+  // Biralar / Beers (serving size shown, legacy `cl`)
+  efes: [{ label: "33 CL", amount: 180 }],
+  bomonti: [{ label: "33 CL", amount: 190 }],
 
   // Şaraplar / Wines (glass / bottle)
   "ev-sarabi-kirmizi": [

@@ -140,6 +140,7 @@ model MenuItem {
   price      Decimal?        @db.Decimal(10, 2) // nullable: unknown prices flagged, never invented
   prices     MenuItemPrice[]
   available  Boolean         @default(true)
+  featured   Boolean         @default(false) // spans full width in its category (legacy featured breakfast)
   sortOrder  Int             @default(0)
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt

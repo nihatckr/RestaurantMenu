@@ -151,6 +151,10 @@ const HIDDEN_BY_VENUE: Record<string, string[]> = {
   garden: ["bomonti"], //     Bomonti only on Terrace's menu
 };
 
+// Featured items span the full category width (legacy featured the first two
+// breakfast spreads). Data-driven — no category name is hard-coded.
+const FEATURED = new Set(["serpme-kahvalti", "mono-kahvalti"]);
+
 type VenueSeed = {
   slug: string;
   name: string;
@@ -279,11 +283,12 @@ async function main() {
       const options = Array.isArray(pv) ? pv : undefined;
       const price = Array.isArray(pv) ? null : (pv ?? null);
       const available = !hidden.has(p.slug); // per-item, per-venue visibility
+      const featured = FEATURED.has(p.slug);
 
       const menuItem = await prisma.menuItem.upsert({
         where: { menuId_productId: { menuId: menu.id, productId } },
-        update: { categoryId, price, available, sortOrder: order },
-        create: { menuId: menu.id, productId, categoryId, price, available, sortOrder: order },
+        update: { categoryId, price, available, featured, sortOrder: order },
+        create: { menuId: menu.id, productId, categoryId, price, available, featured, sortOrder: order },
       });
       if (options) {
         for (let i = 0; i < options.length; i++) {
