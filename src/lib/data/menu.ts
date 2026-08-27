@@ -77,3 +77,100 @@ export async function listVenueCategories(
     name: pickLocalized(mc.category.translations, locale)?.name ?? mc.category.slug,
   }));
 }
+
+export type MenuItemView = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+  price: number | null;
+  image: string | null;
+  kind: "FOOD" | "DRINK";
+  tag: string | null;
+};
+
+export type MenuCategoryView = {
+  slug: string;
+  name: string;
+  items: MenuItemView[];
+};
+
+/**
+ * Full menu for a venue: visible categories in order, each with its available
+ * items (ordered), localized, with Decimal prices converted to number so the
+ * result is serializable across the cache boundary. Returns null if the venue
+ * has no menu.
+ */
+export async function getVenueMenu(
+  venueSlug: string,
+  locale: string = DEFAULT_LOCALE,
+): Promise<MenuCategoryView[] | null> {
+  "use cache";
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: {
+      menu: {
+        select: {
+          categories: {
+            where: { visible: true },
+            orderBy: { sortOrder: "asc" },
+            select: {
+              categoryId: true,
+              category: {
+                select: {
+                  slug: true,
+                  translations: { select: { locale: true, name: true } },
+                },
+              },
+            },
+          },
+          items: {
+            where: { available: true },
+            orderBy: { sortOrder: "asc" },
+            select: {
+              id: true,
+              price: true,
+              categoryId: true,
+              product: {
+                select: {
+                  image: true,
+                  kind: true,
+                  tag: true,
+                  translations: {
+                    select: { locale: true, title: true, subtitle: true, description: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!venue?.menu) return null;
+
+  const itemsByCategory = new Map<string, MenuItemView[]>();
+  for (const item of venue.menu.items) {
+    const t = pickLocalized(item.product.translations, locale);
+    const view: MenuItemView = {
+      id: item.id,
+      title: t?.title ?? "",
+      subtitle: t?.subtitle ?? null,
+      description: t?.description ?? null,
+      price: item.price === null ? null : Number(item.price),
+      image: item.product.image,
+      kind: item.product.kind,
+      tag: item.product.tag,
+    };
+    const bucket = itemsByCategory.get(item.categoryId) ?? [];
+    bucket.push(view);
+    itemsByCategory.set(item.categoryId, bucket);
+  }
+
+  return venue.menu.categories.map((mc) => ({
+    slug: mc.category.slug,
+    name: pickLocalized(mc.category.translations, locale)?.name ?? mc.category.slug,
+    items: itemsByCategory.get(mc.categoryId) ?? [],
+  }));
+}

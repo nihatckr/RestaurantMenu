@@ -122,7 +122,14 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **Acceptance:** landing lists that venue's categories in seeded order; links
   navigate to category view; server-rendered, minimal client JS.
 
-### T7 — Categories & single-scroll menu page
+### T7 — Categories & single-scroll menu page — ✅ DONE (2026-08-27)
+- **Result:** `/[venueSlug]/[categorySlug]` renders the chosen category first,
+  then the rest on one scroll (PR7), via `getVenueMenu` (visible categories
+  ordered, available items grouped by category, localized, Decimal→number). Only
+  visible categories exist, so hidden ones (Breakfast on Terrace) 404 and never
+  appear. Verified: `/terrace/salads` → Salatalar first, no Kahvaltı;
+  `/terrace/breakfast` → not-found; `/garden/breakfast` → Kahvaltı first. All 27
+  (venue,category) pages prerender. Gates green.
 - **Objective:** Category page rendering the chosen category first, then the rest
   on one scroll (PR7), driven by stable category slugs (not display text).
 - **Scope:** `/[venueSlug]/[categorySlug]`; category ordering per venue (PR8);
@@ -132,7 +139,14 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
   hidden items/categories per venue do not appear; no `description`-string
   switching.
 
-### T8 — Product presentation
+### T8 — Product presentation — ◐ MOSTLY DONE (2026-08-27)
+- **Result:** One `MenuItemCard` adapts by `kind` — food shows
+  image/placeholder + title + TRY price + bilingual copy; drinks render compact
+  title/tag/price rows. `ImageWithPlaceholder` shows the brand placeholder when
+  no image (PR11). `CategorySection` grids food / single-columns drinks.
+  **Deferred:** multi-measure spirit pricing (4/8cl, bottle/glass columns) — the
+  legacy Hard-Drinks complexity — pending field semantics (U4) and a real data
+  source; current `MenuItem.price` is a single value.
 - **Objective:** Product/MenuItem card rendering with bilingual text, price,
   image + placeholder, and structured drink attributes (PR6, PR9, PR11).
 - **Scope:** a small set of presentation components covering food and drink
