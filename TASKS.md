@@ -92,7 +92,15 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
   data; querying Terrace excludes Breakfast, Garden includes it, with no
   venue-name branching anywhere.
 
-### T5 — Dynamic venue route
+### T5 — Dynamic venue route — ✅ DONE (2026-08-27)
+- **Result:** `/[venueSlug]` resolves a Venue via `getVenueBySlug`;
+  `generateStaticParams` prerenders known venues (terrace/garden). Unknown slugs
+  render the `notFound()` boundary — the Cache Components pattern (dynamicParams
+  is removed under cacheComponents; params passed into `<Suspense>` and awaited
+  inside). Note: PPR flushes the static shell first, so an unknown slug returns
+  the not-found **body** with HTTP 200 (documented PPR behavior), not a hard 404.
+  Root `/` is a venue chooser. Reads are `use cache`; venue identity is data, no
+  code branch. Gates green + runtime verified.
 - **Objective:** `/[venueSlug]` resolves a Venue from data (404 on unknown).
 - **Scope:** dynamic segment, venue lookup via data-access, not-found handling;
   proves N-venue support (a seeded 3rd venue would work with zero code change).
@@ -100,7 +108,13 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **Acceptance:** `/terrace` and `/garden` render distinct venue landings from
   the same code; an unknown slug 404s; AGENTS rule 10 upheld.
 
-### T6 — Public menu (landing)
+### T6 — Public menu (landing) — ✅ DONE (2026-08-27)
+- **Result:** Server-Component landing renders the venue wordmark
+  (`VenueHeader`) + ordered, localized (tr) category list (`CategoryNav`) via
+  `listVenueCategories`. Order + visibility come from `MenuCategory` data:
+  verified Terrace hides Breakfast and shows Beer→Wines, Garden shows Breakfast
+  and Wines→Beer. Category links point at `/[venueSlug]/[categorySlug]` (target
+  page is T7). Static/PPR; minimal client JS. Gates green + runtime verified.
 - **Objective:** Server-Component landing: venue wordmark + category list
   (PR7, PR10), ordered per venue.
 - **Scope:** category navigation to category view; ordering from data.
