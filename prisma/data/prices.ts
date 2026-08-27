@@ -57,14 +57,14 @@ export const PRICES: Record<string, PriceValue> = {
   efes: [{ label: "33 CL", amount: 180 }],
   bomonti: [{ label: "33 CL", amount: 190 }],
 
-  // Şaraplar / Wines (glass / bottle)
+  // Şaraplar / Wines — bottle then glass (legacy MenuCardWines order)
   "ev-sarabi-kirmizi": [
-    { label: "Kadeh", amount: 320 },
     { label: "Şişe", amount: 1100 },
+    { label: "Kadeh", amount: 320 },
   ],
   "ev-sarabi-beyaz": [
-    { label: "Kadeh", amount: 320 },
     { label: "Şişe", amount: 1100 },
+    { label: "Kadeh", amount: 320 },
   ],
 
   // Alkollü İçecekler / Spirits (cl / bottle)
