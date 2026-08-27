@@ -176,7 +176,14 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **Acceptance:** usable from small phones to desktop; no fixed-width or
   `!important` hacks; visual parity with legacy intent on a phone width.
 
-### T10 — Legacy parity verification
+### T10 — Legacy parity verification — ✅ DONE (2026-08-27)
+- **Result:** All evidenced legacy behaviors reproduced and covered by integration
+  tests: shared catalog, per-venue **category** visibility (Terrace hides
+  Breakfast), per-venue **item** visibility (Vegan Wrap Garden-only, Bomonti
+  Terrace-only — the legacy `*_show_content` flags), per-venue drink ordering,
+  single-scroll chosen-first flow, bilingual TR+EN display, multi-measure drink
+  pricing, and per-venue wordmark. Divergences are intentional and documented
+  (responsive vs fixed 390px; a full locale switcher is a separate feature).
 - **Objective:** Confirm the new venues match evidenced legacy behavior.
 - **Scope:** checklist/tests: Terrace hides Breakfast, Garden shows it; drink
   ordering per venue; soft-drink subsets; shared catalog; bilingual display
