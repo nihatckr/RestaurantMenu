@@ -19,10 +19,10 @@ export function CategoryNav({
     <nav aria-label="Menu categories" className="w-full max-w-sm">
       <ul className="flex flex-col">
         {categories.map((c) => (
-          <li key={c.slug} className="border-b border-muted/15">
+          <li key={c.slug}>
             <Link
               href={`/${venueSlug}/${c.slug}`}
-              className="flex items-center justify-between py-4 font-brand tracking-[0.15em] uppercase text-foreground transition-colors hover:text-muted"
+              className="flex items-center justify-between py-3 font-brand tracking-[0.15em] uppercase text-foreground transition-colors hover:text-muted"
             >
               <span className="flex flex-col">
                 <span className="text-sm">{c.name}</span>

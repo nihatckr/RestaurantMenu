@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { CategorySection } from "@/components/CategorySection";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
@@ -79,15 +80,40 @@ async function CategoryView({
 
   return (
     <div className="flex w-full max-w-md flex-col gap-6 sm:max-w-2xl lg:max-w-4xl">
-      <Link
-        href={`/${venueSlug}`}
-        className="font-body text-xs text-muted underline"
-      >
-        &lsaquo; {venue.name}
-      </Link>
+      {/* Brand header (Figma: MONO mark centered at top of every menu screen). */}
+      <div className="flex flex-col items-center gap-4">
+        <Link
+          href={`/${venueSlug}`}
+          className="self-start font-body text-xs text-muted underline"
+        >
+          &lsaquo; {venue.name}
+        </Link>
+        <div className="relative h-16 w-14">
+          <Image
+            src="/brand/mono.svg"
+            alt="Mono"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
+      </div>
+
       {ordered.map((category) => (
         <CategorySection key={category.slug} category={category} />
       ))}
+
+      {/* Brand footer (Figma: MONO TERRACE wordmark centered at the bottom). */}
+      <footer className="flex justify-center py-8">
+        <div className="relative h-10 w-36">
+          <Image
+            src={venue.wordmark || "/brand/mono.svg"}
+            alt={venue.name}
+            fill
+            className="object-contain"
+          />
+        </div>
+      </footer>
     </div>
   );
 }

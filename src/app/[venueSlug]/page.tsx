@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { VenueHeader } from "@/components/VenueHeader";
 import { CategoryNav } from "@/components/CategoryNav";
 import { Spinner } from "@/components/Spinner";
@@ -68,8 +69,19 @@ async function VenueLanding({
   const categories = await listVenueCategories(venueSlug);
   return (
     <>
-      <VenueHeader name={venue.name} wordmark={venue.wordmark} />
+      <VenueHeader name={venue.name} />
       <CategoryNav venueSlug={venueSlug} categories={categories} />
+      {/* Figma: MONO TERRACE wordmark anchored at the bottom of the landing. */}
+      <footer className="mt-4 flex justify-center pb-2">
+        <div className="relative h-10 w-36">
+          <Image
+            src={venue.wordmark || "/brand/mono.svg"}
+            alt={venue.name}
+            fill
+            className="object-contain"
+          />
+        </div>
+      </footer>
     </>
   );
 }

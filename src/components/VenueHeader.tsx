@@ -1,30 +1,21 @@
 import Image from "next/image";
 
-// Venue wordmark + name (DESIGN.md). The wordmark is per-venue data, falling
-// back to the Mono mark. Server Component, no client JS.
-export function VenueHeader({
-  name,
-  wordmark,
-}: {
-  name: string;
-  wordmark?: string | null;
-}) {
+// Figma landing: the MONO (MO/NO) mark centered at the top; the venue wordmark
+// sits at the very bottom (see the landing page footer). The venue name is kept
+// as an sr-only <h1> for accessibility/SEO without duplicating the wordmark.
+export function VenueHeader({ name }: { name: string }) {
   return (
-    <header className="flex flex-col items-center gap-3 py-6">
-      {/* Fixed box + object-contain so any wordmark aspect (tall mark or wide
-          wordmark) fits without distortion. */}
-      <div className="relative h-14 w-44">
+    <header className="flex flex-col items-center py-6">
+      <div className="relative h-16 w-14">
         <Image
-          src={wordmark || "/brand/mono.svg"}
-          alt={name}
+          src="/brand/mono.svg"
+          alt="Mono"
           fill
           className="object-contain"
           priority
         />
       </div>
-      <h1 className="font-brand text-lg tracking-[0.2em] uppercase text-foreground">
-        {name}
-      </h1>
+      <h1 className="sr-only">{name}</h1>
     </header>
   );
 }

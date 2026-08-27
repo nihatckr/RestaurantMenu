@@ -9,7 +9,26 @@
   --background: #ffffff;
   --foreground: #000000;
   --muted: #727272;
-  --placeholder: #f48787;
+
+  /*
+   * Mono palette — from the "Mono / Tokens & Resources" Figma file
+   * (fileKey CuwYs8Cw0vUqPFUVzBFU9z). Systematic pastel set built from the
+   * anchor bytes 0x87 / 0xF4, warm → cool.
+   */
+  --mono-red: #f48787;
+  --mono-orange: #f4a887;
+  --mono-light-orange: #f4c887;
+  --mono-yellow: #f4dc87;
+  --mono-lime: #bdf487;
+  --mono-green: #87f4b3;
+  --mono-marine: #87f4cd;
+  --mono-sky: #87daf4;
+  --mono-burple: #879ff4;
+  --mono-purple: #d187f4;
+
+  /* Missing-image placeholder. Figma card image box uses a distinct light pink
+     (--primary-pink #ffd4d2), lighter than the palette red. */
+  --placeholder: #ffd4d2;
 }
 
 @theme inline {
@@ -17,6 +36,17 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-placeholder: var(--placeholder);
+  /* Mono palette utilities: bg-mono-red, text-mono-sky, … */
+  --color-mono-red: var(--mono-red);
+  --color-mono-orange: var(--mono-orange);
+  --color-mono-light-orange: var(--mono-light-orange);
+  --color-mono-yellow: var(--mono-yellow);
+  --color-mono-lime: var(--mono-lime);
+  --color-mono-green: var(--mono-green);
+  --color-mono-marine: var(--mono-marine);
+  --color-mono-sky: var(--mono-sky);
+  --color-mono-burple: var(--mono-burple);
+  --color-mono-purple: var(--mono-purple);
   /* font-family utilities: font-brand (Mono display), font-body (Inter) */
   --font-brand: var(--font-brand);
   --font-body: var(--font-body);
