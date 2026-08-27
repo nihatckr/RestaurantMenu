@@ -19,13 +19,20 @@ export function ImageWithPlaceholder({
       <div className={`${aspect} w-full rounded-t-md bg-placeholder`} aria-hidden />
     );
   }
+  // Serve a right-sized source: cocktails are 5-up (~20vw), food 3-up on mobile →
+  // 4-up on desktop (~33vw→25vw). `bg-placeholder` shows the brand pink while the
+  // image loads (no blank flash) — invisible once the photo paints over it.
+  const sizes = portrait
+    ? "20vw"
+    : "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 33vw";
   return (
     <Image
       src={src}
       alt={alt}
       width={portrait ? 160 : 330}
       height={portrait ? 360 : 300}
-      className={`${aspect} w-full rounded-t-md object-cover`}
+      sizes={sizes}
+      className={`${aspect} w-full rounded-t-md bg-placeholder object-cover`}
     />
   );
 }
