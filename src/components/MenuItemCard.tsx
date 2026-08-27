@@ -22,7 +22,14 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
         )}
         <div className="relative flex items-baseline justify-between gap-3 px-2 py-2.5">
           <div className="min-w-0">
-            <p className="truncate font-brand text-sm">{item.title}</p>
+            <p className="truncate font-brand text-sm">
+              {item.title}
+              {item.dlc && (
+                <span className="ml-1.5 rounded border border-muted/40 px-1 text-[9px] align-middle text-muted">
+                  DLC
+                </span>
+              )}
+            </p>
             {item.titleAlt && (
               <p className="truncate font-body text-xs text-muted">{item.titleAlt}</p>
             )}

@@ -53,34 +53,10 @@ export const PRICES: Record<string, PriceValue> = {
   negroni: 440,
   margarita: 420,
 
-  // Biralar / Beers (serving size shown, legacy `cl`)
-  efes: [{ label: "33 CL", amount: 180 }],
-  bomonti: [{ label: "33 CL", amount: 190 }],
-
-  // Şaraplar / Wines — bottle then glass (legacy MenuCardWines order)
-  "ev-sarabi-kirmizi": [
-    { label: "Şişe", amount: 1100 },
-    { label: "Kadeh", amount: 320 },
-  ],
-  "ev-sarabi-beyaz": [
-    { label: "Şişe", amount: 1100 },
-    { label: "Kadeh", amount: 320 },
-  ],
-
-  // Alkollü İçecekler / Spirits (cl / bottle)
-  raki: [
-    { label: "5 CL", amount: 260 },
-    { label: "Şişe", amount: 1400 },
-  ],
-  viski: [
-    { label: "4 CL", amount: 340 },
-    { label: "8 CL", amount: 620 },
-  ],
-
-  // Soft İçecekler / Soft Drinks
-  cola: 90,
-  ayran: 60,
-  su: 40,
+  // Biralar / Şaraplar / Alkollü / Soft: intentionally empty — the previously
+  // seeded drink names were invented (not from legacy) and were removed. Add real
+  // entries here (number = single price; array = labelled measures / cl) when the
+  // real drink list is available. See seed.ts PRODUCTS note.
 
   // Kahvaltı / Breakfast
   "serpme-kahvalti": 650,

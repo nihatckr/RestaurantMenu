@@ -61,25 +61,15 @@ describe("data-access: per-venue visibility & ordering", () => {
       ((await getVenueMenu(slug)) ?? []).flatMap((c) => c.items.map((i) => i.title));
     const terrace = await titles("terrace");
     const garden = await titles("garden");
-    // Vegan Wrap: Garden only. Bomonti: Terrace only.
+    // Vegan Wrap: Garden only. Cheeseburger: Terrace only.
     expect(garden).toContain("Vegan Wrap");
     expect(terrace).not.toContain("Vegan Wrap");
-    expect(terrace).toContain("Bomonti");
-    expect(garden).not.toContain("Bomonti");
+    expect(terrace).toContain("Cheeseburger");
+    expect(garden).not.toContain("Cheeseburger");
   });
 });
 
-describe("data-access: multi-measure drink pricing", () => {
-  it("spirits carry labelled price measures instead of a single price", async () => {
-    const menu = await getVenueMenu("garden");
-    const items = (menu ?? []).flatMap((c) => c.items);
-    const viski = items.find((i) => i.title === "Viski");
-    expect(viski).toBeDefined();
-    expect(viski!.price).toBeNull();
-    expect(viski!.prices.map((p) => p.label)).toEqual(["4 CL", "8 CL"]);
-    expect(viski!.prices.every((p) => p.amount > 0)).toBe(true);
-  });
-
+describe("data-access: pricing shape", () => {
   it("simple items keep a single price and no measures", async () => {
     const menu = await getVenueMenu("garden");
     const items = (menu ?? []).flatMap((c) => c.items);
@@ -87,6 +77,9 @@ describe("data-access: multi-measure drink pricing", () => {
     expect(burger!.prices).toEqual([]);
     expect(burger!.price).not.toBeNull();
   });
+  // NOTE: multi-measure (spirits/wine cl) is exercised once real drink data
+  // exists; the invented demo drinks were removed. The capability remains in the
+  // schema (MenuItemPrice) and rendering.
 });
 
 describe("data-access: localization", () => {

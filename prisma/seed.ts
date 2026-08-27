@@ -75,18 +75,12 @@ const PRODUCTS: ProductSeed[] = [
   { slug: "negroni", kind: "DRINK", category: "cocktails", tag: "Cocktail", title: { tr: "Negroni", en: "Negroni" } },
   { slug: "margarita", kind: "DRINK", category: "cocktails", tag: "Cocktail", title: { tr: "Margarita", en: "Margarita" } },
 
-  { slug: "efes", kind: "DRINK", category: "beers", tag: "Beer", title: { tr: "Efes", en: "Efes" } },
-  { slug: "bomonti", kind: "DRINK", category: "beers", tag: "Beer", title: { tr: "Bomonti", en: "Bomonti" } },
-
-  { slug: "ev-sarabi-kirmizi", kind: "DRINK", category: "wines", tag: "Wine", title: { tr: "Ev Şarabı (Kırmızı)", en: "House Wine (Red)" } },
-  { slug: "ev-sarabi-beyaz", kind: "DRINK", category: "wines", tag: "Wine", title: { tr: "Ev Şarabı (Beyaz)", en: "House Wine (White)" } },
-
-  { slug: "raki", kind: "DRINK", category: "hard-drinks", tag: "Spirit", title: { tr: "Rakı", en: "Rakı" } },
-  { slug: "viski", kind: "DRINK", category: "hard-drinks", tag: "Spirit", title: { tr: "Viski", en: "Whisky" } },
-
-  { slug: "cola", kind: "DRINK", category: "soft-drinks", tag: "Soft", title: { tr: "Coca-Cola", en: "Coca-Cola", ru: "Кока-Кола" } },
-  { slug: "ayran", kind: "DRINK", category: "soft-drinks", tag: "Soft", title: { tr: "Ayran", en: "Ayran" } },
-  { slug: "su", kind: "DRINK", category: "soft-drinks", tag: "Soft", title: { tr: "Su", en: "Water" } },
+  // NOTE: Beer / Wine / Spirit / Soft-drink products are intentionally absent.
+  // Their legacy names came from a now-dead GraphQL taxonomy — the previously
+  // seeded Efes/Bomonti/Ev Şarabı/Rakı/Viski/Cola/Ayran/Su were INVENTED, not
+  // evidenced (AGENTS.md 5–6), so they were removed. These categories stay empty
+  // until real drink data (names, sub-category/tag, cl measures, dlc) is provided.
+  // Cocktails remain — their names ARE evidenced (legacy Coctails/ assets).
 
   { slug: "serpme-kahvalti", kind: "FOOD", category: "breakfast", title: { tr: "Serpme Kahvaltı", en: "Turkish Breakfast", ru: "Турецкий завтрак" } },
   { slug: "mono-kahvalti", kind: "FOOD", category: "breakfast", title: { tr: "Mono Kahvaltı", en: "Mono Breakfast" } },
@@ -130,25 +124,16 @@ const IMAGE_BY_SLUG: Record<string, string> = {
 };
 
 // Drink colour chips (legacy MenuCardSoft/Wines used the product `color` field as
-// a translucent background). Cosmetic; imageless drink rows only. DEMO colours.
-const COLOR_BY_SLUG: Record<string, string> = {
-  efes: "#e0a83e",
-  bomonti: "#c88a2e",
-  "ev-sarabi-kirmizi": "#7b1e2b",
-  "ev-sarabi-beyaz": "#e6dfa8",
-  raki: "#dfe6ec",
-  viski: "#b5651d",
-  cola: "#3b2417",
-  ayran: "#eef2f4",
-  su: "#cfe8f3",
-};
+// a translucent background). Populate per drink slug when real drink data exists;
+// empty for now (the invented drinks were removed). The rendering stays ready.
+const COLOR_BY_SLUG: Record<string, string> = {};
 
 // Per-item, per-venue availability (legacy mn_show_content / mngarden_show_content):
 // a shared product can be hidden in one venue's menu. Slugs listed are HIDDEN in
 // that venue.
 const HIDDEN_BY_VENUE: Record<string, string[]> = {
-  terrace: ["vegan-wrap"], // Vegan Wrap only on Garden's menu
-  garden: ["bomonti"], //     Bomonti only on Terrace's menu
+  terrace: ["vegan-wrap"], //  Vegan Wrap only on Garden's menu
+  garden: ["cheeseburger"], // Cheeseburger only on Terrace's menu
 };
 
 // Featured items span the full category width (legacy featured the first two
@@ -247,6 +232,13 @@ async function main() {
       });
     }
   }
+
+  // Reconcile: the seed is the single source of content (no admin), so remove any
+  // product no longer listed here. Cascades to its menu items / translations /
+  // prices. This is what lets deleting a product from the seed remove it in prod.
+  await prisma.product.deleteMany({
+    where: { businessId: business.id, slug: { notIn: PRODUCTS.map((p) => p.slug) } },
+  });
 
   for (const v of VENUES) {
     const venue = await prisma.venue.upsert({

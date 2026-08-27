@@ -93,6 +93,7 @@ model Product {
   image        String?
   color        String? // drink colour chip (legacy)
   tag          String? // drink family/tag (legacy)
+  dlc          Boolean              @default(false) // wine: has a valid label (legacy "DLC" badge)
   translations ProductTranslation[]
   menuItems    MenuItem[]
   createdAt    DateTime             @default(now())

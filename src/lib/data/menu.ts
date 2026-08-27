@@ -98,6 +98,7 @@ export type MenuItemView = {
   color: string | null; // drink colour chip (legacy) — used by imageless drink rows
   kind: "FOOD" | "DRINK";
   tag: string | null;
+  dlc: boolean; // wine has a valid label (legacy "DLC" badge)
   featured: boolean; // spans full width in its category (legacy featured breakfast)
 };
 
@@ -155,6 +156,7 @@ export async function getVenueMenu(
                   kind: true,
                   tag: true,
                   color: true,
+                  dlc: true,
                   translations: {
                     select: { locale: true, title: true, subtitle: true, description: true },
                   },
@@ -185,6 +187,7 @@ export async function getVenueMenu(
       color: item.product.color,
       kind: item.product.kind,
       tag: item.product.tag,
+      dlc: item.product.dlc,
       featured: item.featured,
     };
     const bucket = itemsByCategory.get(item.categoryId) ?? [];
