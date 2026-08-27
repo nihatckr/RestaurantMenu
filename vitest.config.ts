@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { defineConfig, configDefaults } from "vitest/config";
 import { resolve } from "node:path";
 
 // `@/` path alias (mirrors tsconfig) and a setup file that loads .env so
@@ -14,5 +14,7 @@ export default defineConfig({
   },
   test: {
     setupFiles: ["./test/setup-env.ts"],
+    // Playwright e2e specs live in e2e/ and must not be picked up by Vitest.
+    exclude: [...configDefaults.exclude, "e2e/**"],
   },
 });
