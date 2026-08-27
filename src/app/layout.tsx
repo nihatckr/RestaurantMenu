@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import { MenuFooter } from "@/components/MenuFooter";
@@ -27,6 +27,13 @@ export const metadata: Metadata = {
   ),
   title: "Mono Terrace — Menu",
   description: "Mono Terrace hotel, rooftop bar & garden menu.",
+  icons: { icon: "/icon-192.png", apple: "/icon-192.png" },
+};
+
+// PWA/browser chrome colour (installable menu — app/manifest.ts). Black matches
+// the brand; no visible change to the page itself.
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 // Root layout. Locale-aware `<html lang>` is set by the [locale] segment layout
