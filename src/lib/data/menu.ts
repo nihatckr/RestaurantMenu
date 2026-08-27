@@ -95,6 +95,10 @@ const TAG_EN: Record<string, string> = {
   Rakı: "Rakı",
   Votka: "Vodka",
   Cin: "Gin",
+  Tekila: "Tequila",
+  Rom: "Rum",
+  Konyak: "Cognac",
+  Likör: "Liqueur",
 };
 
 export type MenuItemView = {

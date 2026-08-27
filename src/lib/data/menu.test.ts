@@ -83,7 +83,14 @@ describe("data-access: pricing shape", () => {
     const hard = (menu ?? []).find((c) => c.slug === "hard-drinks");
     const viski = hard?.items.find((i) => i.title === "Viski (Standart)");
     expect(viski?.price).toBeNull();
-    expect(viski?.prices.map((p) => p.label)).toEqual(["4 CL", "8 CL"]);
+    // Glass pours + bottle sizes (the GLASS/BOTTLE grouped columns).
+    expect(viski?.prices.map((p) => p.label)).toEqual([
+      "4 CL",
+      "8 CL",
+      "35 CL",
+      "50 CL",
+      "70 CL",
+    ]);
     expect(viski?.tag).toBe("Viski");
     // Multiple distinct tags → the section renders sub-groups.
     const tags = new Set((hard?.items ?? []).map((i) => i.tag));

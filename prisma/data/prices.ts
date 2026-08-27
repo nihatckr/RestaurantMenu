@@ -69,20 +69,29 @@ export const PRICES: Record<string, PriceValue> = {
   ],
   "kirmizi-sarap-sise": [{ label: "BOTTLE", amount: 1800 }],
 
-  // Alkollü İçecekler / Spirits (grouped by tag; multi-cl).
+  // Alkollü İçecekler / Spirits (grouped by tag; multi-cl). ALL DEMO VALUES.
   // The table renders two groups (legacy MenuItemHardDrinks): a GLASS column for
-  // small pours (4/5/8 CL) and a BOTTLE column for bottle sizes. To show bottle
-  // prices, add labels ≥30 CL (or "Şişe") — e.g. `{ label: "35 CL", amount: … },
-  // { label: "50 CL", amount: … }, { label: "70 CL", amount: … }` — and the
-  // BOTTLE column appears automatically. Bottle prices below are TODO (real
-  // values pending from the owner).
+  // small pours (4/5/8 CL) and a BOTTLE column for bottle sizes (35/50/70 CL, or
+  // "Şişe"). Products carry various CL versions to exercise both columns.
+  // Replace amounts with the real price list (U5).
   "viski-standart": [
     { label: "4 CL", amount: 340 },
     { label: "8 CL", amount: 620 },
+    { label: "35 CL", amount: 2600 },
+    { label: "50 CL", amount: 3600 },
+    { label: "70 CL", amount: 4800 },
   ],
   "viski-premium": [
     { label: "4 CL", amount: 480 },
     { label: "8 CL", amount: 880 },
+    { label: "35 CL", amount: 3600 },
+    { label: "50 CL", amount: 5000 },
+    { label: "70 CL", amount: 6800 },
+  ],
+  "viski-single-malt": [
+    { label: "4 CL", amount: 620 },
+    { label: "8 CL", amount: 1150 },
+    { label: "70 CL", amount: 9500 },
   ],
   raki: [
     { label: "5 CL", amount: 260 },
@@ -95,8 +104,57 @@ export const PRICES: Record<string, PriceValue> = {
   votka: [
     { label: "4 CL", amount: 300 },
     { label: "8 CL", amount: 560 },
+    { label: "35 CL", amount: 2200 },
+    { label: "50 CL", amount: 3000 },
+    { label: "70 CL", amount: 4200 },
+  ],
+  "votka-premium": [
+    { label: "4 CL", amount: 460 },
+    { label: "8 CL", amount: 840 },
+    { label: "70 CL", amount: 6200 },
   ],
   cin: [
+    { label: "4 CL", amount: 300 },
+    { label: "8 CL", amount: 560 },
+    { label: "35 CL", amount: 2200 },
+    { label: "50 CL", amount: 3000 },
+    { label: "70 CL", amount: 4200 },
+  ],
+  "cin-premium": [
+    { label: "4 CL", amount: 480 },
+    { label: "8 CL", amount: 900 },
+    { label: "70 CL", amount: 6600 },
+  ],
+  tekila: [
+    { label: "4 CL", amount: 360 },
+    { label: "8 CL", amount: 660 },
+    { label: "35 CL", amount: 2800 },
+    { label: "50 CL", amount: 3900 },
+    { label: "70 CL", amount: 5200 },
+  ],
+  "tekila-anejo": [
+    { label: "4 CL", amount: 560 },
+    { label: "8 CL", amount: 1040 },
+    { label: "70 CL", amount: 7800 },
+  ],
+  "rom-beyaz": [
+    { label: "4 CL", amount: 320 },
+    { label: "8 CL", amount: 600 },
+    { label: "35 CL", amount: 2400 },
+    { label: "50 CL", amount: 3300 },
+    { label: "70 CL", amount: 4600 },
+  ],
+  "rom-esmer": [
+    { label: "4 CL", amount: 400 },
+    { label: "8 CL", amount: 740 },
+    { label: "70 CL", amount: 5600 },
+  ],
+  konyak: [
+    { label: "4 CL", amount: 640 },
+    { label: "8 CL", amount: 1180 },
+    { label: "70 CL", amount: 9800 },
+  ],
+  likor: [
     { label: "4 CL", amount: 300 },
     { label: "8 CL", amount: 560 },
   ],
