@@ -208,7 +208,15 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **Acceptance:** a Product can be shown in one venue and hidden in another,
   reordered, and (if A1 confirmed) priced per venue — all without code changes.
 
-### T15 — Tests
+### T15 — Tests — ✅ DONE (2026-08-27)
+- **Result:** Vitest suite, **13 tests green**. Unit: `pickLocalized` fallback
+  (i18n), `formatPriceTRY`. Integration (seeded Postgres): both venues listed &
+  ordered, shared catalog (Mono Burger in both), unknown venue → null, and the
+  evidenced per-venue rules — **Terrace hides Breakfast / Garden shows it**,
+  drink order differs, hidden category has no items, category localization
+  (tr/en). `vitest.config.ts` adds the `@/` alias + a `server-only` stub + `.env`
+  loader (`test/setup-env.ts`). CI now provisions Postgres + `migrate deploy` +
+  `db seed` so integration tests and the DB-backed build run in CI too.
 - **Objective:** Meaningful automated coverage of data-access, visibility/order
   logic, and rendering.
 - **Scope:** unit tests for data-access + per-venue filtering; component/render

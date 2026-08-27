@@ -10,6 +10,20 @@ jobs:
     defaults:
       run:
         working-directory: RestaurantMenu
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: menu
+          POSTGRES_PASSWORD: menu
+          POSTGRES_DB: restaurant_menu
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U menu -d restaurant_menu"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://menu:menu@localhost:5432/restaurant_menu?schema=public
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,6 +32,8 @@ jobs:
           cache: npm
           cache-dependency-path: RestaurantMenu/package-lock.json
       - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npx prisma db seed
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run test
