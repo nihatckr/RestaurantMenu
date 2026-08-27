@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/*
+ * Brand design tokens ported from legacy `theme.js` (see DESIGN.md).
+ * Light, print-like menu surface: black text, muted grey, white background,
+ * translucent pink placeholder for missing images.
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --muted: #727272;
+  --placeholder: #f48787;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-placeholder: var(--placeholder);
+  /* font-family utilities: font-brand (Mono display), font-body (Inter) */
+  --font-brand: var(--font-brand);
+  --font-body: var(--font-body);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
