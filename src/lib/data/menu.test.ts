@@ -37,12 +37,13 @@ describe("data-access: venues & shared catalog", () => {
 });
 
 describe("data-access: per-venue visibility & ordering", () => {
-  it("Garden hides Breakfast; Terrace shows it", async () => {
-    // Breakfast is a Terrace-only service; Garden does not serve it.
+  it("Terrace-only categories (breakfast, snacks, hookah) are absent from Garden", async () => {
     const terrace = slugs(await listVenueCategories("terrace"));
     const garden = slugs(await listVenueCategories("garden"));
-    expect(terrace).toContain("breakfast");
-    expect(garden).not.toContain("breakfast");
+    for (const slug of ["breakfast", "snacks", "hookah"]) {
+      expect(terrace).toContain(slug);
+      expect(garden).not.toContain(slug);
+    }
   });
 
   it("drink order differs per venue (data-driven)", async () => {

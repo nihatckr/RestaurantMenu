@@ -30,6 +30,8 @@ const CATEGORIES: { slug: string; name: Tr; columns?: number }[] = [
   { slug: "wines", name: { tr: "Şaraplar", en: "Wines", ru: "Вина" } },
   { slug: "hard-drinks", name: { tr: "Alkollü İçecekler", en: "Spirits", ru: "Крепкие напитки" } },
   { slug: "soft-drinks", name: { tr: "Soft İçecekler", en: "Soft Drinks", ru: "Безалкогольные" } },
+  { slug: "snacks", name: { tr: "Çerezler", en: "Snacks", ru: "Закуски к напиткам" } },
+  { slug: "hookah", name: { tr: "Nargile", en: "Hookah", ru: "Кальян" } },
   { slug: "breakfast", name: { tr: "Kahvaltı", en: "Breakfast", ru: "Завтрак" }, columns: 2 },
 ];
 
@@ -207,7 +209,10 @@ const VENUES: VenueSeed[] = [
       { category: "wines", sortOrder: 9 },
       { category: "hard-drinks", sortOrder: 10 },
       { category: "soft-drinks", sortOrder: 11 },
-      { category: "breakfast", sortOrder: 12, visible: true }, // breakfast = Terrace only
+      // Terrace-only categories (Garden's menu omits them entirely).
+      { category: "snacks", sortOrder: 12 },
+      { category: "hookah", sortOrder: 13 },
+      { category: "breakfast", sortOrder: 14, visible: true }, // breakfast = Terrace only
     ],
   },
   {
