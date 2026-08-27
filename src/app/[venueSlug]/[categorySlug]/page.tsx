@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CategorySection } from "@/components/CategorySection";
@@ -20,6 +21,25 @@ export async function generateStaticParams() {
   } catch {
     return fallback;
   }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ venueSlug: string; categorySlug: string }>;
+}): Promise<Metadata> {
+  const { venueSlug, categorySlug } = await params;
+  const [venue, menu] = await Promise.all([
+    getVenueBySlug(venueSlug),
+    getVenueMenu(venueSlug),
+  ]);
+  const category = menu?.find((c) => c.slug === categorySlug);
+  if (!venue || !category) return {};
+  return {
+    title: `${category.name} · ${venue.name}`,
+    description: `${venue.name} — ${category.name}`,
+    openGraph: { title: `${category.name} · ${venue.name}` },
+  };
 }
 
 // T7: single-scroll category page — the chosen category first, then the rest

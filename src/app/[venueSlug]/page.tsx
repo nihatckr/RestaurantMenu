@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { VenueHeader } from "@/components/VenueHeader";
 import { CategoryNav } from "@/components/CategoryNav";
@@ -22,6 +23,21 @@ export async function generateStaticParams() {
   } catch {
     return [{ venueSlug: "terrace" }]; // cacheComponents requires ≥1 param
   }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ venueSlug: string }>;
+}): Promise<Metadata> {
+  const { venueSlug } = await params;
+  const venue = await getVenueBySlug(venueSlug);
+  if (!venue) return {};
+  return {
+    title: `${venue.name} — Menü`,
+    description: `${venue.name} menüsü.`,
+    openGraph: { title: `${venue.name} — Menü` },
+  };
 }
 
 // T6 landing: venue wordmark + ordered category list.
