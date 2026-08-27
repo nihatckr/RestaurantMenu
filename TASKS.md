@@ -144,6 +144,10 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
   image/placeholder + title + TRY price + bilingual copy; drinks render compact
   title/tag/price rows. `ImageWithPlaceholder` shows the brand placeholder when
   no image (PR11). `CategorySection` grids food / single-columns drinks.
+  **Images wired (2026-08-27):** 25 real food photos ported from legacy assets to
+  `public/products/<slug>`, set via `Product.image` in the seed; `next/image`
+  optimizes them (local, no remote allowlist). After a re-seed, a clean local
+  build is needed (`use cache` persists in `.next`); prod builds start clean.
   **Deferred:** multi-measure spirit pricing (4/8cl, bottle/glass columns) — the
   legacy Hard-Drinks complexity — pending field semantics (U4) and a real data
   source; current `MenuItem.price` is a single value.

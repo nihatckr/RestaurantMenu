@@ -93,6 +93,37 @@ const PRODUCTS: ProductSeed[] = [
   { slug: "pankek", kind: "FOOD", category: "breakfast", price: 220, title: { tr: "Pankek", en: "Pancakes" } },
 ];
 
+// Real product photos ported from the legacy assets (public/products/<slug>).
+// Food items only — drink cards render compact rows without an image. Missing
+// entries fall back to the placeholder box (PR11).
+const IMAGE_BY_SLUG: Record<string, string> = {
+  kalamar: "/products/kalamar.png",
+  falafel: "/products/falafel.png",
+  "karisik-kizartma": "/products/karisik-kizartma.png",
+  "spring-rolls": "/products/spring-rolls.png",
+  "roka-salatasi": "/products/roka-salatasi.png",
+  "mono-fit": "/products/mono-fit.png",
+  "tavuklu-sezar": "/products/tavuklu-sezar.png",
+  "spagetti-bolognese": "/products/spagetti-bolognese.jpg",
+  "fettucini-alfredo": "/products/fettucini-alfredo.jpg",
+  "penne-arabiata": "/products/penne-arabiata.jpg",
+  manti: "/products/manti.jpg",
+  "mono-burger": "/products/mono-burger.jpg",
+  cheeseburger: "/products/cheeseburger.jpg",
+  "vegan-wrap": "/products/vegan-wrap.jpg",
+  "tavuklu-quesedilla": "/products/tavuklu-quesedilla.jpg",
+  "dana-antrikot": "/products/dana-antrikot.jpg",
+  "somon-izgara": "/products/somon-izgara.jpg",
+  "kuzu-incik": "/products/kuzu-incik.jpg",
+  "cokertme-kebabi": "/products/cokertme-kebabi.jpg",
+  "san-sebastian": "/products/san-sebastian.jpg",
+  "baileys-tiramisu": "/products/baileys-tiramisu.jpg",
+  "meyve-tabagi": "/products/meyve-tabagi.jpg",
+  "serpme-kahvalti": "/products/serpme-kahvalti.png",
+  "mono-kahvalti": "/products/mono-kahvalti.png",
+  pankek: "/products/pankek.png",
+};
+
 // Per-venue category order + visibility. Terrace hides Breakfast; drink order
 // differs (Terrace: Beers→Wines; Garden: Wines→…→Beers).
 type VenueSeed = {
@@ -168,10 +199,11 @@ async function main() {
 
   const productIdBySlug = new Map<string, string>();
   for (const p of PRODUCTS) {
+    const image = IMAGE_BY_SLUG[p.slug] ?? null;
     const prod = await prisma.product.upsert({
       where: { businessId_slug: { businessId: business.id, slug: p.slug } },
-      update: { kind: p.kind, tag: p.tag ?? null },
-      create: { businessId: business.id, slug: p.slug, kind: p.kind, tag: p.tag ?? null },
+      update: { kind: p.kind, tag: p.tag ?? null, image },
+      create: { businessId: business.id, slug: p.slug, kind: p.kind, tag: p.tag ?? null, image },
     });
     productIdBySlug.set(p.slug, prod.id);
     for (const [locale, title] of Object.entries(p.title)) {
