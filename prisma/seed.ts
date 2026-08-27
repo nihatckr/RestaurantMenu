@@ -147,9 +147,18 @@ const PRICE_OPTIONS_BY_SLUG: Record<string, { label: string; amount: number }[]>
 
 // Per-venue category order + visibility. Terrace hides Breakfast; drink order
 // differs (Terrace: Beers→Wines; Garden: Wines→…→Beers).
+// Per-item, per-venue availability (legacy mn_show_content / mngarden_show_content):
+// a shared product can be hidden in one venue's menu. Slugs listed are HIDDEN in
+// that venue.
+const HIDDEN_BY_VENUE: Record<string, string[]> = {
+  terrace: ["vegan-wrap"], // Vegan Wrap only on Garden's menu
+  garden: ["bomonti"], //     Bomonti only on Terrace's menu
+};
+
 type VenueSeed = {
   slug: string;
   name: string;
+  wordmark: string;
   sortOrder: number;
   order: { category: string; sortOrder: number; visible?: boolean }[];
 };
@@ -167,6 +176,7 @@ const VENUES: VenueSeed[] = [
   {
     slug: "terrace",
     name: "Mono Terrace",
+    wordmark: "/brand/mono-terrace.svg",
     sortOrder: 1,
     order: [
       ...FOOD_ORDER.map((category, i) => ({ category, sortOrder: i + 1 })),
@@ -181,6 +191,7 @@ const VENUES: VenueSeed[] = [
   {
     slug: "garden",
     name: "Mono Garden",
+    wordmark: "/brand/mono.svg",
     sortOrder: 2,
     order: [
       ...FOOD_ORDER.map((category, i) => ({ category, sortOrder: i + 1 })),
@@ -239,9 +250,10 @@ async function main() {
   for (const v of VENUES) {
     const venue = await prisma.venue.upsert({
       where: { slug: v.slug },
-      update: { name: v.name, sortOrder: v.sortOrder, businessId: business.id },
-      create: { slug: v.slug, name: v.name, sortOrder: v.sortOrder, businessId: business.id },
+      update: { name: v.name, wordmark: v.wordmark, sortOrder: v.sortOrder, businessId: business.id },
+      create: { slug: v.slug, name: v.name, wordmark: v.wordmark, sortOrder: v.sortOrder, businessId: business.id },
     });
+    const hidden = new Set(HIDDEN_BY_VENUE[v.slug] ?? []);
     const menu = await prisma.menu.upsert({
       where: { venueId: venue.id },
       update: {},
@@ -269,10 +281,11 @@ async function main() {
       // Multi-measure items carry their prices in MenuItemPrice; leave the single
       // price null so there is one source of truth.
       const price = options ? null : p.price;
+      const available = !hidden.has(p.slug); // per-item, per-venue visibility
       const menuItem = await prisma.menuItem.upsert({
         where: { menuId_productId: { menuId: menu.id, productId } },
-        update: { categoryId, price, sortOrder: order },
-        create: { menuId: menu.id, productId, categoryId, price, sortOrder: order },
+        update: { categoryId, price, available, sortOrder: order },
+        create: { menuId: menu.id, productId, categoryId, price, available, sortOrder: order },
       });
       if (options) {
         for (let i = 0; i < options.length; i++) {

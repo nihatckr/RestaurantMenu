@@ -11,7 +11,7 @@ import { bilingual, DEFAULT_LOCALE, pickLocalized } from "@/lib/i18n";
 // Functions return plain, serializable DTOs (localized strings) — safe across
 // the cache boundary and decoupled from Prisma types.
 
-export type VenueSummary = { slug: string; name: string };
+export type VenueSummary = { slug: string; name: string; wordmark: string | null };
 // `nameAlt` is the alternate-language name shown alongside the primary one
 // (legacy showed both). Null when absent or identical.
 export type CategoryLink = { slug: string; name: string; nameAlt: string | null };
@@ -30,7 +30,7 @@ export async function listVenueSlugs(): Promise<string[]> {
 export async function listVenues(): Promise<VenueSummary[]> {
   "use cache";
   const venues = await prisma.venue.findMany({
-    select: { slug: true, name: true },
+    select: { slug: true, name: true, wordmark: true },
     orderBy: { sortOrder: "asc" },
   });
   return venues;
@@ -41,7 +41,7 @@ export async function getVenueBySlug(slug: string): Promise<VenueSummary | null>
   "use cache";
   return prisma.venue.findUnique({
     where: { slug },
-    select: { slug: true, name: true },
+    select: { slug: true, name: true, wordmark: true },
   });
 }
 

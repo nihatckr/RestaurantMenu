@@ -55,6 +55,18 @@ describe("data-access: per-venue visibility & ordering", () => {
     const terrace = await getVenueMenu("terrace");
     expect((terrace ?? []).some((c) => c.slug === "breakfast")).toBe(false);
   });
+
+  it("per-item visibility: a product can be hidden in one venue only", async () => {
+    const titles = async (slug: string) =>
+      ((await getVenueMenu(slug)) ?? []).flatMap((c) => c.items.map((i) => i.title));
+    const terrace = await titles("terrace");
+    const garden = await titles("garden");
+    // Vegan Wrap: Garden only. Bomonti: Terrace only.
+    expect(garden).toContain("Vegan Wrap");
+    expect(terrace).not.toContain("Vegan Wrap");
+    expect(terrace).toContain("Bomonti");
+    expect(garden).not.toContain("Bomonti");
+  });
 });
 
 describe("data-access: multi-measure drink pricing", () => {

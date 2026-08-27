@@ -52,7 +52,7 @@ async function VenueLanding({
   const categories = await listVenueCategories(venueSlug);
   return (
     <>
-      <VenueHeader name={venue.name} />
+      <VenueHeader name={venue.name} wordmark={venue.wordmark} />
       <CategoryNav venueSlug={venueSlug} categories={categories} />
     </>
   );

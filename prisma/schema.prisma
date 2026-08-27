@@ -36,6 +36,7 @@ model Venue {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   slug       String   @unique // drives /[venueSlug]; venue identity is data, not code
   name       String
+  wordmark   String? // per-venue logo/wordmark path (data-driven; falls back to the Mono mark)
   sortOrder  Int      @default(0)
   menu       Menu?
   createdAt  DateTime @default(now())
