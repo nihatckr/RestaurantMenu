@@ -79,4 +79,15 @@ body {
   .type-label {
     @apply font-body text-[10px] uppercase tracking-wider text-muted;
   }
+  /* Item name, price and description share ONE family (Inter) so the numbers
+     match the titles/subtitles. Prices are tabular for column alignment. */
+  .type-item {
+    @apply font-body font-bold;
+  }
+  .type-price {
+    @apply font-body font-bold tabular-nums;
+  }
+  .type-desc {
+    @apply font-body text-muted;
+  }
 }

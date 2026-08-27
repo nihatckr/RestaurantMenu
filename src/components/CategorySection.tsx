@@ -85,23 +85,23 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
         {items.map((item) => (
           <div key={item.id} className="flex items-baseline gap-4 py-1.5">
             <div className="min-w-0 flex-1">
-              <span className="font-body text-sm font-bold">{item.title}</span>
+              <span className="type-item text-sm">{item.title}</span>
               {item.dlc && (
                 <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[9px] text-muted">
                   DLC
                 </span>
               )}
               {item.titleAlt && (
-                <span className="ml-2 font-body text-xs text-muted">
+                <span className="type-desc ml-2 text-xs">
                   {item.titleAlt}
                 </span>
               )}
             </div>
-            <span className="w-20 text-right font-body text-sm font-bold tabular-nums sm:w-28">
+            <span className="type-price w-20 text-right text-sm sm:w-28">
               {groupPrices(item, glassLabels)}
             </span>
             {hasBottle && (
-              <span className="w-28 text-right font-body text-sm font-bold tabular-nums sm:w-40">
+              <span className="type-price w-28 text-right text-sm sm:w-40">
                 {groupPrices(item, bottleLabels)}
               </span>
             )}
@@ -153,7 +153,7 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
       </div>
 
       {items.length === 0 ? (
-        <p className="text-center font-body text-xs text-muted">—</p>
+        <p className="type-desc text-center text-xs">—</p>
       ) : grouped ? (
         <div className="flex flex-col gap-6">
           {tags.map((tag) => {

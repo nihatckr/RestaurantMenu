@@ -7,38 +7,27 @@ import type { MenuItemView } from "@/lib/data/menu";
 //    for cocktails = DRINK+image), Figma menu-card layout.
 //  • imageless drinks (beers, softs, wines) → compact card: name on its own
 //    line, then the measure label (e.g. "50 CL") over the price (Figma beer).
+// Name (.type-item), price (.type-price) and description (.type-desc) all share
+// one type system so the numbers match the titles/subtitles.
 export function MenuItemCard({ item }: { item: MenuItemView }) {
   const price = formatPriceTRY(item.price);
   const isImageCard = item.kind === "FOOD" || !!item.image;
 
   if (isImageCard) {
     const portrait = item.kind === "DRINK"; // cocktails: tall narrow tile
+    const size = portrait ? "text-xs" : "text-sm";
     return (
       <article className="flex flex-col">
         <ImageWithPlaceholder src={item.image} alt={item.title} portrait={portrait} />
         <div className="flex items-baseline justify-between gap-2 pt-1">
-          <h3
-            className={`min-w-0 font-body font-bold ${portrait ? "text-xs" : "text-sm"}`}
-          >
-            {item.title}
-          </h3>
+          <h3 className={`type-item min-w-0 ${size}`}>{item.title}</h3>
           {price && (
-            <span
-              className={`whitespace-nowrap font-brand ${portrait ? "text-xs" : "text-sm"}`}
-            >
-              {price}
-            </span>
+            <span className={`type-price whitespace-nowrap ${size}`}>{price}</span>
           )}
         </div>
-        {item.titleAlt && (
-          <p className="font-body text-xs text-muted">{item.titleAlt}</p>
-        )}
-        {item.subtitle && (
-          <p className="font-body text-xs text-muted">{item.subtitle}</p>
-        )}
-        {item.description && (
-          <p className="font-body text-xs text-muted">{item.description}</p>
-        )}
+        {item.titleAlt && <p className="type-desc text-xs">{item.titleAlt}</p>}
+        {item.subtitle && <p className="type-desc text-xs">{item.subtitle}</p>}
+        {item.description && <p className="type-desc text-xs">{item.description}</p>}
       </article>
     );
   }
@@ -56,7 +45,7 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
         />
       )}
       <div className="relative flex flex-col gap-1 p-2">
-        <p className="font-body text-sm font-bold leading-tight">
+        <p className="type-item text-sm leading-tight">
           {item.title}
           {item.dlc && (
             <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[9px] text-muted">
@@ -65,7 +54,7 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
           )}
         </p>
         {item.titleAlt && (
-          <p className="font-body text-xs leading-tight text-muted">{item.titleAlt}</p>
+          <p className="type-desc text-xs leading-tight">{item.titleAlt}</p>
         )}
         <div className="flex flex-wrap items-end gap-x-4 gap-y-1 pt-0.5">
           {item.prices.length > 0 ? (
@@ -75,14 +64,14 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
                 className="flex flex-col border-l border-foreground/25 pl-2 leading-tight"
               >
                 <span className="type-label">{po.label}</span>
-                <span className="font-brand text-sm">{formatPriceTRY(po.amount)}</span>
+                <span className="type-price text-sm">{formatPriceTRY(po.amount)}</span>
               </div>
             ))
           ) : price ? (
             // Softs have no measure label but keep the same bordered-price
             // discipline as the beer cards (user request).
             <div className="flex flex-col border-l border-foreground/25 pl-2 leading-tight">
-              <span className="font-brand text-sm">{price}</span>
+              <span className="type-price text-sm">{price}</span>
             </div>
           ) : null}
         </div>
