@@ -1,14 +1,37 @@
 import { MenuItemCard } from "@/components/MenuItemCard";
-import type { MenuCategoryView } from "@/lib/data/menu";
+import type { MenuCategoryView, MenuItemView } from "@/lib/data/menu";
 
-// A category heading + its items. Drink-only categories render as a single
-// column (compact rows); food/mixed render as a grid (DESIGN.md).
+// A responsive grid of items: imageless measure/price drinks single-column,
+// food/cocktails in a photo grid. Featured items span the full width.
+function ItemGrid({ items }: { items: MenuItemView[] }) {
+  const allCompact =
+    items.length > 0 && items.every((i) => i.kind === "DRINK" && !i.image);
+  return (
+    <div
+      className={
+        allCompact
+          ? "grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2"
+          : "grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4"
+      }
+    >
+      {items.map((item) => (
+        <div key={item.id} className={item.featured ? "col-span-full" : ""}>
+          <MenuItemCard item={item} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// A category heading + its items. When the category has several `tag`
+// sub-categories (legacy hard drinks: Viski/Rakı/…), items are grouped under
+// tag sub-headers; otherwise they render as a single grid (DESIGN.md).
 export function CategorySection({ category }: { category: MenuCategoryView }) {
-  // Compact single-column only for imageless measure/price drinks (beers, wines,
-  // spirits, soft). Categories with photos — food and cocktails — use the grid.
-  const allDrinks =
-    category.items.length > 0 &&
-    category.items.every((i) => i.kind === "DRINK" && !i.image);
+  const items = category.items;
+  const tags = [
+    ...new Set(items.map((i) => i.tag).filter((t): t is string => !!t)),
+  ];
+  const grouped = tags.length >= 2;
 
   return (
     <section className="w-full scroll-mt-4">
@@ -22,22 +45,22 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
           </p>
         )}
       </div>
-      {category.items.length === 0 ? (
+
+      {items.length === 0 ? (
         <p className="text-center font-body text-xs text-muted">—</p>
-      ) : (
-        <div
-          className={
-            allDrinks
-              ? "grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2"
-              : "grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4"
-          }
-        >
-          {category.items.map((item) => (
-            <div key={item.id} className={item.featured ? "col-span-full" : ""}>
-              <MenuItemCard item={item} />
+      ) : grouped ? (
+        <div className="flex flex-col gap-6">
+          {tags.map((tag) => (
+            <div key={tag}>
+              <h3 className="mb-2 font-brand text-sm uppercase tracking-[0.15em] text-muted">
+                {tag}
+              </h3>
+              <ItemGrid items={items.filter((i) => i.tag === tag)} />
             </div>
           ))}
         </div>
+      ) : (
+        <ItemGrid items={items} />
       )}
     </section>
   );

@@ -53,10 +53,52 @@ export const PRICES: Record<string, PriceValue> = {
   negroni: 440,
   margarita: 420,
 
-  // Biralar / Şaraplar / Alkollü / Soft: intentionally empty — the previously
-  // seeded drink names were invented (not from legacy) and were removed. Add real
-  // entries here (number = single price; array = labelled measures / cl) when the
-  // real drink list is available. See seed.ts PRODUCTS note.
+  // Biralar / Beers (serving cl)
+  "fici-bira": [{ label: "50 CL", amount: 190 }],
+  "sise-bira": [{ label: "33 CL", amount: 180 }],
+
+  // Şaraplar / Wines — bottle then glass (legacy MenuCardWines order)
+  "kirmizi-sarap-ev": [
+    { label: "Şişe", amount: 1100 },
+    { label: "Kadeh", amount: 320 },
+  ],
+  "beyaz-sarap-ev": [
+    { label: "Şişe", amount: 1000 },
+    { label: "Kadeh", amount: 300 },
+  ],
+  "kirmizi-sarap-sise": [{ label: "Şişe", amount: 1800 }],
+
+  // Alkollü İçecekler / Spirits (grouped by tag; multi-cl)
+  "viski-standart": [
+    { label: "4 CL", amount: 340 },
+    { label: "8 CL", amount: 620 },
+  ],
+  "viski-premium": [
+    { label: "4 CL", amount: 480 },
+    { label: "8 CL", amount: 880 },
+  ],
+  raki: [
+    { label: "5 CL", amount: 260 },
+    { label: "Şişe", amount: 1400 },
+  ],
+  "raki-ozel": [
+    { label: "5 CL", amount: 320 },
+    { label: "Şişe", amount: 1700 },
+  ],
+  votka: [
+    { label: "4 CL", amount: 300 },
+    { label: "8 CL", amount: 560 },
+  ],
+  cin: [
+    { label: "4 CL", amount: 300 },
+    { label: "8 CL", amount: 560 },
+  ],
+
+  // Soft İçecekler / Soft Drinks
+  kola: 90,
+  soda: 70,
+  ayran: 60,
+  su: 40,
 
   // Kahvaltı / Breakfast
   "serpme-kahvalti": 650,

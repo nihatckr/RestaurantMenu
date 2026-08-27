@@ -75,12 +75,29 @@ const PRODUCTS: ProductSeed[] = [
   { slug: "negroni", kind: "DRINK", category: "cocktails", tag: "Cocktail", title: { tr: "Negroni", en: "Negroni" } },
   { slug: "margarita", kind: "DRINK", category: "cocktails", tag: "Cocktail", title: { tr: "Margarita", en: "Margarita" } },
 
-  // NOTE: Beer / Wine / Spirit / Soft-drink products are intentionally absent.
-  // Their legacy names came from a now-dead GraphQL taxonomy — the previously
-  // seeded Efes/Bomonti/Ev Şarabı/Rakı/Viski/Cola/Ayran/Su were INVENTED, not
-  // evidenced (AGENTS.md 5–6), so they were removed. These categories stay empty
-  // until real drink data (names, sub-category/tag, cl measures, dlc) is provided.
-  // Cocktails remain — their names ARE evidenced (legacy Coctails/ assets).
+  // ── DEMO drinks (placeholder, NOT evidenced) ──────────────────────────────
+  // Structurally faithful to the legacy drink displays so the UI works: beers
+  // show a serving cl; wines show bottle/glass + a DLC (label) badge; spirits are
+  // grouped by `tag` sub-category (Viski/Rakı/…) with multi-cl pricing; soft
+  // drinks use colour chips. Replace names/prices with the real list (U5).
+  { slug: "fici-bira", kind: "DRINK", category: "beers", tag: "Beer", title: { tr: "Fıçı Bira", en: "Draft Beer" } },
+  { slug: "sise-bira", kind: "DRINK", category: "beers", tag: "Beer", title: { tr: "Şişe Bira", en: "Bottled Beer" } },
+
+  { slug: "kirmizi-sarap-ev", kind: "DRINK", category: "wines", title: { tr: "Ev Şarabı (Kırmızı)", en: "House Wine (Red)" } },
+  { slug: "beyaz-sarap-ev", kind: "DRINK", category: "wines", title: { tr: "Ev Şarabı (Beyaz)", en: "House Wine (White)" } },
+  { slug: "kirmizi-sarap-sise", kind: "DRINK", category: "wines", title: { tr: "Kırmızı Şarap (Şişe)", en: "Red Wine (Bottle)" } },
+
+  { slug: "viski-standart", kind: "DRINK", category: "hard-drinks", tag: "Viski", title: { tr: "Viski (Standart)", en: "Whisky (Standard)" } },
+  { slug: "viski-premium", kind: "DRINK", category: "hard-drinks", tag: "Viski", title: { tr: "Viski (Premium)", en: "Whisky (Premium)" } },
+  { slug: "raki", kind: "DRINK", category: "hard-drinks", tag: "Rakı", title: { tr: "Rakı", en: "Rakı" } },
+  { slug: "raki-ozel", kind: "DRINK", category: "hard-drinks", tag: "Rakı", title: { tr: "Rakı (Özel Seri)", en: "Rakı (Special)" } },
+  { slug: "votka", kind: "DRINK", category: "hard-drinks", tag: "Votka", title: { tr: "Votka", en: "Vodka" } },
+  { slug: "cin", kind: "DRINK", category: "hard-drinks", tag: "Cin", title: { tr: "Cin", en: "Gin" } },
+
+  { slug: "kola", kind: "DRINK", category: "soft-drinks", title: { tr: "Kola", en: "Cola" } },
+  { slug: "soda", kind: "DRINK", category: "soft-drinks", title: { tr: "Soda", en: "Sparkling Water" } },
+  { slug: "ayran", kind: "DRINK", category: "soft-drinks", title: { tr: "Ayran", en: "Ayran" } },
+  { slug: "su", kind: "DRINK", category: "soft-drinks", title: { tr: "Su", en: "Water" } },
 
   { slug: "serpme-kahvalti", kind: "FOOD", category: "breakfast", title: { tr: "Serpme Kahvaltı", en: "Turkish Breakfast", ru: "Турецкий завтрак" } },
   { slug: "mono-kahvalti", kind: "FOOD", category: "breakfast", title: { tr: "Mono Kahvaltı", en: "Mono Breakfast" } },
@@ -124,9 +141,27 @@ const IMAGE_BY_SLUG: Record<string, string> = {
 };
 
 // Drink colour chips (legacy MenuCardSoft/Wines used the product `color` field as
-// a translucent background). Populate per drink slug when real drink data exists;
-// empty for now (the invented drinks were removed). The rendering stays ready.
-const COLOR_BY_SLUG: Record<string, string> = {};
+// a translucent background). Imageless drink rows only. DEMO colours.
+const COLOR_BY_SLUG: Record<string, string> = {
+  "fici-bira": "#e0a83e",
+  "sise-bira": "#c88a2e",
+  "kirmizi-sarap-ev": "#7b1e2b",
+  "beyaz-sarap-ev": "#e6dfa8",
+  "kirmizi-sarap-sise": "#5b1620",
+  "viski-standart": "#b5651d",
+  "viski-premium": "#8a4a13",
+  raki: "#dfe6ec",
+  "raki-ozel": "#cfd8e0",
+  votka: "#eef2f4",
+  cin: "#dfeae0",
+  kola: "#3b2417",
+  soda: "#cfe8f3",
+  ayran: "#f2f2f2",
+  su: "#cfe8f3",
+};
+
+// Wines with a valid label carry the legacy "DLC" badge; house wines don't.
+const DLC = new Set(["kirmizi-sarap-sise"]);
 
 // Per-item, per-venue availability (legacy mn_show_content / mngarden_show_content):
 // a shared product can be hidden in one venue's menu. Slugs listed are HIDDEN in
@@ -218,10 +253,11 @@ async function main() {
   for (const p of PRODUCTS) {
     const image = IMAGE_BY_SLUG[p.slug] ?? null;
     const color = COLOR_BY_SLUG[p.slug] ?? null;
+    const dlc = DLC.has(p.slug);
     const prod = await prisma.product.upsert({
       where: { businessId_slug: { businessId: business.id, slug: p.slug } },
-      update: { kind: p.kind, tag: p.tag ?? null, image, color },
-      create: { businessId: business.id, slug: p.slug, kind: p.kind, tag: p.tag ?? null, image, color },
+      update: { kind: p.kind, tag: p.tag ?? null, image, color, dlc },
+      create: { businessId: business.id, slug: p.slug, kind: p.kind, tag: p.tag ?? null, image, color, dlc },
     });
     productIdBySlug.set(p.slug, prod.id);
     for (const [locale, title] of Object.entries(p.title)) {

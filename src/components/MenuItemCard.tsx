@@ -33,9 +33,6 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
             {item.titleAlt && (
               <p className="truncate font-body text-xs text-muted">{item.titleAlt}</p>
             )}
-            {item.tag && (
-              <p className="font-body text-xs text-muted">{item.tag}</p>
-            )}
           </div>
           {item.prices.length > 0 ? (
             <div className="flex shrink-0 flex-wrap justify-end gap-x-3 gap-y-0.5">

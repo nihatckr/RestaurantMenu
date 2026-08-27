@@ -77,9 +77,24 @@ describe("data-access: pricing shape", () => {
     expect(burger!.prices).toEqual([]);
     expect(burger!.price).not.toBeNull();
   });
-  // NOTE: multi-measure (spirits/wine cl) is exercised once real drink data
-  // exists; the invented demo drinks were removed. The capability remains in the
-  // schema (MenuItemPrice) and rendering.
+  it("spirits carry multi-measure prices and a tag sub-category", async () => {
+    const menu = await getVenueMenu("garden");
+    const hard = (menu ?? []).find((c) => c.slug === "hard-drinks");
+    const viski = hard?.items.find((i) => i.title === "Viski (Standart)");
+    expect(viski?.price).toBeNull();
+    expect(viski?.prices.map((p) => p.label)).toEqual(["4 CL", "8 CL"]);
+    expect(viski?.tag).toBe("Viski");
+    // Multiple distinct tags → the section renders sub-groups.
+    const tags = new Set((hard?.items ?? []).map((i) => i.tag));
+    expect(tags.size).toBeGreaterThanOrEqual(2);
+  });
+
+  it("wine DLC flag round-trips", async () => {
+    const menu = await getVenueMenu("garden");
+    const wines = (menu ?? []).find((c) => c.slug === "wines")?.items ?? [];
+    expect(wines.find((i) => i.title === "Kırmızı Şarap (Şişe)")?.dlc).toBe(true);
+    expect(wines.find((i) => i.title === "Ev Şarabı (Kırmızı)")?.dlc).toBe(false);
+  });
 });
 
 describe("data-access: localization", () => {
