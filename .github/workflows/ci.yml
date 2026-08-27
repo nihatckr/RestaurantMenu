@@ -38,5 +38,8 @@ jobs:
       - run: npm run lint
       - run: npm run test
       - run: npm run build
+      # E2E: Playwright drives the built app (its webServer runs `next start`).
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
       # Security gate (SECURITY.md §4): fail on known high/critical advisories.
       - run: npm audit --audit-level=high
