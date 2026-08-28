@@ -9,9 +9,12 @@
 > `theme.js`, letter-spacing, card/table layouts), mobile-first responsive grids +
 > **fluid typography**, PWA (installable), a11y polish, Vitest unit+integration +
 > Playwright e2e + CI, and this docs set (see `JOURNEY.md`).
-> **Now planned (2026-08-28):** the **admin (T12–T14)** — the owner will self-update
-> the menu, so T11's "no-admin" is superseded and the source of truth shifts DB←seed.
-> See **`ADMIN_PLAN.md`** (auth + CRUD + cache revalidation, phased).
+> **Admin ✅ DONE (2026-08-28):** T12–T14 shipped — auth, inline category/product
+> CRUD, per-venue visibility + reorder, measure prices, image/logo/favicon uploads
+> (Vercel Blob + sharp), a Settings page, Excel backup export/import, trash+restore,
+> and an audit log + `noindex` on admin surfaces. The owner self-updates the menu;
+> source of truth is DB←seed. 23 Playwright e2e cover the human flows.
+> See **`ADMIN_PLAN.md`** / **`DECISIONS.md`** (B.1–B.28).
 > **Pending owner:** real prices (`prices.ts`) + EN/RU translations & descriptions
 > (`translations.ts`) — `U5` / `DEMO_MENU.md`, and executing the deploy
 > (`DEPLOY.md`).
@@ -280,12 +283,17 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
   from the menu, restore brings it back; 17 tests green.
 - [x] **Vitest `next/cache` stub** (no-op `cacheTag`/`revalidateTag`) so the Phase-B
   tagging doesn't throw outside the Next runtime — fixes the integration suite.
+- [x] **Trash + restore UI** (Settings "Çöp kutusu"): soft-deleted categories/
+  products are listed and restorable. *Verified e2e:* create → trash → restore →
+  back in the public nav.
+- [x] **Excel export/import** (`exceljs`, slug-keyed, zod+integrity, upsert) —
+  admin-only `/admin/export` download + Settings importer. Import validates the
+  whole file first (row errors, no partial writes) and applies as an atomic
+  upsert (never deletes). *Verified e2e:* export→import round-trip + invalid-file
+  rejection.
 - [ ] Verify managed-Postgres **backups/PITR** + test one restore — **owner/ops
   action** (non-codeable; OPS.md).
-- [ ] Env break-glass (password reset) — with T12.
-- [ ] **Excel export/import** (`exceljs`, slug-keyed, zod+integrity, upsert/
-  full-replace) — **moved to build WITH T12 (auth)**: admin endpoints must be
-  authenticated, so they can't safely ship before login exists.
+- [ ] Env break-glass (password reset) — owner/ops action.
 
 **T12 — Auth** — ✅ DONE (first-run setup moved to T13 with venue CRUD)
 - [x] Deps `iron-session` + `bcryptjs` (bcrypt over argon2 — no native build).
@@ -298,7 +306,7 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
   right password → logs in + session persists; wrong → "Şifre hatalı"; logout clears.
 - [x] **e2e** login/logout (10 e2e); CI seeds the admin (`npm run seed:admin`).
 
-**T13 — Inline CRUD (create-first)** — ◐ IN PROGRESS
+**T13 — Inline CRUD (create-first)** — ✅ DONE (2026-08-28)
 - [x] Deps: `clsx`, `tailwind-merge`, `lucide-react`, `zod`. UI primitives: `cn()`,
   `Button`, `Input`/`Textarea`/`Field`, and the `Modal` (native `<dialog>` wrapper:
   focus-trap, ESC, backdrop-click close, body scroll-lock).
@@ -308,39 +316,39 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
   **`CategoryManager`** (admin-only Suspense island on the landing) with modal
   forms + delete-confirm. *Verified e2e:* login → add (appears in nav instantly) →
   delete (gone). 11 e2e green.
-- [ ] **Product CRUD** (modal: tr/en/ru, category, kind, tag, price/measures,
-  venues, visibility; auto-slug).
-- [ ] Per-venue **visibility/order** toggles + reorder.
-- [ ] zod schema per entity (shared client form + server action).
-- [ ] Inline Edit/Delete + "＋ Add" controls, rendered only in an admin session.
-- [ ] **Category** add/edit/delete (server action + modal: tr/en/ru, columns,
-  auto-slug) + `revalidateMenu`. *Done when:* owner adds/edits/deletes a category live.
-- [ ] **Product** add/edit/delete (modal: tr/en/ru, category, kind, tag, price/
-  measures, venues, visibility; auto-slug) + revalidate. *Done when:* owner builds a
-  product from scratch and it appears live.
-- [ ] Per-venue **visibility/order** toggles + reorder.
-- [ ] Sticky-header account control (Settings + Logout) when logged in.
+- [x] **Product CRUD** (modal: tr/en/ru, category, kind, tag, single price **and**
+  labelled measures, image; auto-slug) — inline `ProductRowControls` on each card +
+  `AddProductButton` per section (icon in the heading + full button below). Guests
+  stay static via the session-gated `MenuSectionsIsland`. *Verified e2e:* add →
+  appears → edit → delete; measure-price add; photo upload → card renders it.
+- [x] Per-venue **visibility** (eye toggle: `MenuItem.available` /
+  `MenuCategory.visible`; admin sees hidden greyed) and **reorder** (up/down arrows,
+  shared `reorder()` renumber). *Verified e2e:* visibility round-trip + category reorder.
+- [x] zod schema per entity (shared client form + server action).
+- [x] Inline Edit/Delete + "＋ Add" controls, admin-session only.
+- [x] **Category** add/edit/delete + `revalidateMenu` (inline on the existing list).
+- [x] Sticky-header account control (**Settings + Çıkış**) when logged in.
 
-**T14 — Images / logos / favicon + Settings**
-- [ ] Blob storage (Vercel Blob) + `next.config` `remotePatterns`.
-- [ ] `ImageField` (tap-pick + preview + remove; optional desktop drag-drop) + server
-  upload action + **sharp** optimize (WebP/resize/strip). Product photo wired.
-- [ ] **Migration:** add `Business.logo String?` (promote `BRAND.mark` → data, SVG
-  default fallback).
-- [ ] **Settings page:** venue details, wordmark; **brand logo**; **favicon + PWA
-  icons** generated from the logo (sharp) via dynamic routes/manifest. PNG/WebP for
-  logos (SVG XSS).
-- [ ] Blob **orphan cleanup** on replace/remove.
+**T14 — Images / logos / favicon + Settings** — ✅ DONE (2026-08-28)
+- [x] Blob storage (**Vercel Blob**) + `next.config` `remotePatterns` + CSP `img-src`.
+  Dev/e2e **fallback** to `/public/uploads` when no token, so uploads are testable.
+- [x] `ImageField` (tap-pick + preview + remove) + server upload action + **sharp**
+  optimize (WebP/resize/strip). Product photo wired. *Verified e2e:* real upload → card.
+- [x] **Migration `add_business_logo`:** `Business.logo String?`; brand mark now
+  data-driven (`getBrandLogo()` with `BRAND.mark` fallback) across chooser/landing/category.
+- [x] **Settings page:** brand logo + per-venue wordmark uploads; **favicon**
+  generated from the logo via the `/brand-icon` route (sharp → PNG, fallbacks).
+- [x] Blob **orphan cleanup** on replace/remove (best-effort `deleteImage`).
 
-**Security + tests (cross-cutting, before go-live)**
-- [ ] **Migration:** `AuditLog` model (who/action/entity/timestamp); every mutation
-  writes an entry. *Done when:* edits/deletes are traceable.
-- [ ] `ADMIN_PLAN.md` §4b hardening all present (authz on every action, zod
-  allow-list, server-mediated uploads, least-priv DB, admin `noindex`).
-- [ ] Admin UI copy in **Turkish** (owner's language; not part of the tr/en/ru
-  public switcher).
-- [ ] **e2e human flow:** login → add category → add product → set price → see it
-  live → logout.
+**Security + tests (cross-cutting, before go-live)** — ✅ DONE (2026-08-28)
+- [x] **Migration `add_audit_log`:** `AuditLog` model; every content mutation writes
+  an entry via `audit()`. Settings shows a "Son işlemler" list. *Verified e2e.*
+- [x] `ADMIN_PLAN.md` §4b hardening present: authz (`requireAdmin`) on every action,
+  zod allow-list, server-mediated + sharp-re-encoded uploads, admin `noindex`
+  (login + settings). *(Least-priv DB role remains an owner/ops action.)*
+- [x] Admin UI copy in **Turkish** throughout.
+- [x] **e2e human flow:** login → add category → add product (price/measures/photo) →
+  visibility → reorder → export/import → trash/restore → activity log → logout. 23 e2e green.
 
 ### T15 — Tests — ✅ DONE (2026-08-27)
 - **Result:** Vitest suite, **13 tests green**. Unit: `pickLocalized` fallback
