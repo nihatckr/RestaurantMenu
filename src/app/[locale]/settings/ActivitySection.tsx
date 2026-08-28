@@ -1,8 +1,14 @@
 import { History } from "lucide-react";
-import { getRecentAudit } from "@/lib/data/audit";
+import {
+  getRecentAudit,
+  type AuditAction,
+  type AuditEntity,
+} from "@/lib/data/audit";
 import { Card, CardHeader } from "@/components/ui/Card";
 
-const ACTIONS: Record<string, string> = {
+// Exhaustive label maps — typing them by the union forces a Turkish label for
+// every audit action/entity (adding one without a label is a compile error).
+const ACTIONS: Record<AuditAction, string> = {
   create: "oluşturuldu",
   update: "güncellendi",
   delete: "silindi",
@@ -10,7 +16,7 @@ const ACTIONS: Record<string, string> = {
   import: "içe aktarıldı",
   settings: "değiştirildi",
 };
-const ENTITIES: Record<string, string> = {
+const ENTITIES: Record<AuditEntity, string> = {
   category: "Kategori",
   product: "Ürün",
   brand: "Marka logosu",
@@ -24,7 +30,7 @@ const ENTITIES: Record<string, string> = {
 
 // Recent admin activity (audit trail). Server-rendered, read-only.
 export async function ActivitySection() {
-  const rows = await getRecentAudit(20);
+  const rows = await getRecentAudit();
   if (rows.length === 0) return null;
   return (
     <Card id="islemler">
@@ -40,7 +46,8 @@ export async function ActivitySection() {
             className="flex items-baseline justify-between gap-3 py-1 font-body text-sm"
           >
             <span>
-              {ENTITIES[r.entity] ?? r.entity} {ACTIONS[r.action] ?? r.action}
+              {ENTITIES[r.entity as AuditEntity] ?? r.entity}{" "}
+              {ACTIONS[r.action as AuditAction] ?? r.action}
               {r.detail ? <span className="text-muted"> — {r.detail}</span> : null}
             </span>
             <span className="shrink-0 text-xs text-muted">

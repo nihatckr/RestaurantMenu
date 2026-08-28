@@ -3,6 +3,7 @@ import { getIronSession, type IronSession } from "iron-session";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { config } from "@/lib/config";
 
 // Single-admin (owner) auth — ADMIN_PLAN.md §3. One password, hashed in env
 // (`ADMIN_PASSWORD_HASH`), verified with bcrypt; the session is an encrypted,
@@ -33,7 +34,7 @@ function sessionOptions() {
         process.env.AUTH_ALLOW_HTTP !== "1",
       sameSite: "lax" as const,
       path: "/",
-      maxAge: 60 * 60 * 8, // 8 hours
+      maxAge: config.session.ttlSeconds,
     },
   };
 }
@@ -107,8 +108,6 @@ export async function setPassword(newPassword: string): Promise<void> {
 // Best-effort in-process login throttle (single admin). Distributed rate-limiting
 // across serverless instances is deferred to Upstash if ever needed (ADMIN_PLAN §4/§4b).
 const FAILS = new Map<string, { count: number; until: number }>();
-const MAX_FAILS = 5;
-const LOCK_MS = 5 * 60 * 1000; // 5 minutes
 
 export function loginLocked(key: string): boolean {
   const rec = FAILS.get(key);
@@ -118,7 +117,7 @@ export function recordLoginFail(key: string): void {
   const now = Date.now();
   const rec = FAILS.get(key) ?? { count: 0, until: 0 };
   rec.count += 1;
-  if (rec.count >= MAX_FAILS) rec.until = now + LOCK_MS;
+  if (rec.count >= config.login.maxFails) rec.until = now + config.login.lockMs;
   FAILS.set(key, rec);
 }
 export function resetLoginFails(key: string): void {

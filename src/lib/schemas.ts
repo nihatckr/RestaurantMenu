@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { config } from "@/lib/config";
 
 // Validation schemas shared by the client forms and the server actions (the server
 // re-validates — never trusts the client). Admin content (ADMIN_PLAN.md §5).
@@ -29,7 +30,7 @@ export type CategoryInput = z.infer<typeof categorySchema>;
 // One labelled measure (e.g. "Kadeh"/"Şişe", "4 CL") with its price.
 export const measureSchema = z.object({
   label: z.string().trim().min(1, "Ölçü adı zorunlu").max(40),
-  amount: z.coerce.number().min(0).max(1_000_000),
+  amount: z.coerce.number().min(0).max(config.price.max),
 });
 
 export const productSchema = z.object({
@@ -40,7 +41,7 @@ export const productSchema = z.object({
   kind: z.enum(["FOOD", "DRINK"]),
   tag: z.string().trim().max(40).optional().or(z.literal("")),
   // Single price (TRY). Optional — priceless items, or superseded by `prices`.
-  price: z.coerce.number().min(0).max(1_000_000).optional(),
+  price: z.coerce.number().min(0).max(config.price.max).optional(),
   // Labelled measures (Kadeh/Şişe, CL sizes). When non-empty, the single price is
   // ignored and the item is measure-priced (legacy hard drinks / wines).
   prices: z.array(measureSchema).max(6).optional(),

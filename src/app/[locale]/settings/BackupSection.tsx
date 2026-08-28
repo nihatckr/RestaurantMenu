@@ -4,6 +4,7 @@ import { Download, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { useRefreshingAction } from "@/lib/useRefreshingAction";
+import { config } from "@/lib/config";
 import { importBackupAction } from "./settings-actions";
 
 export function BackupSection() {
@@ -52,10 +53,10 @@ export function BackupSection() {
         )}
         {state.errors && state.errors.length > 0 && (
           <ul className="flex list-disc flex-col gap-0.5 pl-4 font-body text-xs text-mono-red">
-            {state.errors.slice(0, 20).map((e, i) => (
+            {state.errors.slice(0, config.backup.importErrorLimit).map((e, i) => (
               <li key={i}>{e}</li>
             ))}
-            {state.errors.length > 20 && <li>… ve {state.errors.length - 20} tane daha</li>}
+            {state.errors.length > config.backup.importErrorLimit && <li>… ve {state.errors.length - config.backup.importErrorLimit} tane daha</li>}
           </ul>
         )}
       </form>

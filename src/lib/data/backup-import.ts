@@ -2,6 +2,7 @@ import "server-only";
 import ExcelJS from "exceljs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { config } from "@/lib/config";
 import { SHEETS } from "@/lib/data/backup";
 
 // Import the owner's Excel backup (DECISIONS B.16). Fully validated first: if ANY
@@ -51,7 +52,7 @@ const itemSchema = z.object({
   venueSlug: z.string().trim().min(1),
   categorySlug: z.string().trim().min(1),
   productSlug: z.string().trim().min(1),
-  price: z.union([z.coerce.number().min(0).max(1_000_000), z.literal("")]).optional(),
+  price: z.union([z.coerce.number().min(0).max(config.price.max), z.literal("")]).optional(),
   available: boolField,
   sortOrder: z.coerce.number().int().min(0).default(0),
   featured: boolField,

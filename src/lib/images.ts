@@ -3,15 +3,12 @@ import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import { put, del } from "@vercel/blob";
+import { config } from "@/lib/config";
 
 // Server-side image pipeline (SECURITY.md §2: re-encode every upload; never trust
 // the bytes). sharp strips metadata and produces a bounded WebP; the optimized
 // file is then stored in Vercel Blob (production) or a local /public/uploads
 // folder (dev/e2e, when no BLOB token is set) so the flow is testable offline.
-
-const MAX_WIDTH = 1200; // plenty for menu photos; keeps blobs small
-const WEBP_QUALITY = 78;
-const MAX_INPUT_BYTES = 8 * 1024 * 1024; // reject oversized uploads before decoding
 
 export class ImageError extends Error {}
 
@@ -19,8 +16,8 @@ export class ImageError extends Error {}
 export async function optimizeImage(input: Buffer): Promise<Buffer> {
   return sharp(input)
     .rotate() // honour EXIF orientation, then drop metadata
-    .resize({ width: MAX_WIDTH, withoutEnlargement: true })
-    .webp({ quality: WEBP_QUALITY })
+    .resize({ width: config.image.maxWidth, withoutEnlargement: true })
+    .webp({ quality: config.image.webpQuality })
     .toBuffer();
 }
 
@@ -31,7 +28,8 @@ export async function optimizeImage(input: Buffer): Promise<Buffer> {
  */
 export async function uploadImage(file: File, keyPrefix: string): Promise<string> {
   if (!file.type.startsWith("image/")) throw new ImageError("Görsel dosyası seçin.");
-  if (file.size > MAX_INPUT_BYTES) throw new ImageError("Görsel 8MB'den küçük olmalı.");
+  if (file.size > config.image.maxUploadBytes)
+    throw new ImageError("Görsel 8MB'den küçük olmalı.");
 
   let buffer: Buffer;
   try {

@@ -2,6 +2,7 @@
 
 import { requireAdmin, verifyPassword, setPassword, setUsername } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
+import { config } from "@/lib/config";
 import { resolveUploadedImage, ImageError } from "@/lib/images";
 import { setBrandLogo, setVenueWordmark, setBusinessInfo } from "@/lib/data/settings";
 import { emptyTrash } from "@/lib/data/admin";
@@ -65,7 +66,8 @@ export async function importBackupAction(
   await requireAdmin();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) return { error: "Dosya seçin." };
-  if (file.size > 10 * 1024 * 1024) return { error: "Dosya çok büyük (>10MB)." };
+  if (file.size > config.backup.maxUploadBytes)
+    return { error: "Dosya çok büyük (>10MB)." };
 
   const result = await importBackup(await file.arrayBuffer());
   if (!result.ok) return { errors: result.errors };

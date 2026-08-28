@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db";
+import { config } from "@/lib/config";
 
 export type AuditAction =
   | "create"
@@ -44,7 +45,9 @@ export type AuditRow = {
 };
 
 /** Most-recent audit entries for the Settings "recent activity" list. */
-export async function getRecentAudit(limit = 20): Promise<AuditRow[]> {
+export async function getRecentAudit(
+  limit = config.audit.pageSize,
+): Promise<AuditRow[]> {
   const rows = await prisma.auditLog.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
