@@ -5,18 +5,18 @@ binding. If a task appears to require breaking one, stop and raise it instead of
 proceeding.
 
 ## Source of authority
-1. **`PRODUCT.md` is the product authority.** It defines what the system is and
+1. **`docs/PRODUCT.md` is the product authority.** It defines what the system is and
    does. Build to it.
-2. **`ARCHITECTURE.md` defines the technical boundaries.** Stack, allowed/denied
+2. **`docs/ARCHITECTURE.md` defines the technical boundaries.** Stack, allowed/denied
    dependencies, read/write paths. Stay inside them.
-3. **`LEGACY_AUDIT.md` is evidence only.** It records what the old apps did (and
+3. **`docs/LEGACY_AUDIT.md` is evidence only.** It records what the old apps did (and
    the 2026-08-27 live-site findings). It is a reference for behavior, never a
    template to copy code from and never an authority over
-   `PRODUCT.md`/`ARCHITECTURE.md`.
+   `docs/PRODUCT.md`/`docs/ARCHITECTURE.md`.
 
-**Supporting specs (binding within their domain):** `SECURITY.md` (security),
-`I18N.md` (localization + affects the schema), `DESIGN.md` (UI/tokens/a11y),
-`DATA_SOURCING.md` (seed source + cutover), `OPS.md` (deploy/infra). They refine
+**Supporting specs (binding within their domain):** `docs/SECURITY.md` (security),
+`docs/I18N.md` (localization + affects the schema), `docs/DESIGN.md` (UI/tokens/a11y),
+`docs/DATA_SOURCING.md` (seed source + cutover), `docs/OPS.md` (deploy/infra). They refine
 — never override — PRODUCT/ARCHITECTURE.
 
 > **Next.js 16.3 note — agent files coexist with this contract:** on 16.3+,
@@ -35,8 +35,8 @@ proceeding.
    All new code lives in `RestaurantMenu/`.
 
 ## Correctness discipline
-5. **Do not invent behavior.** If a requirement is not backed by `PRODUCT.md` or
-   evidence in `LEGACY_AUDIT.md`, do not build it.
+5. **Do not invent behavior.** If a requirement is not backed by `docs/PRODUCT.md` or
+   evidence in `docs/LEGACY_AUDIT.md`, do not build it.
 6. **Unknowns stay UNKNOWN.** If something is unproven, mark it UNKNOWN /
    ASSUMPTION and surface it — do not fill the gap with a guess turned into code.
 7. **No out-of-scope refactors.** Change only what the task needs. No drive-by
@@ -44,7 +44,7 @@ proceeding.
 
 ## Dependencies & stack
 8. **Justify new dependencies before adding them.** State why the need cannot be
-   met by the `ARCHITECTURE.md` stack. Never add a denied dependency (GraphQL/
+   met by the `docs/ARCHITECTURE.md` stack. Never add a denied dependency (GraphQL/
    Apollo/Pothos/codegen, Supabase, Redux/Zustand, styled-components, etc.).
    Legacy usage is not justification.
 
@@ -67,16 +67,16 @@ proceeding.
     lives on `MenuItem`.
 
 ## Security
-13. **`SECURITY.md` controls are binding.** Public path stays read-only and
+13. **`docs/SECURITY.md` controls are binding.** Public path stays read-only and
     leak-free (no raw errors, no `dangerouslySetInnerHTML`, `next/image` host
     allowlist). Every mutation is authenticated + authorized **server-side** and
     schema-validated; no mass assignment; no raw/unsafe SQL. Secrets only via
     env — never committed, never in the client bundle. Deferred features (admin,
     auth, analytics/trackers) may only be built **together with** their
-    `SECURITY.md` controls, not before.
+    `docs/SECURITY.md` controls, not before.
 
 ## Working style
-- Keep Prisma access behind the thin data-access layer (`ARCHITECTURE.md`); no
+- Keep Prisma access behind the thin data-access layer (`docs/ARCHITECTURE.md`); no
   `prisma.*` calls in components.
 - Public reads = Server Components; mutations = Server Actions / Route Handlers.
 - Prefer the smallest change that satisfies the task and its acceptance criteria.

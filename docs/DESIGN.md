@@ -80,6 +80,63 @@ Type scale (font / weight / size / letter-spacing):
 - Per-locale `<html lang>`, titles, and meta; sensible Open Graph (brand image).
 - Fast fonts (`font-display: swap`, preloaded `MonoTRegular`).
 
+## As-built system (implemented — 2026-08-28)
+
+The spec above is the intent; this is what shipped. See `JOURNEY.md` §4–5 for the
+reasoning.
+
+### Centralized typography (one place)
+`src/app/globals.css` defines the design tokens **and** a set of typography roles
+used across every component — fonts/casing live here; only size/letter-spacing vary
+at the call site:
+
+| Role class | Font (legacy `theme.js`) | Used for |
+| --- | --- | --- |
+| `.type-heading` | Mono, uppercase | category header title, nav links |
+| `.type-subheading` | Mono, uppercase, muted | the TR/EN sub-line under a heading |
+| `.type-tag` | Mono, uppercase | hard-drink sub-category (Whisky/Rakı/…) |
+| `.type-item` | Inter 700 | product name |
+| `.type-price` | Mono | prices/numbers |
+| `.type-desc` | Inter, muted | subtitle / description |
+| `.type-label` | Mono, uppercase, muted | CL / measure column labels |
+
+**Rule (invariant):** *a thing's Turkish and English text share ONE font* — so a
+Mono EN heading has a Mono TR sub-line; Inter product names have Inter alt names.
+
+**Fonts are from legacy `theme.js`, not Figma:** price + cl = **Mono** (the
+slashed-zero is the legacy design), title/subtitle/desc = **Inter**, headings =
+Mono. Prices render as **plain numbers** — no `₺` (the Mono font has no ₺ glyph;
+currency is stated once in the footer) and no thousands separator (`1400`, not
+`1.400`). English uppercase uses a dotless I (`lang="en"` + CSS `uppercase`);
+Turkish keeps its dotted İ.
+
+### Fluid type scale (the responsive standard)
+`html { font-size: clamp(13.5px, 11.9px + 0.45vw, 16px); }` and **all** sizes are
+rem-based, so every piece of text scales up/down together at the same ratio
+(≈13.5px on a small phone → 16px on desktop). No fixed `px`, no `sm:text-*` jumps.
+
+### Responsive grids (mobile-first, 1/2/3-up)
+- Compact drinks (beer/soft/wine): **2 → lg:3**.
+- Cocktails (photo tiles): **3 → sm:4 → lg:5**.
+- Food photos: **2 → sm:3 → lg:4**; desserts/breakfast: **2** (per-category
+  `Category.columns` override).
+- **Hard-drinks price table:** ONE shared CSS grid (header + all rows via React
+  `Fragment`), a column per measure, so CL labels align above prices and a missing
+  measure leaves an empty cell that holds its column. GLASS/BOTTLE groups separated
+  by a gap column.
+
+### Tokens correction
+- Missing-image placeholder box = **`#ffd4d2`** (`--placeholder`, the Figma card
+  pink), not `#F48787@20%`. The per-drink colour **chip** behind compact drink
+  cards uses `Product.color` at ~20% opacity.
+- Full Mono pastel palette (`--mono-red … --mono-purple`) is available as Tailwind
+  `bg-mono-*` utilities.
+
+### A11y as-built
+- Keyboard `:focus-visible` outline on links/buttons; bigger tap targets.
+- No horizontal overflow down to 320px (verified).
+- `lang` attributes drive correct TR/EN uppercasing.
+
 ## Open questions
 - **U-design-1** Exact brand palette beyond the two greys (any accent colors from
   current SaaS)? Confirm during data sourcing.
