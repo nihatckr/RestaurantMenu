@@ -93,17 +93,23 @@ async function CategoryView({
 
   return (
     <div className="flex w-full max-w-md flex-col gap-6 sm:max-w-2xl lg:max-w-4xl">
-      {/* Brand header (Figma: MONO mark centered at top of every menu screen). */}
-      <div className="flex flex-col items-center gap-4">
-        <div className="flex w-full items-center justify-between">
-          <Link
-            href={`/${locale}/${venueSlug}`}
-            className="-my-1 py-2 font-body text-xs text-muted underline"
-          >
-            &lsaquo; {venue.name}
-          </Link>
-          <LanguageSwitcher current={locale as Locale} />
-        </div>
+      {/* Slim sticky control bar: back-link + language switcher stay reachable at
+          any scroll depth on the long single-scroll page. Direct child of the tall
+          container (so `sticky` holds for the whole scroll, not just a short
+          header). Full-bleed on phones via negative margins over main's padding;
+          the brand mark below scrolls normally under it. */}
+      <div className="sticky top-0 z-10 -mx-4 flex items-center justify-between border-b border-muted/10 bg-background/90 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+        <Link
+          href={`/${locale}/${venueSlug}`}
+          className="py-1 font-body text-xs text-muted underline"
+        >
+          &lsaquo; {venue.name}
+        </Link>
+        <LanguageSwitcher current={locale as Locale} />
+      </div>
+
+      {/* Brand mark (Figma: MONO mark near the top). Scrolls normally. */}
+      <div className="flex justify-center">
         <Link
           href={`/${locale}/${venueSlug}`}
           aria-label={BRAND.name}

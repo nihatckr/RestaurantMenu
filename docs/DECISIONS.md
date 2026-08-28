@@ -102,7 +102,8 @@ option · `"…"` = the user's own phrase. **U#/T#** = tracked unknowns/tasks.
 | 7.3 | SEO hreflang, seed integrity, RU e2e, DRY helper | Robustness + SEO + coverage | `buildAlternates`, seed self-checks, RU-switch e2e, `localeFromPathname` | `AskUserQuestion` | `bb6a89b` |
 | 7.4 | Continue | More quality | OG share image, reduced-motion a11y, committed `.env.example` | `"devam et"` | `a6ab515`, `7fa335a` |
 | 7.5 | Push | Ship the session's work | Pushed 9 commits to `origin/main` | `"push et"` | `7d539cd..7fa335a` |
-| 7.6 | Add home links to the logos | Logo = standard "go home" affordance | Brand mark + wordmark wrapped in `<Link>`: category pages → venue landing, landing → venue chooser; + a logo-click e2e (9 e2e) | `"logolara anasayfa linkleri ekle"` | *(pending)* |
+| 7.6 | Add home links to the logos | Logo = standard "go home" affordance | Brand mark + wordmark wrapped in `<Link>`: category pages → venue landing, landing → venue chooser; + a logo-click e2e | `"logolara anasayfa linkleri ekle"` | `1adfc68` |
+| 7.7 | Should the header (back + language) be sticky? | Long single-scroll menu — reach back/language at any depth | Slim sticky bar on the category page (back + switcher; brand mark scrolls); landing untouched | `AskUserQuestion`: "İnce sticky bar (geri + dil)" | *(pending)* |
 
 ---
 
