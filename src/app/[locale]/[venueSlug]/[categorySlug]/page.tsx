@@ -5,9 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { CategorySection } from "@/components/CategorySection";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
 import { LOCALES, isLocale, buildAlternates, type Locale } from "@/lib/i18n";
+import { getMessages } from "@/lib/messages";
 import { BRAND } from "@/lib/brand";
 import { BUILD_FALLBACK } from "@/lib/site";
 
@@ -145,6 +147,8 @@ async function CategoryView({
           />
         </Link>
       </footer>
+
+      <ScrollToTop label={getMessages(locale).scrollTop} />
     </div>
   );
 }

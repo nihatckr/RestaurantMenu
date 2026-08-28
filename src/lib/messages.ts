@@ -12,6 +12,7 @@ type Messages = {
   errorTitle: string;
   errorBody: string;
   retry: string;
+  scrollTop: string; // "back to top" button label
   metaMenuSuffix: string; // appended to venue name in <title>
   venueMenuDescription: (name: string) => string;
 };
@@ -25,6 +26,7 @@ const MESSAGES: Record<Locale, Messages> = {
     errorTitle: "Bir şeyler ters gitti",
     errorBody: "Menü yüklenirken bir sorun oluştu.",
     retry: "Tekrar dene",
+    scrollTop: "Yukarı çık",
     metaMenuSuffix: "Menü",
     venueMenuDescription: (name) => `${name} menüsü.`,
   },
@@ -36,6 +38,7 @@ const MESSAGES: Record<Locale, Messages> = {
     errorTitle: "Something went wrong",
     errorBody: "There was a problem loading the menu.",
     retry: "Try again",
+    scrollTop: "Back to top",
     metaMenuSuffix: "Menu",
     venueMenuDescription: (name) => `${name} menu.`,
   },
@@ -47,6 +50,7 @@ const MESSAGES: Record<Locale, Messages> = {
     errorTitle: "Что-то пошло не так",
     errorBody: "При загрузке меню произошла ошибка.",
     retry: "Повторить",
+    scrollTop: "Наверх",
     metaMenuSuffix: "Меню",
     venueMenuDescription: (name) => `Меню ${name}.`,
   },
