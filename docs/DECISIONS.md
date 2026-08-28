@@ -114,6 +114,7 @@ option · `"…"` = the user's own phrase. **U#/T#** = tracked unknowns/tasks.
 | B.6 | Modal implementation | Minimal deps, enough for ~4 dialogs | **native `<dialog>`** + one thin `<Modal>` wrapper (React open-sync + focus return, backdrop-click close, body scroll-lock); native-CSS enter/exit animation. Radix kept as fallback only. | `"native dialog ile devam et"` | *(planning)* |
 | B.7 | Tailwind helpers/components? | Keep the bespoke brand look, minimal deps | **No UI kit** (shadcn=reintroduces Radix; DaisyUI clashes with the design). Use a small **`cn()`** (clsx + tailwind-merge) + hand-rolled primitives (Button/Input/Textarea/Field/Modal). cva only if variants grow; `prettier-plugin-tailwindcss` optional. | `"tailwindcss için ne önerirsin … yoksa ihtiyac yok mu"` | *(planning)* |
 | B.8 | React Query / TanStack needed? | Avoid duplicating Next's caching / client-fetch | **No.** App Router + Server Actions cover it: Server Components + `use cache`/`cacheTag` (fetch+cache), `revalidateTag` (refresh), `useActionState`/`useFormStatus`/`useOptimistic` (form/optimistic). TanStack Table also not needed (simple lists). | `"react query yada tanstack … ihtiyacımız var mı"` | *(planning)* |
+| B.9 | Redis needed? | Extra managed service — justify or skip | **No for v1.** Read cache = Next; sessions = DB/JWT; rate-limit starts light. Only future justification = distributed rate-limiting on serverless → **Upstash Redis** then. No queues/real-time. | `"redis gibi bir teknolojiye"` | *(planning)* |
 
 ---
 

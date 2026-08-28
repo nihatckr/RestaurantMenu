@@ -87,6 +87,11 @@ Public reads use `use cache` (PPR). For edits to appear without redeploying:
 - **Controls:** CSRF (Auth.js built-in for actions/handlers), **rate-limiting** on
   auth + mutations, **audit log** (who changed what, when), secrets only in env,
   **no raw SQL**, non-leaky errors (SECURITY.md §4).
+- **No Redis for v1.** Read caching is Next (`use cache`/`cacheTag`); sessions are
+  DB/JWT via Auth.js — neither needs it. Rate-limiting starts light (magic-link
+  already curbs brute force; a DB counter or Vercel's edge limit if needed). The
+  only future justification is **distributed** rate-limiting on serverless → then
+  **Upstash Redis** (HTTP, serverless-friendly). No queues/real-time in scope.
 - **No separate admin route to secure** — the edit controls + modal forms are
   authenticated **islands** rendered into the existing pages only when a valid admin
   session is present (server-checked). The guest render ships none of it. The mutation
