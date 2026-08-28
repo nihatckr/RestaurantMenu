@@ -1,8 +1,7 @@
 "use client";
 
-import { useActionState, useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Plus, Trash2, ChevronUp, ChevronDown, Store } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Plus, Trash2, Store } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/form";
@@ -10,6 +9,8 @@ import { ImageField } from "@/components/ui/ImageField";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { SavedHint } from "@/components/ui/SavedHint";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { ReorderButtons } from "@/components/ui/ReorderButtons";
+import { useRefreshingAction } from "@/lib/useRefreshingAction";
 import {
   createVenueAction,
   updateVenueNameAction,
@@ -22,14 +23,10 @@ import { updateVenueWordmarkAction, type SettingsFormState } from "./settings-ac
 type Venue = { slug: string; name: string; wordmark: string | null };
 
 function NameForm({ venue }: { venue: Venue }) {
-  const [state, action, pending] = useActionState(
+  const [state, action, pending] = useRefreshingAction(
     updateVenueNameAction.bind(null, venue.slug),
     {} as VenueFormState,
   );
-  const router = useRouter();
-  useEffect(() => {
-    if (state.ok) router.refresh();
-  }, [state.ok, router]);
   return (
     <form action={action} className="flex flex-col gap-1">
       <Field label="Ad">
@@ -47,14 +44,10 @@ function NameForm({ venue }: { venue: Venue }) {
 }
 
 function WordmarkForm({ venue }: { venue: Venue }) {
-  const [state, action, pending] = useActionState(
+  const [state, action, pending] = useRefreshingAction(
     updateVenueWordmarkAction.bind(null, venue.slug),
     {} as SettingsFormState,
   );
-  const router = useRouter();
-  useEffect(() => {
-    if (state.ok) router.refresh();
-  }, [state.ok, router]);
   return (
     <form action={action} className="flex flex-col gap-1">
       <ImageField
@@ -90,26 +83,13 @@ function VenueRow({
       <div className="flex items-center justify-between gap-2">
         <span className="font-body text-xs text-muted">/{venue.slug}</span>
         <div className="flex items-center gap-1">
-          <form action={moveVenueAction.bind(null, venue.slug, "up")} className="flex">
-            <button
-              type="submit"
-              disabled={index === 0}
-              aria-label={`${venue.name} yukarı taşı`}
-              className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
-            >
-              <ChevronUp size={16} aria-hidden />
-            </button>
-          </form>
-          <form action={moveVenueAction.bind(null, venue.slug, "down")} className="flex">
-            <button
-              type="submit"
-              disabled={index === count - 1}
-              aria-label={`${venue.name} aşağı taşı`}
-              className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
-            >
-              <ChevronDown size={16} aria-hidden />
-            </button>
-          </form>
+          <ReorderButtons
+            label={venue.name}
+            upAction={moveVenueAction.bind(null, venue.slug, "up")}
+            downAction={moveVenueAction.bind(null, venue.slug, "down")}
+            canUp={index > 0}
+            canDown={index < count - 1}
+          />
           {/* Can't delete the last remaining venue. */}
           <button
             type="button"
@@ -144,14 +124,11 @@ function VenueRow({
 }
 
 function AddVenueModal({ onClose }: { onClose: () => void }) {
-  const [state, action, pending] = useActionState(createVenueAction, {} as VenueFormState);
-  const router = useRouter();
-  useEffect(() => {
-    if (state.ok) {
-      onClose();
-      router.refresh();
-    }
-  }, [state.ok, onClose, router]);
+  const [state, action, pending] = useRefreshingAction(
+    createVenueAction,
+    {} as VenueFormState,
+    onClose,
+  );
   return (
     <Modal open onClose={onClose} title="Mekan ekle">
       <form action={action} className="flex flex-col gap-3">

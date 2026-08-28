@@ -1,18 +1,13 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Download, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { useRefreshingAction } from "@/lib/useRefreshingAction";
 import { importBackupAction } from "./settings-actions";
 
 export function BackupSection() {
-  const [state, formAction, pending] = useActionState(importBackupAction, {});
-  const router = useRouter();
-  useEffect(() => {
-    if (state.ok) router.refresh();
-  }, [state.ok, router]);
+  const [state, formAction, pending] = useRefreshingAction(importBackupAction, {});
 
   return (
     <Card id="yedek" className="flex flex-col gap-4">

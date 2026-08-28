@@ -3,17 +3,10 @@
 import { useActionState, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Eye,
-  EyeOff,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { ReorderButtons } from "@/components/ui/ReorderButtons";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/form";
 import type { CategoryAdminRow } from "@/lib/data/admin";
@@ -70,32 +63,13 @@ export function CategoryManager({
               {displayName(row)}
             </Link>
             {/* Reorder within the venue menu (up/down; edges disabled). */}
-            <form
-              action={moveCategoryAction.bind(null, locale, venueSlug, row.id, "up")}
-              className="flex"
-            >
-              <button
-                type="submit"
-                disabled={index === 0}
-                aria-label={`${row.nameTr} yukarı taşı`}
-                className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
-              >
-                <ChevronUp size={16} aria-hidden />
-              </button>
-            </form>
-            <form
-              action={moveCategoryAction.bind(null, locale, venueSlug, row.id, "down")}
-              className="flex"
-            >
-              <button
-                type="submit"
-                disabled={index === categories.length - 1}
-                aria-label={`${row.nameTr} aşağı taşı`}
-                className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
-              >
-                <ChevronDown size={16} aria-hidden />
-              </button>
-            </form>
+            <ReorderButtons
+              label={row.nameTr}
+              upAction={moveCategoryAction.bind(null, locale, venueSlug, row.id, "up")}
+              downAction={moveCategoryAction.bind(null, locale, venueSlug, row.id, "down")}
+              canUp={index > 0}
+              canDown={index < categories.length - 1}
+            />
             <button
               type="button"
               aria-label={`${row.nameTr} düzenle`}

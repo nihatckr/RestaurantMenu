@@ -1,12 +1,11 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { Input, Field } from "@/components/ui/form";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { SavedHint } from "@/components/ui/SavedHint";
+import { useRefreshingAction } from "@/lib/useRefreshingAction";
 import { updateBusinessInfoAction } from "./settings-actions";
 
 export function BusinessForm({
@@ -16,11 +15,7 @@ export function BusinessForm({
   name: string;
   footerExtra: string | null;
 }) {
-  const [state, formAction, pending] = useActionState(updateBusinessInfoAction, {});
-  const router = useRouter();
-  useEffect(() => {
-    if (state.ok) router.refresh();
-  }, [state.ok, router]);
+  const [state, formAction, pending] = useRefreshingAction(updateBusinessInfoAction, {});
 
   return (
     <Card>

@@ -1,20 +1,15 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { UserRound } from "lucide-react";
 import { Input, Field } from "@/components/ui/form";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { SavedHint } from "@/components/ui/SavedHint";
+import { useRefreshingAction } from "@/lib/useRefreshingAction";
 import { changeUsernameAction } from "./settings-actions";
 
 export function UsernameForm({ currentUsername }: { currentUsername: string }) {
-  const [state, formAction, pending] = useActionState(changeUsernameAction, {});
-  const router = useRouter();
-  useEffect(() => {
-    if (state.ok) router.refresh();
-  }, [state.ok, router]);
+  const [state, formAction, pending] = useRefreshingAction(changeUsernameAction, {});
 
   return (
     <Card>

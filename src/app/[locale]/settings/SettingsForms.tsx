@@ -1,12 +1,11 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import { ImageField } from "@/components/ui/ImageField";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { SavedHint } from "@/components/ui/SavedHint";
+import { useRefreshingAction } from "@/lib/useRefreshingAction";
 import { updateBrandLogoAction, type SettingsFormState } from "./settings-actions";
 
 function ImageUploadForm({
@@ -18,11 +17,7 @@ function ImageUploadForm({
   initial: string | null;
   label: string;
 }) {
-  const [state, formAction, pending] = useActionState(action, {});
-  const router = useRouter();
-  useEffect(() => {
-    if (state.ok) router.refresh();
-  }, [state.ok, router]);
+  const [state, formAction, pending] = useRefreshingAction(action, {});
 
   return (
     <form action={formAction} className="flex flex-col items-start gap-2">

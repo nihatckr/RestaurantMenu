@@ -2,17 +2,10 @@
 
 import { useActionState, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Eye,
-  EyeOff,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { ReorderButtons } from "@/components/ui/ReorderButtons";
 import { Button } from "@/components/ui/Button";
 import { Input, Field, Select } from "@/components/ui/form";
 import { ImageField } from "@/components/ui/ImageField";
@@ -125,34 +118,14 @@ export function ProductRowControls({
         }
       >
         {reorder && (
-          <>
-            <form
-              action={moveProductAction.bind(null, locale, venueSlug, row.id, "up")}
-              className="flex"
-            >
-              <button
-                type="submit"
-                disabled={!reorder.up}
-                aria-label={`${row.titleTr} yukarı taşı`}
-                className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
-              >
-                <ChevronUp size={14} aria-hidden />
-              </button>
-            </form>
-            <form
-              action={moveProductAction.bind(null, locale, venueSlug, row.id, "down")}
-              className="flex"
-            >
-              <button
-                type="submit"
-                disabled={!reorder.down}
-                aria-label={`${row.titleTr} aşağı taşı`}
-                className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
-              >
-                <ChevronDown size={14} aria-hidden />
-              </button>
-            </form>
-          </>
+          <ReorderButtons
+            label={row.titleTr}
+            upAction={moveProductAction.bind(null, locale, venueSlug, row.id, "up")}
+            downAction={moveProductAction.bind(null, locale, venueSlug, row.id, "down")}
+            canUp={reorder.up}
+            canDown={reorder.down}
+            size={14}
+          />
         )}
         <button
           type="button"
