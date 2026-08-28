@@ -7,6 +7,7 @@ import { VenueHeader } from "@/components/VenueHeader";
 import { CategoryNavIsland } from "./CategoryNavIsland";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { AdminSessionControls } from "@/components/AdminSessionControls";
+import { TrackView } from "@/components/TrackView";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
 import { getBrandLogo } from "@/lib/data/settings";
@@ -90,6 +91,8 @@ async function VenueLanding({
       {jsonLd && (
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       )}
+      {/* Menu-open analytics beacon (no PII; keeps the page static). */}
+      <TrackView venueSlug={venueSlug} locale={locale} />
       <div className="flex w-full max-w-sm items-center justify-end gap-3">
         <Suspense fallback={null}>
           <AdminSessionControls locale={locale} />

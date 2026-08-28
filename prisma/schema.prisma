@@ -202,3 +202,15 @@ model AuditLog {
 
   @@index([createdAt])
 }
+
+// Privacy-preserving menu-open analytics (no PII): one row per guest opening a
+// venue's menu, recorded via a client beacon so the public page stays static.
+model PageView {
+  id        String   @id @default(cuid())
+  venueSlug String
+  locale    String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([venueSlug])
+}

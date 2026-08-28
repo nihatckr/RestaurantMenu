@@ -357,6 +357,33 @@ test("admin downloads the Excel backup from settings", async ({ page }) => {
   expect(download.suggestedFilename()).toMatch(/^menu-yedek-.*\.xlsx$/);
 });
 
+test("opening a venue menu is counted in the settings analytics panel", async ({
+  page,
+}) => {
+  // A guest opening the QR landing fires the (PII-free) analytics beacon.
+  await Promise.all([
+    page.waitForResponse(
+      (r) => r.url().includes("/api/track") && r.request().method() === "POST",
+    ),
+    page.goto("/tr/terrace"),
+  ]);
+
+  // The admin then sees a non-zero open count on the Analitik tab.
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "Analitik" }).click();
+
+  const totalBlock = page
+    .locator("div")
+    .filter({ hasText: /^\d+Toplam açılış$/ });
+  await expect(totalBlock).toBeVisible();
+  const count = Number((await totalBlock.innerText()).replace(/\D/g, ""));
+  expect(count).toBeGreaterThan(0);
+});
+
 test("admin routes reject unauthenticated requests (401)", async ({ page }) => {
   // No login — the request carries no admin session cookie.
   expect((await page.request.get("/admin/export")).status()).toBe(401);

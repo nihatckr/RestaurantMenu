@@ -14,6 +14,7 @@ import { ActivitySection } from "./ActivitySection";
 import { PasswordForm } from "./PasswordForm";
 import { UsernameForm } from "./UsernameForm";
 import { QRSection } from "./QRSection";
+import { AnalyticsSection } from "./AnalyticsSection";
 import { BusinessForm } from "./BusinessForm";
 import { VenueManager } from "./VenueManager";
 import { SettingsTabs } from "./SettingsTabs";
@@ -85,6 +86,7 @@ async function SettingsView({
             panel: <BusinessForm business={settings.business} />,
           },
           { id: "qr", label: "QR kodları", panel: <QRSection venues={settings.venues} /> },
+          { id: "analitik", label: "Analitik", panel: <AnalyticsSection /> },
           { id: "yedek", label: "Yedek", panel: <BackupSection /> },
           { id: "cop", label: "Çöp kutusu", panel: <TrashSection /> },
           {
