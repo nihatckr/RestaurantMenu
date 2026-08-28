@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
 import { isLocale } from "@/lib/i18n";
+import { BRAND } from "@/lib/brand";
 import { Spinner } from "@/components/Spinner";
 import { LoginForm } from "@/components/LoginForm";
 import { login } from "./actions";
@@ -20,11 +22,21 @@ export default async function LoginPage({
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
-      <h1 className="font-brand text-lg uppercase tracking-[0.2em]">Yönetim</h1>
-      <Suspense fallback={<Spinner />}>
-        <LoginState locale={locale} />
-      </Suspense>
+    <main className="flex flex-1 flex-col items-center justify-center p-6">
+      <div className="flex w-full max-w-sm flex-col items-center gap-6 rounded-xl border border-muted/20 p-8 shadow-sm">
+        <div className="flex flex-col items-center gap-3">
+          <Image src={BRAND.mark} alt={BRAND.name} width={44} height={54} priority />
+          <div className="flex flex-col items-center gap-1">
+            <h1 className="font-brand text-lg uppercase tracking-[0.2em]">Yönetim</h1>
+            <p className="font-body text-xs text-muted">
+              Menüyü yönetmek için giriş yapın.
+            </p>
+          </div>
+        </div>
+        <Suspense fallback={<Spinner />}>
+          <LoginState locale={locale} />
+        </Suspense>
+      </div>
     </main>
   );
 }

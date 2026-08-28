@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n";
 import {
   getSession,
-  verifyPassword,
+  verifyCredentials,
   loginLocked,
   recordLoginFail,
   resetLoginFails,
@@ -29,10 +29,11 @@ export async function login(
   if (loginLocked(key)) {
     return { error: "Çok fazla deneme. Lütfen birkaç dakika sonra tekrar deneyin." };
   }
+  const username = String(formData.get("username") ?? "");
   const password = String(formData.get("password") ?? "");
-  if (!(await verifyPassword(password))) {
+  if (!(await verifyCredentials(username, password))) {
     recordLoginFail(key);
-    return { error: "Şifre hatalı." };
+    return { error: "Kullanıcı adı veya şifre hatalı." };
   }
   resetLoginFails(key);
   const session = await getSession();

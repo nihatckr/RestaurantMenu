@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
-import { isAdmin, verifyPassword } from "@/lib/auth";
+import { isAdmin, verifyPassword, getAdminUsername } from "@/lib/auth";
 import { isLocale } from "@/lib/i18n";
 import { getSettings } from "@/lib/data/settings";
 import { Spinner } from "@/components/Spinner";
@@ -12,6 +12,7 @@ import { BackupSection } from "./BackupSection";
 import { TrashSection } from "./TrashSection";
 import { ActivitySection } from "./ActivitySection";
 import { PasswordForm } from "./PasswordForm";
+import { UsernameForm } from "./UsernameForm";
 import { QRSection } from "./QRSection";
 import { BusinessForm } from "./BusinessForm";
 import { VenueManager } from "./VenueManager";
@@ -44,9 +45,10 @@ async function SettingsView({
   // Reading the session makes this dynamic; guests are bounced to login.
   if (!(await isAdmin())) redirect(`/${locale}/login`);
 
-  const [settings, usingDefaultPassword] = await Promise.all([
+  const [settings, usingDefaultPassword, adminUsername] = await Promise.all([
     getSettings(),
     verifyPassword("1234"),
+    getAdminUsername(),
   ]);
   return (
     <>
@@ -87,7 +89,16 @@ async function SettingsView({
           { id: "qr", label: "QR kodları", panel: <QRSection venues={settings.venues} /> },
           { id: "yedek", label: "Yedek", panel: <BackupSection /> },
           { id: "cop", label: "Çöp kutusu", panel: <TrashSection /> },
-          { id: "guvenlik", label: "Güvenlik", panel: <PasswordForm /> },
+          {
+            id: "guvenlik",
+            label: "Güvenlik",
+            panel: (
+              <div className="flex flex-col gap-4">
+                <UsernameForm currentUsername={adminUsername} />
+                <PasswordForm />
+              </div>
+            ),
+          },
           { id: "islemler", label: "Son işlemler", panel: <ActivitySection /> },
         ]}
       />

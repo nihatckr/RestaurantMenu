@@ -62,6 +62,36 @@ export async function verifyPassword(input: string): Promise<boolean> {
   return bcrypt.compare(input, admin.passwordHash);
 }
 
+/** Verify username + password for login (single admin, looked up by username). */
+export async function verifyCredentials(
+  username: string,
+  password: string,
+): Promise<boolean> {
+  if (!username || !password) return false;
+  const admin = await prisma.adminUser.findUnique({
+    where: { username: username.trim() },
+    select: { passwordHash: true },
+  });
+  if (!admin) return false;
+  return bcrypt.compare(password, admin.passwordHash);
+}
+
+/** The admin's current username (for the Settings form). */
+export async function getAdminUsername(): Promise<string> {
+  const admin = await prisma.adminUser.findFirst({ select: { username: true } });
+  return admin?.username ?? "admin";
+}
+
+/** Change the admin username (single admin row). */
+export async function setUsername(newUsername: string): Promise<void> {
+  const admin = await prisma.adminUser.findFirst({ select: { id: true } });
+  if (!admin) throw new Error("Admin bulunamadı.");
+  await prisma.adminUser.update({
+    where: { id: admin.id },
+    data: { username: newUsername.trim() },
+  });
+}
+
 /** Set (bcrypt-hash) the admin password. Single admin: updates the one row, or
  *  creates it if missing. Callers must be authenticated + have verified current. */
 export async function setPassword(newPassword: string): Promise<void> {

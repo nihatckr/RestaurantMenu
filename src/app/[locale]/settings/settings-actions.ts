@@ -1,6 +1,6 @@
 "use server";
 
-import { requireAdmin, verifyPassword, setPassword } from "@/lib/auth";
+import { requireAdmin, verifyPassword, setPassword, setUsername } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
 import { uploadImage, ImageError } from "@/lib/images";
 import { setBrandLogo, setVenueWordmark, setBusinessInfo } from "@/lib/data/settings";
@@ -106,6 +106,27 @@ export async function updateBusinessInfoAction(
 }
 
 export type PasswordState = { ok?: boolean; error?: string };
+
+// Change the admin username (login identity).
+export async function changeUsernameAction(
+  _prev: PasswordState,
+  formData: FormData,
+): Promise<PasswordState> {
+  await requireAdmin();
+  const username = String(formData.get("username") ?? "").trim();
+  if (username.length < 3) return { error: "Kullanıcı adı en az 3 karakter olmalı." };
+  if (username.length > 40) return { error: "Kullanıcı adı çok uzun." };
+  if (!/^[a-zA-Z0-9._-]+$/.test(username)) {
+    return { error: "Sadece harf, rakam, nokta, alt çizgi ve tire kullanın." };
+  }
+  try {
+    await setUsername(username);
+  } catch {
+    return { error: "Bu kullanıcı adı kullanılamıyor." };
+  }
+  await audit("settings", "password", `kullanıcı adı: ${username}`);
+  return { ok: true };
+}
 
 // Change the admin password (requires the current one).
 export async function changePasswordAction(

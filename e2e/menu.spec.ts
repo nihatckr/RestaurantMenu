@@ -570,6 +570,28 @@ test("settings warns while the default password is active", async ({ page }) => 
   await expect(page.getByText(/Varsayılan şifre/)).toBeVisible();
 });
 
+test("login rejects a wrong username", async ({ page }) => {
+  await page.goto("/tr/login");
+  await page.getByLabel("Kullanıcı adı").fill("yanliskullanici");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page.getByText("Kullanıcı adı veya şifre hatalı.")).toBeVisible();
+});
+
+test("admin saves the username (settings)", async ({ page }) => {
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "Güvenlik" }).click();
+
+  // Keep it "admin" so other tests still log in with the default username.
+  await page.locator('input[name="username"]').fill("admin");
+  await page.getByRole("button", { name: "Kullanıcı adını kaydet" }).click();
+  await expect(page.getByText("Kaydedildi", { exact: true })).toBeVisible();
+});
+
 test("admin changes the password (current verified)", async ({ page }) => {
   await page.goto("/tr/login");
   await page.getByLabel("Şifre").fill("1234");
