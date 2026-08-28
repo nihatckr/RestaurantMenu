@@ -288,6 +288,10 @@ export type ProductAdminRow = {
   titleTr: string;
   titleEn: string;
   titleRu: string;
+  descriptionTr: string;
+  descriptionEn: string;
+  descriptionRu: string;
+  calories: number | null;
   categorySlug: string;
   kind: ProductKind;
   tag: string;
@@ -342,7 +346,10 @@ export async function getProductsAdmin(
                   kind: true,
                   tag: true,
                   image: true,
-                  translations: { select: { locale: true, title: true } },
+                  calories: true,
+                  translations: {
+                    select: { locale: true, title: true, description: true },
+                  },
                 },
               },
             },
@@ -353,11 +360,18 @@ export async function getProductsAdmin(
   });
   return (venue?.menu?.items ?? []).map((it) => {
     const t = Object.fromEntries(it.product.translations.map((x) => [x.locale, x.title]));
+    const d = Object.fromEntries(
+      it.product.translations.map((x) => [x.locale, x.description ?? ""]),
+    );
     return {
       id: it.product.id,
       titleTr: t.tr ?? "",
       titleEn: t.en ?? "",
       titleRu: t.ru ?? "",
+      descriptionTr: d.tr ?? "",
+      descriptionEn: d.en ?? "",
+      descriptionRu: d.ru ?? "",
+      calories: it.product.calories,
       categorySlug: it.category.slug,
       kind: it.product.kind,
       tag: it.product.tag ?? "",
@@ -369,9 +383,14 @@ export async function getProductsAdmin(
 }
 
 function titleRows(input: ProductInput) {
-  const rows = [{ locale: "tr", title: input.titleTr.trim() }];
-  if (input.titleEn?.trim()) rows.push({ locale: "en", title: input.titleEn.trim() });
-  if (input.titleRu?.trim()) rows.push({ locale: "ru", title: input.titleRu.trim() });
+  const mk = (locale: string, title: string, description?: string) => ({
+    locale,
+    title: title.trim(),
+    description: description?.trim() || null,
+  });
+  const rows = [mk("tr", input.titleTr, input.descriptionTr)];
+  if (input.titleEn?.trim()) rows.push(mk("en", input.titleEn, input.descriptionEn));
+  if (input.titleRu?.trim()) rows.push(mk("ru", input.titleRu, input.descriptionRu));
   return rows;
 }
 
@@ -414,6 +433,7 @@ export async function createProduct(
       kind: input.kind as ProductKind,
       tag: input.tag?.trim() || null,
       image: image ?? null,
+      calories: input.calories ?? null,
       translations: { create: titleRows(input) },
     },
   });
@@ -468,24 +488,26 @@ export async function updateProduct(
     data: {
       kind: input.kind as ProductKind,
       tag: input.tag?.trim() || null,
+      calories: input.calories ?? null,
       ...(image !== undefined ? { image } : {}),
     },
   });
   if (image !== undefined && oldImage && oldImage !== image) {
     await deleteImage(oldImage);
   }
-  const values: [string, string | undefined][] = [
-    ["tr", input.titleTr],
-    ["en", input.titleEn],
-    ["ru", input.titleRu],
+  const values: [string, string | undefined, string | undefined][] = [
+    ["tr", input.titleTr, input.descriptionTr],
+    ["en", input.titleEn, input.descriptionEn],
+    ["ru", input.titleRu, input.descriptionRu],
   ];
-  for (const [locale, raw] of values) {
-    const title = (raw ?? "").trim();
+  for (const [locale, rawTitle, rawDesc] of values) {
+    const title = (rawTitle ?? "").trim();
+    const description = (rawDesc ?? "").trim() || null;
     if (title) {
       await prisma.productTranslation.upsert({
         where: { productId_locale: { productId, locale } },
-        update: { title },
-        create: { productId, locale, title },
+        update: { title, description },
+        create: { productId, locale, title, description },
       });
     } else if (locale !== "tr") {
       await prisma.productTranslation.deleteMany({ where: { productId, locale } });

@@ -7,7 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { ReorderButtons } from "@/components/ui/ReorderButtons";
 import { Button } from "@/components/ui/Button";
-import { Input, Field, Select } from "@/components/ui/form";
+import { Input, Textarea, Field, Select } from "@/components/ui/form";
 import { ImageField } from "@/components/ui/ImageField";
 import type { ProductAdminRow } from "@/lib/data/admin";
 import {
@@ -257,6 +257,23 @@ function ProductFormModal({
           error={state.fieldErrors?.titleRu}
         >
           <Input name="titleRu" defaultValue={initial.titleRu} />
+        </Field>
+
+        <Field
+          label="Açıklama (Türkçe, opsiyonel)"
+          hint="Kısa açıklama / içindekiler — kartta ürünün altında görünür."
+          error={state.fieldErrors?.descriptionTr}
+        >
+          <Textarea name="descriptionTr" defaultValue={initial.descriptionTr} rows={2} />
+        </Field>
+        <Field label="Açıklama (İngilizce, opsiyonel)" error={state.fieldErrors?.descriptionEn}>
+          <Textarea name="descriptionEn" defaultValue={initial.descriptionEn} rows={2} />
+        </Field>
+        <Field label="Açıklama (Rusça, opsiyonel)" error={state.fieldErrors?.descriptionRu}>
+          <Textarea name="descriptionRu" defaultValue={initial.descriptionRu} rows={2} />
+        </Field>
+        <Field label="Kalori (opsiyonel)" hint="kcal — kartta rozet olarak gösterilir." error={state.fieldErrors?.calories}>
+          <Input name="calories" type="number" min={0} defaultValue={initial.calories ?? ""} />
         </Field>
         <Field
           label="Kategori"

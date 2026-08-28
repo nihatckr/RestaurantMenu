@@ -27,6 +27,9 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
         </div>
         {item.subtitle && <p className="type-desc text-xs">{item.subtitle}</p>}
         {item.description && <p className="type-desc text-xs">{item.description}</p>}
+        {item.calories != null && (
+          <p className="type-desc text-xs text-muted">{item.calories} kcal</p>
+        )}
       </article>
     );
   }

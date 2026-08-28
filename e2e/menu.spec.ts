@@ -215,6 +215,36 @@ test("admin reorders categories with the up/down arrows", async ({ page }) => {
   await expect(links.nth(1)).toHaveText(second);
 });
 
+test("admin adds a product with a description and calories", async ({ page }) => {
+  const title = `E2EDetay ${Date.now()}`;
+  const desc = `Açıklama${Date.now()}`;
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/terrace/starters");
+
+  const section = page.locator("section", {
+    has: page.getByRole("heading", { name: "Başlangıçlar" }),
+  });
+  await section.getByRole("button", { name: "Ürün ekle" }).first().click();
+  await page.getByLabel("Ad (Türkçe)").fill(title);
+  await page.locator('textarea[name="descriptionTr"]').fill(desc);
+  await page.locator('input[name="calories"]').fill("320");
+  await page.getByRole("button", { name: "Kaydet" }).click();
+
+  // The card shows the description + calories.
+  const card = page.locator("article", { hasText: title });
+  await expect(card.getByText(desc)).toBeVisible();
+  await expect(card.getByText("320 kcal")).toBeVisible();
+
+  // Clean up.
+  await page.getByRole("button", { name: `${title} sil` }).click();
+  await page.getByRole("button", { name: "Sil", exact: true }).click();
+  await expect(page.getByText(title)).toHaveCount(0);
+});
+
 test("admin adds a product with labelled measure prices", async ({ page }) => {
   const title = `E2EÖlçü ${Date.now()}`;
   const measure = `Ölçü${Date.now()}`; // unique label so it never collides

@@ -32,10 +32,15 @@ function parse(formData: FormData) {
     .filter((r) => r.label !== "")
     .map((r) => ({ label: r.label, amount: Number(r.amount || 0) }));
 
+  const caloriesRaw = formData.get("calories");
   return productSchema.safeParse({
     titleTr: String(formData.get("titleTr") ?? ""),
     titleEn: String(formData.get("titleEn") ?? ""),
     titleRu: String(formData.get("titleRu") ?? ""),
+    descriptionTr: String(formData.get("descriptionTr") ?? ""),
+    descriptionEn: String(formData.get("descriptionEn") ?? ""),
+    descriptionRu: String(formData.get("descriptionRu") ?? ""),
+    calories: caloriesRaw ? Number(caloriesRaw) : undefined,
     categorySlug: String(formData.get("categorySlug") ?? ""),
     kind: String(formData.get("kind") ?? "FOOD"),
     tag: String(formData.get("tag") ?? ""),

@@ -128,6 +128,8 @@ export type MenuItemView = {
   dlc: boolean; // wine has a valid label (legacy "DLC" badge)
   featured: boolean; // spans full width in its category (legacy featured breakfast)
   available: boolean; // per-venue visibility; public reads only ever return true
+  calories: number | null; // optional kcal shown on the card
+  dietary: string[]; // diet/allergen tags (vegan, vegetarian, gluten_free, spicy, halal)
 };
 
 export type MenuCategoryView = {
@@ -170,6 +172,8 @@ const menuItemSelect = {
       tag: true,
       color: true,
       dlc: true,
+      calories: true,
+      dietary: true,
       translations: {
         select: { locale: true, title: true, subtitle: true, description: true },
       },
@@ -206,6 +210,8 @@ function mapMenu(
       dlc: item.product.dlc,
       featured: item.featured,
       available: item.available,
+      calories: item.product.calories,
+      dietary: item.product.dietary,
     };
     const bucket = itemsByCategory.get(item.categoryId) ?? [];
     bucket.push(view);

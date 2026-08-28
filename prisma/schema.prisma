@@ -33,6 +33,10 @@ model Business {
   name          String
   logo          String? // brand mark URL (admin-uploaded; falls back to BRAND.mark)
   footerExtra   String? // optional extra footer line (contact/address); shown below the legal notice
+  hours         String? // opening hours, free text (e.g. "Her gün 08:00–24:00")
+  phone         String? // contact phone (tel: link in the footer)
+  instagram     String? // Instagram handle or URL
+  mapUrl        String? // Google Maps / location link
   currency      String     @default("TRY")
   defaultLocale String     @default("tr")
   locales       String[]   @default(["tr", "en", "ru"])
@@ -113,6 +117,8 @@ model Product {
   color        String? // drink colour chip (legacy)
   tag          String? // drink family/tag (legacy)
   dlc          Boolean              @default(false) // wine: has a valid label (legacy "DLC" badge)
+  calories     Int? // optional kcal, shown on the card
+  dietary      String[]             @default([]) // diet/allergen tags: vegan, vegetarian, gluten_free, spicy, halal
   translations ProductTranslation[]
   menuItems    MenuItem[]
   createdAt    DateTime             @default(now())
