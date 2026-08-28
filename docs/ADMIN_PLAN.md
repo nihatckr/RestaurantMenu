@@ -88,8 +88,13 @@ fit for one person editing (often from a phone).
   and `bcrypt.compare`s. (`src/lib/auth.ts`.)
 - **Login flow:** discreet unlinked route `/[locale]/login` → password field
   (`LoginForm`, `useActionState`) → server action verifies → sets the session cookie →
-  redirects to the menu. Logout action destroys it. **Login rate-limit** (in-process
+  **redirects to the menu**. Visiting `/login` while already logged in also redirects
+  to the menu (never stuck on the login screen). **Login rate-limit** (in-process
   best-effort: 5 fails → 5-min lock, generic error). Admin chrome is Turkish.
+- **Logout — global admin bar:** when logged in, `AdminBar` (a session-gated island
+  in the root layout, Suspense-isolated so guests still get the static shell) shows a
+  small "Yönetim modu · Çıkış" affordance on every page, so logout is reachable
+  anywhere. (In T13 this bar also hosts the edit-mode / Settings controls.)
 - **Cookie:** encrypted, httpOnly, SameSite=lax, 8h; **`secure` in production**
   (HTTPS). `AUTH_ALLOW_HTTP=1` disables `secure` for local `next start` over
   http://localhost (dev/e2e only — never in prod).

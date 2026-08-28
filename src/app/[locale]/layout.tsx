@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { MenuFooter } from "@/components/MenuFooter";
+import { AdminBar } from "@/components/AdminBar";
 import { LOCALES, isLocale } from "@/lib/i18n";
 import { BRAND } from "@/lib/brand";
 import { SITE_URL } from "@/lib/site";
@@ -66,6 +68,11 @@ export default async function LocaleLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground font-body">
         {children}
         <MenuFooter locale={locale} />
+        {/* Admin affordance (logout) — renders only when logged in; isolated in a
+            Suspense boundary so the static public shell is unaffected. */}
+        <Suspense fallback={null}>
+          <AdminBar locale={locale} />
+        </Suspense>
       </body>
     </html>
   );

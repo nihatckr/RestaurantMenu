@@ -141,16 +141,21 @@ test("prices render as plain numbers (no ₺ tofu)", async ({ page }) => {
   await expect(page.getByText("₺")).toHaveCount(0);
 });
 
-test("admin logs in with the password and logs out", async ({ page }) => {
+test("admin logs in, gets the admin bar, and logs out", async ({ page }) => {
   await page.goto("/tr/login");
   await page.getByLabel("Şifre").fill("1234");
   await page.getByRole("button", { name: "Giriş" }).click();
   await expect(page).toHaveURL(/\/tr$/); // redirected to the menu after login
 
-  // The session persists — the login route now shows the logged-in panel.
-  await page.goto("/tr/login");
-  await expect(page.getByText("Giriş yapıldı")).toBeVisible();
+  // The global admin bar (logout) appears when logged in.
+  await expect(page.getByText("Yönetim modu")).toBeVisible();
 
-  await page.getByRole("button", { name: "Çıkış yap" }).click();
-  await expect(page.getByRole("button", { name: "Giriş" })).toBeVisible(); // back to form
+  // Visiting /login while logged in bounces back to the menu (no getting stuck).
+  await page.goto("/tr/login");
+  await expect(page).toHaveURL(/\/tr$/);
+
+  // Log out from the admin bar → back to a logged-out login form.
+  await page.getByRole("button", { name: "Çıkış" }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByRole("button", { name: "Giriş" })).toBeVisible();
 });
