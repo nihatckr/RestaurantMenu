@@ -260,14 +260,12 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
 > migrations** only, called out per phase below (`deletedAt`, `Business.logo`,
 > `AuditLog`).
 
-**Phase A — Seedless foundation** *(must land first — else deploys wipe edits)*
-- [ ] Make `prisma/seed.ts` idempotent **bootstrap-only**: remove every
-  `deleteMany(… notIn …)` reconcile; never overwrite existing rows. *Done when:*
-  re-running seed on a populated DB changes nothing.
-- [ ] Demote content seed to `npm run seed:demo` (dev-only); keep `prices.ts`/
-  `translations.ts` as the demo source. *Done when:* seeding is not in the prod path.
-- [ ] `vercel-build` → **migrate-only** (drop `db seed`). *Done when:* a fresh prod
-  DB comes up **empty**; DEPLOY.md updated.
+**Phase A — Seedless foundation** *(must land first — else deploys wipe edits)* — ✅ DONE
+- [x] Make `prisma/seed.ts` **bootstrap-only**: bails out if the DB already has
+  content; removed every `deleteMany(… notIn …)` reconcile. *Verified:* re-running on
+  the populated DB skips (counts unchanged 2/12/53/106).
+- [x] Demote content seed to `npm run seed:demo` (dev-only). *Done:* script added.
+- [x] `vercel-build` → **migrate-only** (dropped `db seed`); DEPLOY.md updated.
 
 **Phase B — Cache tagging**
 - [ ] Add `cacheTag("menu","venue:<slug>")` to the data-access reads. *Done when:*

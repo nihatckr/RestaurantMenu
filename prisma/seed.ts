@@ -4,14 +4,15 @@ import { TRANSLATIONS, type LocalizedText } from "./data/translations";
 
 const prisma = new PrismaClient();
 
-// Idempotent seed (re-runnable). Two venues sharing one catalog (U11 = two
-// venues). Content is grounded in legacy evidence: product names come from the
-// legacy asset folders (real menu items) and the category set mirrors the legacy
-// structure. Per-venue differences (Terrace hides Breakfast; drink ordering;
-// per-item visibility) are DATA, never code (AGENTS.md 10).
+// DEMO bootstrap seed — populates an EMPTY database only (Path B, ADMIN_PLAN.md §1).
+// Since the admin makes the DB the source of truth, this seed is a dev/demo importer,
+// NOT authoritative: it **bails out if the DB already has content** (never overwrites
+// or deletes admin-edited rows) and is NOT run on deploy (vercel-build is migrate-
+// only). Run it on a fresh DB with `npm run seed:demo` (or `db:seed`); to re-apply
+// changed demo data, reset first (`npm run db:reset`).
 //
-// PRICES live in ./data/prices.ts (single place to edit) and are DEMO values
-// pending a real source (DATA_SOURCING.md / U5). No admin UI (T11 = seed-data).
+// Two venues sharing one catalog (U11). Content is grounded in legacy evidence.
+// PRICES/TRANSLATIONS live in ./data/*.ts and are DEMO values pending real data (U5).
 
 const BUSINESS_ID = "mono";
 
@@ -286,6 +287,17 @@ async function main() {
   });
   assertLocalesSupported(business.locales);
 
+  // Bootstrap-only: if the DB already holds content, the admin (or a prior seed) owns
+  // it — never touch it. Only an empty DB gets the demo data.
+  const existingContent =
+    (await prisma.venue.count()) + (await prisma.product.count());
+  if (existingContent > 0) {
+    console.log(
+      "Seed skipped — DB already has content (DB/admin is the source of truth).",
+    );
+    return;
+  }
+
   const categoryIdBySlug = new Map<string, string>();
   for (const c of CATEGORIES) {
     const cat = await prisma.category.upsert({
@@ -303,16 +315,6 @@ async function main() {
     }
   }
 
-  // Reconcile: CATEGORIES is authoritative — remove any category no longer listed
-  // (cascades to its translations + per-venue MenuCategory links). Safe as long as
-  // the dropped category has no MenuItems (products are reconciled just below).
-  await prisma.category.deleteMany({
-    where: {
-      businessId: business.id,
-      slug: { notIn: CATEGORIES.map((c) => c.slug) },
-    },
-  });
-
   const productIdBySlug = new Map<string, string>();
   for (const p of PRODUCTS) {
     const image = IMAGE_BY_SLUG[p.slug] ?? null;
@@ -327,17 +329,14 @@ async function main() {
     const text = TRANSLATIONS[p.slug];
     if (!text) throw new Error(`Missing TRANSLATIONS entry for product "${p.slug}"`);
     // Data-driven: iterate the business's supported locales (schema default
-    // ["tr","en","ru"]) — no hard-coded language list. TRANSLATIONS is
-    // authoritative per locale: a filled title upserts the row; a blank ("") title
-    // removes any stale row so the app falls back to the default language.
+    // ["tr","en","ru"]) — no hard-coded language list. A filled title creates the
+    // row; a blank ("") locale is skipped (app falls back to the default language).
     const pick = (field?: LocalizedText, locale?: string) =>
       field && locale ? field[locale as keyof LocalizedText]?.trim() : undefined;
     for (const locale of business.locales) {
       const title = pick(text.title, locale);
-      if (!title) {
-        await prisma.productTranslation.deleteMany({ where: { productId: prod.id, locale } });
-        continue;
-      }
+      if (!title) continue; // blank → no row; app falls back to the default language
+
       const subtitle = pick(text.subtitle, locale) || null;
       const description = pick(text.description, locale) || null;
       await prisma.productTranslation.upsert({
@@ -347,13 +346,6 @@ async function main() {
       });
     }
   }
-
-  // Reconcile: the seed is the single source of content (no admin), so remove any
-  // product no longer listed here. Cascades to its menu items / translations /
-  // prices. This is what lets deleting a product from the seed remove it in prod.
-  await prisma.product.deleteMany({
-    where: { businessId: business.id, slug: { notIn: PRODUCTS.map((p) => p.slug) } },
-  });
 
   for (const v of VENUES) {
     const venue = await prisma.venue.upsert({
@@ -407,15 +399,6 @@ async function main() {
           });
         }
       }
-      // Reconcile: the PRICES map is authoritative — drop any stale measure rows
-      // whose label is no longer listed (e.g. after renaming Şişe→BOTTLE), so
-      // re-seeding never leaves duplicate/old measures behind.
-      await prisma.menuItemPrice.deleteMany({
-        where: {
-          menuItemId: menuItem.id,
-          label: { notIn: options ? options.map((o) => o.label) : [] },
-        },
-      });
     }
   }
 
