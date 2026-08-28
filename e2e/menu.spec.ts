@@ -358,7 +358,13 @@ test.describe.serial("trash bin", () => {
     // Restore it from the settings trash tab…
     await page.goto("/tr/settings");
     await page.getByRole("tab", { name: "Çöp kutusu" }).click();
-    await page.locator("li", { hasText: name }).getByRole("button", { name: "Geri al" }).click();
+    const trashRow = page
+      .locator("li")
+      .filter({ hasText: name })
+      .filter({ has: page.getByRole("button", { name: "Geri al" }) });
+    await trashRow.getByRole("button", { name: "Geri al" }).click();
+    // Wait for the restore to land (the row leaves the trash) before navigating.
+    await expect(trashRow).toHaveCount(0);
 
     // …and it's back in the public category nav.
     await page.goto("/tr/terrace");
@@ -438,6 +444,36 @@ test("import rejects a file that isn't a valid workbook", async ({ page }) => {
   });
   await page.getByRole("button", { name: "Yedeği içe aktar" }).click();
   await expect(page.getByText(/Dosya okunamadı/)).toBeVisible();
+});
+
+test("admin sets and clears the business footer note", async ({ page }) => {
+  const note = `E2ENot ${Date.now()}`;
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+
+  // Set the extra footer line, then confirm it PERSISTS (the form re-reads it
+  // fresh on reload — deterministic, unlike the cached public footer).
+  await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "İşletme" }).click();
+  await page.locator('input[name="footerExtra"]').fill(note);
+  await page.getByRole("button", { name: "Kaydet" }).click();
+  await expect(page.getByText("Kaydedildi", { exact: true })).toBeVisible();
+
+  await page.reload();
+  await page.getByRole("tab", { name: "İşletme" }).click();
+  await expect(page.locator('input[name="footerExtra"]')).toHaveValue(note);
+
+  // Clear it again (leaves the DB clean for the public footer).
+  await page.locator('input[name="footerExtra"]').fill("");
+  await page.getByRole("button", { name: "Kaydet" }).click();
+  await expect(page.getByText("Kaydedildi", { exact: true })).toBeVisible();
+
+  await page.reload();
+  await page.getByRole("tab", { name: "İşletme" }).click();
+  await expect(page.locator('input[name="footerExtra"]')).toHaveValue("");
 });
 
 test("admin sees and downloads a venue QR code", async ({ page }) => {

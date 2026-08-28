@@ -18,6 +18,7 @@ const ENTITIES: Record<string, string> = {
   backup: "Yedek",
   trash: "Çöp kutusu",
   password: "Şifre",
+  business: "İşletme",
 };
 
 // Recent admin activity (audit trail). Server-rendered, read-only.

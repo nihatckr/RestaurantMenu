@@ -32,6 +32,7 @@ model Business {
   id            String     @id @default(cuid())
   name          String
   logo          String? // brand mark URL (admin-uploaded; falls back to BRAND.mark)
+  footerExtra   String? // optional extra footer line (contact/address); shown below the legal notice
   currency      String     @default("TRY")
   defaultLocale String     @default("tr")
   locales       String[]   @default(["tr", "en", "ru"])

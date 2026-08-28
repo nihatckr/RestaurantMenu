@@ -3,7 +3,7 @@
 import { requireAdmin, verifyPassword, setPassword } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
 import { uploadImage, ImageError } from "@/lib/images";
-import { setBrandLogo, setVenueWordmark } from "@/lib/data/settings";
+import { setBrandLogo, setVenueWordmark, setBusinessInfo } from "@/lib/data/settings";
 import { emptyTrash } from "@/lib/data/admin";
 import { importBackup } from "@/lib/data/backup-import";
 import { audit } from "@/lib/data/audit";
@@ -87,6 +87,22 @@ export async function importBackupAction(
   );
   revalidateMenu();
   return { ok: true, counts: result.counts };
+}
+
+// Business name + optional extra footer line.
+export async function updateBusinessInfoAction(
+  _prev: SettingsFormState,
+  formData: FormData,
+): Promise<SettingsFormState> {
+  await requireAdmin();
+  const name = String(formData.get("name") ?? "").trim();
+  const footerExtra = String(formData.get("footerExtra") ?? "").trim();
+  if (name.length < 1) return { error: "İşletme adı zorunlu." };
+  if (name.length > 120 || footerExtra.length > 200) return { error: "Girdi çok uzun." };
+  await setBusinessInfo(name, footerExtra || null);
+  await audit("settings", "business", "işletme bilgileri güncellendi");
+  revalidateMenu();
+  return { ok: true };
 }
 
 export type PasswordState = { ok?: boolean; error?: string };

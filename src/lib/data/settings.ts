@@ -16,19 +16,51 @@ export async function getBrandLogo(): Promise<string | null> {
   return business?.logo ?? null;
 }
 
-/** Fresh snapshot for the admin Settings form: brand logo + each venue's wordmark. */
+/** Business name + optional extra footer line (cached; tagged so the public
+ *  footer refreshes on change). */
+export async function getBusinessInfo(): Promise<{
+  name: string;
+  footerExtra: string | null;
+}> {
+  "use cache";
+  cacheTag(MENU_TAG);
+  const business = await prisma.business.findFirst({
+    select: { name: true, footerExtra: true },
+  });
+  return { name: business?.name ?? "", footerExtra: business?.footerExtra ?? null };
+}
+
+/** Set the business name + extra footer line. */
+export async function setBusinessInfo(name: string, footerExtra: string | null) {
+  const business = await prisma.business.findFirst({ select: { id: true } });
+  if (!business) throw new Error("Business not found");
+  await prisma.business.update({
+    where: { id: business.id },
+    data: { name, footerExtra },
+  });
+}
+
+/** Fresh snapshot for the admin Settings form: brand logo, business info + each
+ *  venue's wordmark. */
 export async function getSettings(): Promise<{
   logo: string | null;
+  name: string;
+  footerExtra: string | null;
   venues: { slug: string; name: string; wordmark: string | null }[];
 }> {
   const [business, venues] = await Promise.all([
-    prisma.business.findFirst({ select: { logo: true } }),
+    prisma.business.findFirst({ select: { logo: true, name: true, footerExtra: true } }),
     prisma.venue.findMany({
       orderBy: { sortOrder: "asc" },
       select: { slug: true, name: true, wordmark: true },
     }),
   ]);
-  return { logo: business?.logo ?? null, venues };
+  return {
+    logo: business?.logo ?? null,
+    name: business?.name ?? "",
+    footerExtra: business?.footerExtra ?? null,
+    venues,
+  };
 }
 
 /** Set/replace/clear the brand mark; deletes the previous blob on change. */

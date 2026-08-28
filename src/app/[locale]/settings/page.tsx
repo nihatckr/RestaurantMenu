@@ -12,6 +12,7 @@ import { TrashSection } from "./TrashSection";
 import { ActivitySection } from "./ActivitySection";
 import { PasswordForm } from "./PasswordForm";
 import { QRSection } from "./QRSection";
+import { BusinessForm } from "./BusinessForm";
 import { SettingsTabs } from "./SettingsTabs";
 
 // Admin-only; never indexed.
@@ -58,6 +59,13 @@ async function SettingsView({
             id: "marka",
             label: "Marka & Mekanlar",
             panel: <SettingsForms logo={settings.logo} venues={settings.venues} />,
+          },
+          {
+            id: "isletme",
+            label: "İşletme",
+            panel: (
+              <BusinessForm name={settings.name} footerExtra={settings.footerExtra} />
+            ),
           },
           { id: "qr", label: "QR kodları", panel: <QRSection venues={settings.venues} /> },
           { id: "yedek", label: "Yedek", panel: <BackupSection /> },
