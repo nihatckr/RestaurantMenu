@@ -13,7 +13,7 @@ import {
   listVenueSlugs,
 } from "@/lib/data/menu";
 import { buildMenuJsonLd } from "@/lib/jsonld";
-import { LOCALES, isLocale, type Locale } from "@/lib/i18n";
+import { LOCALES, isLocale, buildAlternates, type Locale } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
 import { BRAND } from "@/lib/brand";
 import { BUILD_FALLBACK } from "@/lib/site";
@@ -49,6 +49,7 @@ export async function generateMetadata({
   return {
     title,
     description: t.venueMenuDescription(venue.name),
+    alternates: buildAlternates(locale, `/${venueSlug}`),
     openGraph: { title },
   };
 }

@@ -21,6 +21,30 @@ export function isLocale(value: string): value is Locale {
   return (LOCALES as readonly string[]).includes(value);
 }
 
+/**
+ * The locale from a pathname's first segment (`/tr/…` → `tr`), or the default
+ * when unsupported/missing. For client contexts that only have the URL (e.g. the
+ * error boundary) where route params aren't available.
+ */
+export function localeFromPathname(pathname: string | null | undefined): Locale {
+  const seg = (pathname ?? "").split("/")[1] ?? "";
+  return isLocale(seg) ? seg : DEFAULT_LOCALE;
+}
+
+/**
+ * `Metadata.alternates` for a menu path: the canonical (current locale) plus one
+ * `hreflang` link per supported locale and an `x-default`. `pathAfterLocale` is the
+ * path *without* the locale segment, e.g. `/terrace` or `/terrace/starters`. URLs
+ * are relative — Next resolves them against `metadataBase` (SITE_URL). Built from
+ * `LOCALES`, so a new language needs no change here.
+ */
+export function buildAlternates(locale: string, pathAfterLocale: string) {
+  const languages: Record<string, string> = {};
+  for (const l of LOCALES) languages[l] = `/${l}${pathAfterLocale}`;
+  languages["x-default"] = `/${DEFAULT_LOCALE}${pathAfterLocale}`;
+  return { canonical: `/${locale}${pathAfterLocale}`, languages };
+}
+
 /** Pick the row for `locale`, falling back to tr, then to the first available. */
 export function pickLocalized<T extends { locale: string }>(
   rows: T[],

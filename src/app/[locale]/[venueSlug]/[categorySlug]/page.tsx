@@ -7,7 +7,7 @@ import { CategorySection } from "@/components/CategorySection";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
-import { LOCALES, isLocale, type Locale } from "@/lib/i18n";
+import { LOCALES, isLocale, buildAlternates, type Locale } from "@/lib/i18n";
 import { BRAND } from "@/lib/brand";
 import { BUILD_FALLBACK } from "@/lib/site";
 
@@ -51,6 +51,7 @@ export async function generateMetadata({
   return {
     title: `${category.name} · ${venue.name}`,
     description: `${venue.name} — ${category.name}`,
+    alternates: buildAlternates(locale, `/${venueSlug}/${categorySlug}`),
     openGraph: { title: `${category.name} · ${venue.name}` },
   };
 }

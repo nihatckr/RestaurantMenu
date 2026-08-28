@@ -45,6 +45,27 @@ test("language switcher swaps the whole menu to one language", async ({ page }) 
   await expect(page.getByRole("link", { name: /Başlangıçlar/ })).toHaveCount(0);
 });
 
+test("switching to Russian localizes categories and falls back to Turkish for untranslated items", async ({
+  page,
+}) => {
+  await page.goto("/tr/terrace");
+  await page.getByRole("link", { name: "РУ", exact: true }).click();
+  await expect(page).toHaveURL(/\/ru\/terrace$/);
+
+  // Categories are fully translated → shown in Russian.
+  const zakuski = page.getByRole("link", { name: /Закуски/ });
+  await expect(zakuski).toBeVisible();
+  await zakuski.click();
+  await expect(page).toHaveURL(/\/ru\/terrace\/starters$/);
+  await expect(page.getByRole("heading", { name: "Закуски" })).toBeVisible();
+
+  // A product with a Russian title renders in Cyrillic (single-scroll page shows
+  // every category, so the wraps/burgers item is on the page too).
+  await expect(page.getByText("Моно Бургер")).toBeVisible();
+  // A product WITHOUT a Russian title falls back to Turkish — never blank.
+  await expect(page.getByText("Kalamar", { exact: true })).toBeVisible();
+});
+
 test("desserts render two-up (legacy per-category grid)", async ({ page }) => {
   await page.goto("/tr/terrace/desserts");
   const section = page.locator("section", {

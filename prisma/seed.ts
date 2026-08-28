@@ -236,12 +236,55 @@ const VENUES: VenueSeed[] = [
   },
 ];
 
+// Fail loudly on content drift BEFORE writing anything: the seed is the single
+// source of content, so a missing translation, orphan key or unknown category is a
+// data bug, not something to seed silently. Cheap insurance for the fill-in files.
+function assertContentIntegrity() {
+  const slugs = new Set(PRODUCTS.map((p) => p.slug));
+  const catSlugs = new Set(CATEGORIES.map((c) => c.slug));
+  const problems: string[] = [];
+
+  for (const p of PRODUCTS) {
+    if (!catSlugs.has(p.category))
+      problems.push(`product "${p.slug}" → unknown category "${p.category}"`);
+    const t = TRANSLATIONS[p.slug];
+    if (!t) problems.push(`TRANSLATIONS missing entry for product "${p.slug}"`);
+    else if (!t.title.tr?.trim())
+      problems.push(`TRANSLATIONS["${p.slug}"].title.tr is empty (tr is required)`);
+  }
+  for (const key of Object.keys(TRANSLATIONS))
+    if (!slugs.has(key)) problems.push(`TRANSLATIONS has orphan key "${key}" (no such product)`);
+  for (const key of Object.keys(PRICES))
+    if (!slugs.has(key)) problems.push(`PRICES has orphan key "${key}" (no such product)`);
+
+  if (problems.length)
+    throw new Error(`Seed content integrity check failed:\n - ${problems.join("\n - ")}`);
+}
+
+// Every locale used in TRANSLATIONS must be one the business supports, else it
+// would be silently ignored (the product loop iterates business.locales).
+function assertLocalesSupported(supported: string[]) {
+  const ok = new Set(supported);
+  const used = new Set<string>();
+  for (const t of Object.values(TRANSLATIONS))
+    for (const field of [t.title, t.subtitle, t.description])
+      if (field) for (const l of Object.keys(field)) used.add(l);
+  const stray = [...used].filter((l) => !ok.has(l));
+  if (stray.length)
+    throw new Error(
+      `TRANSLATIONS use locale(s) [${stray.join(", ")}] not in business.locales [${supported.join(", ")}]`,
+    );
+}
+
 async function main() {
+  assertContentIntegrity();
+
   const business = await prisma.business.upsert({
     where: { id: BUSINESS_ID },
     update: {},
     create: { id: BUSINESS_ID, name: "Mono" },
   });
+  assertLocalesSupported(business.locales);
 
   const categoryIdBySlug = new Map<string, string>();
   for (const c of CATEGORIES) {
