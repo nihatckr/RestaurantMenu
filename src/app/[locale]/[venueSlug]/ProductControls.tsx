@@ -2,7 +2,15 @@
 
 import { useActionState, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Eye,
+  EyeOff,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Field, Select } from "@/components/ui/form";
@@ -12,6 +20,7 @@ import {
   updateProductAction,
   deleteProductAction,
   toggleProductAvailabilityAction,
+  moveProductAction,
   type ProductFormState,
 } from "./product-actions";
 
@@ -81,6 +90,7 @@ export function ProductRowControls({
   available,
   categoryOptions,
   overlay = false,
+  reorder,
 }: {
   locale: string;
   venueSlug: string;
@@ -88,6 +98,8 @@ export function ProductRowControls({
   available: boolean;
   categoryOptions: CategoryOption[];
   overlay?: boolean;
+  // Present → show up/down arrows; each flag enables that direction (edge = off).
+  reorder?: { up: boolean; down: boolean };
 }) {
   const [editing, setEditing] = useState<"edit" | "delete" | null>(null);
   const router = useRouter();
@@ -105,6 +117,36 @@ export function ProductRowControls({
             : "ml-2 inline-flex gap-1 align-middle"
         }
       >
+        {reorder && (
+          <>
+            <form
+              action={moveProductAction.bind(null, locale, venueSlug, row.id, "up")}
+              className="flex"
+            >
+              <button
+                type="submit"
+                disabled={!reorder.up}
+                aria-label={`${row.titleTr} yukarı taşı`}
+                className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
+              >
+                <ChevronUp size={14} aria-hidden />
+              </button>
+            </form>
+            <form
+              action={moveProductAction.bind(null, locale, venueSlug, row.id, "down")}
+              className="flex"
+            >
+              <button
+                type="submit"
+                disabled={!reorder.down}
+                aria-label={`${row.titleTr} aşağı taşı`}
+                className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
+              >
+                <ChevronDown size={14} aria-hidden />
+              </button>
+            </form>
+          </>
+        )}
         <button
           type="button"
           aria-label={`${row.titleTr} düzenle`}

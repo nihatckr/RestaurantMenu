@@ -8,6 +8,8 @@ import {
   updateCategory,
   softDeleteCategory,
   setCategoryVisibility,
+  moveCategory,
+  type MoveDirection,
 } from "@/lib/data/admin";
 
 export type CategoryFormState = {
@@ -90,5 +92,17 @@ export async function toggleCategoryVisibilityAction(
 ): Promise<void> {
   await requireAdmin();
   await setCategoryVisibility(venueSlug, id, visible);
+  revalidateMenu(venueSlug);
+}
+
+// Bound with (locale, venueSlug, id, dir) → used as a <form action>.
+export async function moveCategoryAction(
+  locale: string,
+  venueSlug: string,
+  id: string,
+  dir: MoveDirection,
+): Promise<void> {
+  await requireAdmin();
+  await moveCategory(venueSlug, id, dir);
   revalidateMenu(venueSlug);
 }

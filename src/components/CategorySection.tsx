@@ -27,10 +27,14 @@ function ItemGrid({
   items,
   columns,
   admin,
+  enableReorder = false,
 }: {
   items: MenuItemView[];
   columns?: number | null;
   admin?: SectionAdmin;
+  // Only the ungrouped category path reorders (a whole-category order); grouped
+  // hard-drink tables keep their tag grouping and don't expose arrows.
+  enableReorder?: boolean;
 }) {
   const nonEmpty = items.length > 0;
   // Grids are mobile-first responsive (1/2/3 up) so nothing is cramped on a phone.
@@ -50,7 +54,7 @@ function ItemGrid({
       : `grid gap-x-3 gap-y-6 sm:gap-x-6 ${foodCols}`;
   return (
     <div className={cls}>
-      {items.map((item) => {
+      {items.map((item, index) => {
         const row = admin?.rowsById[item.productId];
         return (
           <div
@@ -65,6 +69,11 @@ function ItemGrid({
                 available={item.available}
                 categoryOptions={admin.categoryOptions}
                 overlay
+                reorder={
+                  enableReorder
+                    ? { up: index > 0, down: index < items.length - 1 }
+                    : undefined
+                }
               />
             )}
             {/* Grey the card (not the controls) when hidden from the public menu. */}
@@ -263,7 +272,12 @@ export function CategorySection({
           })}
         </div>
       ) : (
-        <ItemGrid items={items} columns={category.columns} admin={admin} />
+        <ItemGrid
+          items={items}
+          columns={category.columns}
+          admin={admin}
+          enableReorder
+        />
       )}
 
       {/* Admin-only: the full "add product" control below the items (mirrors the

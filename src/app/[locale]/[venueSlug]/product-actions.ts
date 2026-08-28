@@ -8,6 +8,8 @@ import {
   updateProduct,
   softDeleteProduct,
   setProductAvailability,
+  moveProduct,
+  type MoveDirection,
 } from "@/lib/data/admin";
 
 export type ProductFormState = {
@@ -93,5 +95,17 @@ export async function toggleProductAvailabilityAction(
 ): Promise<void> {
   await requireAdmin();
   await setProductAvailability(venueSlug, id, available);
+  revalidateMenu(venueSlug);
+}
+
+// Bound with (locale, venueSlug, id, dir) → used as a <form action>.
+export async function moveProductAction(
+  locale: string,
+  venueSlug: string,
+  id: string,
+  dir: MoveDirection,
+): Promise<void> {
+  await requireAdmin();
+  await moveProduct(venueSlug, id, dir);
   revalidateMenu(venueSlug);
 }

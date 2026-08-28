@@ -191,6 +191,30 @@ test("admin creates and deletes a category inline", async ({ page }) => {
   await expect(page.getByRole("link", { name })).toHaveCount(0);
 });
 
+test("admin reorders categories with the up/down arrows", async ({ page }) => {
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/terrace");
+
+  const nav = page.getByRole("navigation", { name: "Menu categories" });
+  const links = nav.getByRole("link");
+  const first = (await links.nth(0).textContent())?.trim() ?? "";
+  const second = (await links.nth(1).textContent())?.trim() ?? "";
+  expect(first).not.toEqual(second);
+
+  // Move the 2nd category up → it becomes the 1st.
+  await page.getByRole("button", { name: `${second} yukarı taşı` }).click();
+  await expect(links.nth(0)).toHaveText(second);
+  await expect(links.nth(1)).toHaveText(first);
+
+  // Move it back down → original order restored (leaves data as it was).
+  await page.getByRole("button", { name: `${second} aşağı taşı` }).click();
+  await expect(links.nth(0)).toHaveText(first);
+  await expect(links.nth(1)).toHaveText(second);
+});
+
 test("admin creates and deletes a product inline on a category page", async ({
   page,
 }) => {

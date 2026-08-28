@@ -1,8 +1,29 @@
 import "server-only";
-import type { ProductKind } from "@prisma/client";
+import { Prisma, type ProductKind } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import type { CategoryInput, ProductInput } from "@/lib/schemas";
+
+export type MoveDirection = "up" | "down";
+
+// Move `key`'s row one slot up/down within `rows` (already in display order) and
+// renumber every row's sortOrder to its new index — robust even if the current
+// sortOrders are equal/duplicated. No-op at the edges. Callers pass a per-model
+// `update`; all writes run in one transaction.
+async function reorder(
+  rows: { id: string; key: string }[],
+  key: string,
+  dir: MoveDirection,
+  update: (id: string, sortOrder: number) => Prisma.PrismaPromise<unknown>,
+) {
+  const idx = rows.findIndex((r) => r.key === key);
+  if (idx < 0) return;
+  const swapIdx = dir === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= rows.length) return; // already at the edge
+  const next = [...rows];
+  [next[idx], next[swapIdx]] = [next[swapIdx], next[idx]];
+  await prisma.$transaction(next.map((r, i) => update(r.id, i)));
+}
 
 // Admin write path for categories (ADMIN_PLAN.md §5). Prisma stays behind this
 // data-access layer; the server actions call these after auth + zod. Admin reads are
@@ -58,6 +79,30 @@ export async function getCategoriesAdmin(
       nameRu: t.ru ?? "",
     };
   });
+}
+
+/** Move a category up/down in this venue's menu order. */
+export async function moveCategory(
+  venueSlug: string,
+  categoryId: string,
+  dir: MoveDirection,
+) {
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: { menu: { select: { id: true } } },
+  });
+  if (!venue?.menu) throw new Error("Venue menu not found");
+  const rows = await prisma.menuCategory.findMany({
+    where: { menuId: venue.menu.id, category: { deletedAt: null } },
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, categoryId: true },
+  });
+  await reorder(
+    rows.map((r) => ({ id: r.id, key: r.categoryId })),
+    categoryId,
+    dir,
+    (id, sortOrder) => prisma.menuCategory.update({ where: { id }, data: { sortOrder } }),
+  );
 }
 
 /** Show/hide a category in this venue's menu (per-venue MenuCategory.visible). */
@@ -325,6 +370,39 @@ export async function softDeleteProduct(productId: string) {
     where: { id: productId },
     data: { deletedAt: new Date() },
   });
+}
+
+/** Move a product up/down within its category in this venue's menu. */
+export async function moveProduct(
+  venueSlug: string,
+  productId: string,
+  dir: MoveDirection,
+) {
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: { menu: { select: { id: true } } },
+  });
+  if (!venue?.menu) throw new Error("Venue menu not found");
+  const target = await prisma.menuItem.findFirst({
+    where: { menuId: venue.menu.id, productId, product: { deletedAt: null } },
+    select: { categoryId: true },
+  });
+  if (!target) return;
+  const rows = await prisma.menuItem.findMany({
+    where: {
+      menuId: venue.menu.id,
+      categoryId: target.categoryId,
+      product: { deletedAt: null },
+    },
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, productId: true },
+  });
+  await reorder(
+    rows.map((r) => ({ id: r.id, key: r.productId })),
+    productId,
+    dir,
+    (id, sortOrder) => prisma.menuItem.update({ where: { id }, data: { sortOrder } }),
+  );
 }
 
 /** Show/hide a product in this venue's menu (per-venue MenuItem.available). */

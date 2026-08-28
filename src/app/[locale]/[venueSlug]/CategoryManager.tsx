@@ -3,7 +3,15 @@
 import { useActionState, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Eye,
+  EyeOff,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/form";
@@ -13,6 +21,7 @@ import {
   updateCategoryAction,
   deleteCategoryAction,
   toggleCategoryVisibilityAction,
+  moveCategoryAction,
   type CategoryFormState,
 } from "./category-actions";
 
@@ -47,7 +56,7 @@ export function CategoryManager({
   return (
     <nav aria-label="Menu categories" className="w-full max-w-sm">
       <ul className="flex flex-col">
-        {categories.map((row) => (
+        {categories.map((row, index) => (
           <li key={row.id} className="flex items-center gap-2 py-1">
             {/* Same category link as guests see, plus inline admin controls.
                 Hidden categories are greyed so the owner can still reach them. */}
@@ -59,6 +68,33 @@ export function CategoryManager({
             >
               {displayName(row)}
             </Link>
+            {/* Reorder within the venue menu (up/down; edges disabled). */}
+            <form
+              action={moveCategoryAction.bind(null, locale, venueSlug, row.id, "up")}
+              className="flex"
+            >
+              <button
+                type="submit"
+                disabled={index === 0}
+                aria-label={`${row.nameTr} yukarı taşı`}
+                className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
+              >
+                <ChevronUp size={16} aria-hidden />
+              </button>
+            </form>
+            <form
+              action={moveCategoryAction.bind(null, locale, venueSlug, row.id, "down")}
+              className="flex"
+            >
+              <button
+                type="submit"
+                disabled={index === categories.length - 1}
+                aria-label={`${row.nameTr} aşağı taşı`}
+                className="text-muted transition-colors hover:text-foreground disabled:opacity-30"
+              >
+                <ChevronDown size={16} aria-hidden />
+              </button>
+            </form>
             <button
               type="button"
               aria-label={`${row.nameTr} düzenle`}
