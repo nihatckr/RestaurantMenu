@@ -574,34 +574,39 @@ test("admin adds a venue (appears in the chooser) and deletes it", async ({
   await expect(page.getByRole("link", { name })).toHaveCount(0);
 });
 
-test("admin sets and clears the business footer note", async ({ page }) => {
+test("admin sets and clears the business footer note + contact", async ({ page }) => {
   const note = `E2ENot ${Date.now()}`;
+  const phone = `0242 ${Date.now()}`;
 
   await page.goto("/tr/login");
   await page.getByLabel("Şifre").fill("1234");
   await page.getByRole("button", { name: "Giriş" }).click();
   await expect(page).toHaveURL(/\/tr$/);
 
-  // Set the extra footer line, then confirm it PERSISTS (the form re-reads it
-  // fresh on reload — deterministic, unlike the cached public footer).
+  // Set the footer note + a contact phone, then confirm they PERSIST (the form
+  // re-reads fresh on reload — deterministic, unlike the cached public footer).
   await page.goto("/tr/settings");
   await page.getByRole("tab", { name: "İşletme" }).click();
   await page.locator('input[name="footerExtra"]').fill(note);
+  await page.locator('input[name="phone"]').fill(phone);
   await page.getByRole("button", { name: "Kaydet" }).click();
   await expect(page.getByText("Kaydedildi", { exact: true })).toBeVisible();
 
   await page.reload();
   await page.getByRole("tab", { name: "İşletme" }).click();
   await expect(page.locator('input[name="footerExtra"]')).toHaveValue(note);
+  await expect(page.locator('input[name="phone"]')).toHaveValue(phone);
 
-  // Clear it again (leaves the DB clean for the public footer).
+  // Clear them again (leaves the DB clean for the public footer).
   await page.locator('input[name="footerExtra"]').fill("");
+  await page.locator('input[name="phone"]').fill("");
   await page.getByRole("button", { name: "Kaydet" }).click();
   await expect(page.getByText("Kaydedildi", { exact: true })).toBeVisible();
 
   await page.reload();
   await page.getByRole("tab", { name: "İşletme" }).click();
   await expect(page.locator('input[name="footerExtra"]')).toHaveValue("");
+  await expect(page.locator('input[name="phone"]')).toHaveValue("");
 });
 
 test("admin sees and downloads a venue QR code", async ({ page }) => {

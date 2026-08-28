@@ -86,11 +86,21 @@ export async function updateBusinessInfoAction(
   formData: FormData,
 ): Promise<SettingsFormState> {
   await requireAdmin();
-  const name = String(formData.get("name") ?? "").trim();
-  const footerExtra = String(formData.get("footerExtra") ?? "").trim();
+  const s = (k: string) => String(formData.get(k) ?? "").trim();
+  const name = s("name");
   if (name.length < 1) return { error: "İşletme adı zorunlu." };
-  if (name.length > 120 || footerExtra.length > 200) return { error: "Girdi çok uzun." };
-  await setBusinessInfo(name, footerExtra || null);
+  const fields = {
+    name,
+    footerExtra: s("footerExtra") || null,
+    hours: s("hours") || null,
+    phone: s("phone") || null,
+    instagram: s("instagram") || null,
+    mapUrl: s("mapUrl") || null,
+  };
+  if (Object.values(fields).some((v) => v && v.length > 200)) {
+    return { error: "Girdi çok uzun (en fazla 200 karakter)." };
+  }
+  await setBusinessInfo(fields);
   await audit("settings", "business", "işletme bilgileri güncellendi");
   revalidateMenu();
   return { ok: true };

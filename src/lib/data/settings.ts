@@ -16,40 +16,64 @@ export async function getBrandLogo(): Promise<string | null> {
   return business?.logo ?? null;
 }
 
-/** Business name + optional extra footer line (cached; tagged so the public
- *  footer refreshes on change). */
-export async function getBusinessInfo(): Promise<{
+export type BusinessInfo = {
   name: string;
   footerExtra: string | null;
-}> {
+  hours: string | null;
+  phone: string | null;
+  instagram: string | null;
+  mapUrl: string | null;
+};
+
+const businessInfoSelect = {
+  name: true,
+  footerExtra: true,
+  hours: true,
+  phone: true,
+  instagram: true,
+  mapUrl: true,
+} as const;
+
+/** Business name + footer note + contact/social (cached; tagged so the public
+ *  footer refreshes on change). */
+export async function getBusinessInfo(): Promise<BusinessInfo> {
   "use cache";
   cacheTag(MENU_TAG);
-  const business = await prisma.business.findFirst({
-    select: { name: true, footerExtra: true },
-  });
-  return { name: business?.name ?? "", footerExtra: business?.footerExtra ?? null };
+  const b = await prisma.business.findFirst({ select: businessInfoSelect });
+  return {
+    name: b?.name ?? "",
+    footerExtra: b?.footerExtra ?? null,
+    hours: b?.hours ?? null,
+    phone: b?.phone ?? null,
+    instagram: b?.instagram ?? null,
+    mapUrl: b?.mapUrl ?? null,
+  };
 }
 
-/** Set the business name + extra footer line. */
-export async function setBusinessInfo(name: string, footerExtra: string | null) {
+/** Set the business name + footer note + contact/social. `name` is required; the
+ *  rest are optional (null clears). */
+export async function setBusinessInfo(input: {
+  name: string;
+  footerExtra: string | null;
+  hours: string | null;
+  phone: string | null;
+  instagram: string | null;
+  mapUrl: string | null;
+}) {
   const business = await prisma.business.findFirst({ select: { id: true } });
   if (!business) throw new Error("Business not found");
-  await prisma.business.update({
-    where: { id: business.id },
-    data: { name, footerExtra },
-  });
+  await prisma.business.update({ where: { id: business.id }, data: input });
 }
 
 /** Fresh snapshot for the admin Settings form: brand logo, business info + each
  *  venue's wordmark. */
 export async function getSettings(): Promise<{
   logo: string | null;
-  name: string;
-  footerExtra: string | null;
+  business: BusinessInfo;
   venues: { slug: string; name: string; wordmark: string | null }[];
 }> {
   const [business, venues] = await Promise.all([
-    prisma.business.findFirst({ select: { logo: true, name: true, footerExtra: true } }),
+    prisma.business.findFirst({ select: { logo: true, ...businessInfoSelect } }),
     prisma.venue.findMany({
       orderBy: { sortOrder: "asc" },
       select: { slug: true, name: true, wordmark: true },
@@ -57,8 +81,14 @@ export async function getSettings(): Promise<{
   ]);
   return {
     logo: business?.logo ?? null,
-    name: business?.name ?? "",
-    footerExtra: business?.footerExtra ?? null,
+    business: {
+      name: business?.name ?? "",
+      footerExtra: business?.footerExtra ?? null,
+      hours: business?.hours ?? null,
+      phone: business?.phone ?? null,
+      instagram: business?.instagram ?? null,
+      mapUrl: business?.mapUrl ?? null,
+    },
     venues,
   };
 }

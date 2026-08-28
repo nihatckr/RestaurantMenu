@@ -82,9 +82,7 @@ async function SettingsView({
           {
             id: "isletme",
             label: "İşletme",
-            panel: (
-              <BusinessForm name={settings.name} footerExtra={settings.footerExtra} />
-            ),
+            panel: <BusinessForm business={settings.business} />,
           },
           { id: "qr", label: "QR kodları", panel: <QRSection venues={settings.venues} /> },
           { id: "yedek", label: "Yedek", panel: <BackupSection /> },
