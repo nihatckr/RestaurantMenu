@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { VenueHeader } from "@/components/VenueHeader";
 import { CategoryNav } from "@/components/CategoryNav";
+import { CategoryAdmin } from "./CategoryAdmin";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Spinner } from "@/components/Spinner";
 import {
@@ -98,6 +99,11 @@ async function VenueLanding({
       </div>
       <VenueHeader name={venue.name} homeHref={`/${locale}`} />
       <CategoryNav locale={locale} venueSlug={venueSlug} categories={categories} />
+      {/* Admin-only inline category manager — session-gated island, so guests keep
+          the static shell (renders null for them). */}
+      <Suspense fallback={null}>
+        <CategoryAdmin locale={locale} venueSlug={venueSlug} />
+      </Suspense>
       {/* Figma: MONO TERRACE wordmark anchored at the bottom of the landing.
           Links to the venue chooser (the locale root "home"). */}
       <footer className="mt-4 flex justify-center pb-2">

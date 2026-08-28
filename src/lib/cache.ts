@@ -1,5 +1,5 @@
 import "server-only";
-import { revalidateTag } from "next/cache";
+import { updateTag } from "next/cache";
 
 // Cache tags for the public menu reads (applied via `cacheTag` in
 // `src/lib/data/menu.ts`). Admin mutations call `revalidateMenu()` so the static /
@@ -9,16 +9,12 @@ export const MENU_TAG = "menu";
 export const venueTag = (slug: string) => `venue:${slug}`;
 
 /**
- * Invalidate the public menu cache after an admin write. Pass a venue slug to also
- * target that venue's tag; omit to refresh everything menu-related.
- *
- * Uses `revalidateTag` (serve-stale-then-refresh). When the admin wants the owner to
- * see their own edit immediately (read-your-own-writes), a Server Action can call
- * `updateTag` from `next/cache` instead — same tag names.
+ * Invalidate the public menu cache after an admin write, **read-your-own-writes**:
+ * `updateTag` purges immediately so the admin's next render (router.refresh) shows
+ * the change right away — not stale-while-revalidate. Must be called from a Server
+ * Action (updateTag's constraint), which all our admin mutations are.
  */
 export function revalidateMenu(venueSlug?: string) {
-  // `"max"` = serve stale while revalidating in the background (recommended;
-  // single-arg form is deprecated in Next 16).
-  revalidateTag(MENU_TAG, "max");
-  if (venueSlug) revalidateTag(venueTag(venueSlug), "max");
+  updateTag(MENU_TAG);
+  if (venueSlug) updateTag(venueTag(venueSlug));
 }

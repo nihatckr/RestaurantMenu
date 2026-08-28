@@ -159,3 +159,28 @@ test("admin logs in, gets the admin bar, and logs out", async ({ page }) => {
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("button", { name: "Giriş" })).toBeVisible();
 });
+
+test("admin creates and deletes a category inline", async ({ page }) => {
+  // Unique name so parallel runs / leftovers never collide.
+  const name = `E2E ${Date.now()}`;
+
+  // Log in, then open the venue landing (where the category manager appears).
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/terrace");
+
+  // Add a category via the modal.
+  await page.getByRole("button", { name: /Ekle/ }).click();
+  await page.getByLabel("Ad (Türkçe)").fill(name);
+  await page.getByRole("button", { name: "Kaydet" }).click();
+
+  // It appears in the public category nav immediately (updateTag read-your-own-writes).
+  await expect(page.getByRole("link", { name })).toBeVisible();
+
+  // Delete it → confirm → it's gone from the nav again.
+  await page.getByRole("button", { name: `${name} sil` }).click();
+  await page.getByRole("button", { name: "Sil", exact: true }).click();
+  await expect(page.getByRole("link", { name })).toHaveCount(0);
+});

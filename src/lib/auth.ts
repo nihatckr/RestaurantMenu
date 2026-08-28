@@ -47,6 +47,12 @@ export async function isAdmin(): Promise<boolean> {
   return (await getSession()).isAdmin === true;
 }
 
+/** Guard for admin mutations — throws if the caller isn't an authenticated admin.
+ *  Every write server action calls this first (never trusts the client/UI). */
+export async function requireAdmin(): Promise<void> {
+  if (!(await isAdmin())) throw new Error("Unauthorized");
+}
+
 /** Verify a submitted password against the bcrypt hash stored in the DB (seeded by
  *  `prisma/auth.seed.ts`). Single admin, so the first (only) AdminUser row is used. */
 export async function verifyPassword(input: string): Promise<boolean> {
