@@ -49,7 +49,8 @@ Type scale (font / weight / size / letter-spacing):
   evidenced flow (PR7).
 
 ## Component inventory (collapse legacy ~18 → a small set)
-- `VenueHeader` (wordmark + language switcher).
+- `VenueHeader` (brand MO/NO mark; venue wordmark sits in the footer). No language
+  switcher — TR+EN are shown together (bilingual); a switcher is deferred (`I18N.md`).
 - `CategoryNav` (ordered category list, PR8).
 - `CategorySection` (heading + item grid; one component, config-driven).
 - `MenuItemCard` — **one** card that adapts by item shape:
@@ -69,7 +70,8 @@ Type scale (font / weight / size / letter-spacing):
   body size above the legacy 6–8px for readability).
 - Semantic landmarks/headings; category headings as real `<h*>`.
 - All images have meaningful/empty `alt` (decorative → `alt=""`).
-- Language switcher and nav are keyboard-operable; visible focus states.
+- Nav/links are keyboard-operable with visible `:focus-visible` states. (No
+  language switcher yet — deferred.)
 - Respect `prefers-reduced-motion` (legacy used framer-motion stagger; keep
   motion optional/minimal).
 

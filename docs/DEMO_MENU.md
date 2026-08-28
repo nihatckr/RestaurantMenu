@@ -1,5 +1,10 @@
 # Mono — Demo Menü & Fiyat Listesi
 
+> ⚠️ **Bu liste güncel olmayabilir** (üretildikten sonra spirits genişledi ve
+> fiyatlar sembolsüz/ayıraçsız düz sayıya döndü). **Tek doğru kaynak
+> `prisma/data/prices.ts` + `prisma/seed.ts`.** Gerçek fiyatlar için U5 bekleniyor;
+> düzenlenebilir doldurma listesi kullanıcıya ayrıca gönderildi.
+>
 > **DEMO fiyatlar** — `prisma/data/prices.ts` içinden gelir; oradan güncelle, `npm run db:seed` çalıştır.
 > İki mekânda aynıdır. **Terrace** *Kahvaltı*'yı gizler; **Garden** gösterir.
 
