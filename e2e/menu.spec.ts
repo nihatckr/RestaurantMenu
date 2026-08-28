@@ -299,6 +299,42 @@ test("admin downloads the Excel backup from settings", async ({ page }) => {
   expect(download.suggestedFilename()).toMatch(/^menu-yedek-.*\.xlsx$/);
 });
 
+test("admin exports then re-imports the backup (round-trip)", async ({ page }) => {
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/settings");
+
+  // Download the current backup…
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("link", { name: "Yedek indir (Excel)" }).click(),
+  ]);
+  const file = await download.path();
+
+  // …then feed the exact same file back into the importer (upsert = idempotent).
+  await page.locator('input[type="file"][name="file"]').setInputFiles(file);
+  await page.getByRole("button", { name: "Yedeği içe aktar" }).click();
+  await expect(page.getByText(/İçe aktarıldı:/)).toBeVisible();
+});
+
+test("import rejects a file that isn't a valid workbook", async ({ page }) => {
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/settings");
+
+  await page.locator('input[type="file"][name="file"]').setInputFiles({
+    name: "notreal.xlsx",
+    mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    buffer: Buffer.from("this is not a spreadsheet"),
+  });
+  await page.getByRole("button", { name: "Yedeği içe aktar" }).click();
+  await expect(page.getByText(/Dosya okunamadı/)).toBeVisible();
+});
+
 test("admin uploads a product photo", async ({ page }) => {
   const title = `E2EFoto ${Date.now()}`;
   // A tiny valid 8×8 PNG so sharp can decode + re-encode it.

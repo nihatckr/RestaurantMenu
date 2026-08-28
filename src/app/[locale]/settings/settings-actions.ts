@@ -4,8 +4,16 @@ import { requireAdmin } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
 import { uploadImage, ImageError } from "@/lib/images";
 import { setBrandLogo, setVenueWordmark } from "@/lib/data/settings";
+import { importBackup } from "@/lib/data/backup-import";
 
 export type SettingsFormState = { ok?: boolean; error?: string };
+
+export type ImportState = {
+  ok?: boolean;
+  error?: string;
+  errors?: string[];
+  counts?: { categories: number; products: number; items: number };
+};
 
 // Same file semantics as the product image: new file → optimize+upload; remove
 // checked → null; neither → undefined (no change).
@@ -53,4 +61,21 @@ export async function updateVenueWordmarkAction(
   await setVenueWordmark(venueSlug, image);
   revalidateMenu(venueSlug);
   return { ok: true };
+}
+
+// Import an Excel backup (upsert). Validates first; on any error nothing is
+// written and the row messages come back for display.
+export async function importBackupAction(
+  _prev: ImportState,
+  formData: FormData,
+): Promise<ImportState> {
+  await requireAdmin();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "Dosya seçin." };
+  if (file.size > 10 * 1024 * 1024) return { error: "Dosya çok büyük (>10MB)." };
+
+  const result = await importBackup(await file.arrayBuffer());
+  if (!result.ok) return { errors: result.errors };
+  revalidateMenu();
+  return { ok: true, counts: result.counts };
 }
