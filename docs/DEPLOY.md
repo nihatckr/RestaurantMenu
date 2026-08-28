@@ -27,11 +27,12 @@ these are the steps to run; an agent cannot perform account/DNS actions.
 4. **Deploy.** Vercel runs the `vercel-build` script automatically:
    `prisma generate && prisma migrate deploy && prisma db seed (tsx) && next build`.
    So **migrations + seed run on every deploy** — the seed is idempotent and is the
-   single content source (no admin, `PRODUCT.md` A3). Updating content/prices =
-   edit the repo (`prisma/data/prices.ts`, `prisma/seed.ts`) + redeploy.
-5. **Verify:** `/` (venue chooser), `/terrace`, `/garden`, a category page,
-   `/api/health` → `{status:"ok"}`, `/robots.txt`, `/sitemap.xml`, and the security
-   headers (CSP, HSTS, nosniff).
+   single content source (no admin, `PRODUCT.md` A3). Updating content =
+   edit the repo (`prisma/data/prices.ts`, `prisma/data/translations.ts`,
+   `prisma/seed.ts`) + redeploy.
+5. **Verify:** `/` (→ redirects to `/tr`), `/tr` (venue chooser), `/tr/terrace`,
+   `/en/terrace`, `/ru/terrace`, a category page, `/api/health` → `{status:"ok"}`,
+   `/robots.txt`, `/sitemap.xml`, and the security headers (CSP, HSTS, nosniff).
 
 ## Cutover (replace the SaaS)
 1. Keep the SaaS live until parity is confirmed (`menu-parity-check`; T10 /

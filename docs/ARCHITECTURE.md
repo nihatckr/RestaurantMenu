@@ -39,9 +39,10 @@ Next.js Server Component
 - The public menu is **read-only** and should be **Server Components** fetching
   directly through a small data-access layer. Render on the server; ship minimal
   client JS.
-- Use dynamic segments for venues: `/[venueSlug]` (landing) and
-  `/[venueSlug]/[categorySlug]` (or single-scroll page). **Venue is a route
-  parameter resolved to a Venue record — never a hard-coded branch.**
+- Use dynamic segments for locale + venues: `/[locale]/[venueSlug]` (landing) and
+  `/[locale]/[venueSlug]/[categorySlug]` (single-scroll page). **Venue is a route
+  parameter resolved to a Venue record — never a hard-coded branch.** Locale is the
+  first segment (`/tr`, `/en`, `/ru`); `/` redirects to the default (`I18N.md`).
 
 ## Write path (only when a mutation is genuinely needed, e.g. admin)
 ```
@@ -152,7 +153,9 @@ Mirror `PRODUCT.md`: `Business`, `Venue`, `Menu`, `Category`, `Product`,
 - The legacy fixed `390px` phone frame is a QR-screen constraint, not a
   requirement — build **responsive** by default (`PRODUCT.md` browsing flow,
   Stage: responsive).
-- Bilingual content is shown **together** (no runtime language toggle in MVP).
+- Content renders in **one language at a time**, selected by the `/[locale]`
+  route segment via a language switcher; missing translations fall back to
+  Turkish (`I18N.md`). (Earlier MVP showed TR+EN together — since replaced.)
 
 ## Config & environment
 - No secrets in the repo. `DATABASE_URL` (and Auth.js secrets, if/when added) via

@@ -9,12 +9,18 @@ resolves `LEGACY_AUDIT.md` **U12**.
 > before public launch.
 
 ## Handled in the app
-- **Prices in TRY, tax-included.** Prices render with `₺` (`formatPriceTRY`,
-  `tr-TR`), and a site-wide notice states **"Tüm fiyatlarımıza KDV dâhildir"**
-  (`MenuFooter`). The displayed price is the final price the customer pays.
-- **No service/table/cover charge.** The app adds none; the footer states
-  **"Servis ücreti alınmaz"** (servis/masa/kuver ücreti are prohibited by the
-  regulation).
+- **Prices in TRY, tax-included.** Prices render as plain numbers (no thousands
+  separator; `formatPriceTRY`) — no `₺` symbol (the brand Mono font has no ₺ glyph);
+  the
+  currency + tax status is stated in the site-wide footer notice (`MenuFooter`).
+  The displayed price is the final price the customer pays.
+- **No service/table/cover charge.** The app adds none; the footer notice states
+  tax-inclusive pricing + no service charge (servis/masa/kuver ücreti are
+  prohibited by the regulation).
+- **Footer notice is localized** to the page language (tr/en/ru via `messages.ts`),
+  so it reads for the current guest — e.g. TR "Tüm fiyatlarımıza KDV dâhildir ·
+  Servis ücreti alınmaz". A Turkish inspection views `/tr`, which shows the Turkish
+  text.
 - **Clear, legible names & prices**, easily visible (responsive, adequate
   contrast/size — `DESIGN.md`).
 

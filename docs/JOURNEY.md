@@ -51,19 +51,21 @@ mismatched client, so the major is pinned. Local DB is a Docker Postgres on port
 
 ## 2. The public menu
 
-Built the read path end-to-end: root venue chooser → `/[venueSlug]` landing (brand
-mark + ordered category list) → `/[venueSlug]/[categorySlug]` single-scroll page
-(chosen category first, then the rest). Reads use `use cache` (Cache Components /
-PPR); unknown slugs are a soft-404.
+Built the read path end-to-end: root venue chooser → `/[locale]/[venueSlug]`
+landing (brand mark + ordered category list) → `/[locale]/[venueSlug]/[categorySlug]`
+single-scroll page (chosen category first, then the rest). Reads use `use cache`
+(Cache Components / PPR); unknown slugs are a soft-404.
+
+> The routes gained the `/[locale]` prefix in the i18n rework — see §7. Early on
+> the read path lived at `/[venueSlug]` and showed TR+EN together.
 
 Key behaviors, all **data-driven**:
 
 - **Per-venue category visibility & ordering** come from `MenuCategory` rows, not
   code.
-- **Bilingual display** — the legacy showed Turkish + English together, so we
-  reproduced it (`bilingual()` helper: primary in locale + an alt line; collapses
-  when TR == EN).
-- **Category slugs are English** (`/terrace/salads`, not `/salatalar`); names are
+- **Language** — initially the legacy TR+EN-together display; later reworked into a
+  single-language `/[locale]` switcher (§7).
+- **Category slugs are English** (`/tr/terrace/salads`, not `/salatalar`); names are
   localized.
 - **Card variant is driven by data, not a category name** — image-presence and
   measure-count decide the layout (see §4), never a hard-coded category string.
@@ -137,9 +139,9 @@ source of truth, and reading it settled several things that Figma alone got wron
 
 Centralised styling was introduced so this never drifts again: `globals.css`
 defines the design tokens **and** a set of typography roles — `.type-heading`,
-`.type-subheading`, `.type-tag`, `.type-item`, `.type-price`, `.type-desc`,
-`.type-label` — used across every component. Fonts and casing live in these; only
-letter-spacing/size vary at the call site.
+`.type-tag`, `.type-item`, `.type-price`, `.type-desc`, `.type-label` — used across
+every component. Fonts and casing live in these; only letter-spacing/size vary at
+the call site.
 
 ---
 
@@ -185,19 +187,47 @@ narrowed desktop browser / a separate `next dev`):
 
 ---
 
-## 7. Where things stand
+## 7. Making it multilingual (the `/[locale]` switcher)
+
+The public menu first reproduced the legacy **TR+EN-together** display. When the
+owner asked for a language selector we briefly built an RU on-demand toggle (RU
+lines hidden in the HTML, revealed by CSS), then — after confirming the intent — 
+replaced it with a **real single-language switcher**: the menu renders in **one
+language at a time**, chosen by the first route segment (`/tr`, `/en`, `/ru`).
+
+- **Routing:** every page moved under `src/app/[locale]/…`; `[locale]/layout.tsx`
+  is the root layout and sets `<html lang={locale}>`. `/` redirects to `/tr`;
+  unsupported locales `notFound()`. Each locale is its own static route (the `use
+  cache` key includes the locale), and `generateStaticParams` prerenders
+  locales × venues × categories.
+- **One switcher, no branches:** `LanguageSwitcher` swaps the locale segment with
+  plain `<Link>`s; adding a 4th language is data + `LOCALES`, no code branch.
+- **Two text sources:** DB product/category text via `translations.ts` (single
+  fill-in file, tr required, en/ru fall back to tr); the app's own static strings
+  (footer, 404/error/empty, metadata) via a small `messages.ts` catalog.
+- **Cyrillic gotcha:** the brand `MonoTRegular` font has no Cyrillic glyphs, so on
+  `/ru` the brand-font text roles fall back to **Inter** (with the `cyrillic`
+  subset) to keep sizing consistent; prices/labels stay Mono (Latin).
+
+Coverage today: categories fully tr/en/ru; most product titles are tr/en, so `/ru`
+falls back to Turkish until the owner fills `translations.ts` (`U5`). Full details
+in `I18N.md`.
+
+## 8. Where things stand
 
 **Done:** foundation, DB model, public menu (venues/categories/single-scroll/
-bilingual/per-venue visibility+ordering), legal footer, SEO + JSON-LD, security
-headers, Figma + legacy visual fidelity (fonts, letter-spacing, card/table layouts,
-TR/EN font rule), mobile-first responsive grids + fluid typography, PWA (installable
-manifest + icons), a11y polish, Vitest unit+integration tests, Playwright e2e, CI.
+per-venue visibility+ordering), **`/[locale]` language switcher (tr/en/ru)** with
+localized UI chrome, legal footer, SEO + JSON-LD, security headers, Figma + legacy
+visual fidelity (fonts, letter-spacing, card/table layouts), mobile-first responsive
+grids + fluid typography, PWA (installable manifest + icons), a11y polish, Vitest
+unit+integration tests, Playwright e2e, CI.
 
 **Pending (needs the owner):**
 
 - **Real content (`U5`)** — food/drink prices, spirit bottle sizes (35/50/70 CL),
-  soft-drink serving CL, descriptions. Everything currently shown is DEMO; the
-  structure is ready. A fill-in sheet was generated for the owner.
+  soft-drink serving CL, and **EN/RU translations + descriptions**. Everything
+  currently shown is DEMO; the structure is ready. Prices go in `prices.ts`, all
+  localized text in `translations.ts`.
 - **Execute the deploy** (`DEPLOY.md`) — needs Vercel + managed-Postgres + domain
   accounts.
 - **Alcohol/allergen legal copy** where applicable (`U12` / `COMPLIANCE.md`).

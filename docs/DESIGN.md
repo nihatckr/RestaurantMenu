@@ -49,8 +49,9 @@ Type scale (font / weight / size / letter-spacing):
   evidenced flow (PR7).
 
 ## Component inventory (collapse legacy ~18 → a small set)
-- `VenueHeader` (brand MO/NO mark; venue wordmark sits in the footer). No language
-  switcher — TR+EN are shown together (bilingual); a switcher is deferred (`I18N.md`).
+- `VenueHeader` (brand MO/NO mark; venue wordmark sits in the footer).
+- `LanguageSwitcher` (TR | EN | РУ; swaps the `/[locale]` route segment — the menu
+  renders in one language at a time, `I18N.md`).
 - `CategoryNav` (ordered category list, PR8).
 - `CategorySection` (heading + item grid; one component, config-driven).
 - `MenuItemCard` — **one** card that adapts by item shape:
@@ -70,8 +71,8 @@ Type scale (font / weight / size / letter-spacing):
   body size above the legacy 6–8px for readability).
 - Semantic landmarks/headings; category headings as real `<h*>`.
 - All images have meaningful/empty `alt` (decorative → `alt=""`).
-- Nav/links are keyboard-operable with visible `:focus-visible` states. (No
-  language switcher yet — deferred.)
+- Nav/links are keyboard-operable with visible `:focus-visible` states. The
+  language switcher uses real links with `aria-current` on the active locale.
 - Respect `prefers-reduced-motion` (legacy used framer-motion stagger; keep
   motion optional/minimal).
 
@@ -95,22 +96,25 @@ at the call site:
 | Role class | Font (legacy `theme.js`) | Used for |
 | --- | --- | --- |
 | `.type-heading` | Mono, uppercase | category header title, nav links |
-| `.type-subheading` | Mono, uppercase, muted | the TR/EN sub-line under a heading |
 | `.type-tag` | Mono, uppercase | hard-drink sub-category (Whisky/Rakı/…) |
 | `.type-item` | Inter 700 | product name |
 | `.type-price` | Mono | prices/numbers |
 | `.type-desc` | Inter, muted | subtitle / description |
 | `.type-label` | Mono, uppercase, muted | CL / measure column labels |
 
-**Rule (invariant):** *a thing's Turkish and English text share ONE font* — so a
-Mono EN heading has a Mono TR sub-line; Inter product names have Inter alt names.
-
 **Fonts are from legacy `theme.js`, not Figma:** price + cl = **Mono** (the
 slashed-zero is the legacy design), title/subtitle/desc = **Inter**, headings =
 Mono. Prices render as **plain numbers** — no `₺` (the Mono font has no ₺ glyph;
 currency is stated once in the footer) and no thousands separator (`1400`, not
-`1.400`). English uppercase uses a dotless I (`lang="en"` + CSS `uppercase`);
-Turkish keeps its dotted İ.
+`1.400`). The page renders in one language (`<html lang={locale}>`), so uppercase
+headings get the right dotted/dotless I automatically — English → dotless
+(SPIRITS), Turkish → dotted (VİSKİ).
+
+**Cyrillic (Russian):** MonoTRegular has **no Cyrillic glyphs**, so on `/ru` the
+brand-font *text* roles (`.type-heading`, `.type-tag`) fall back to **Inter**
+(loaded with the `cyrillic` subset) — otherwise Cyrillic dropped to a
+size-mismatched system font and looked oversized. Prices/measure labels stay Mono
+(Latin digits/abbreviations render fine).
 
 ### Fluid type scale (the responsive standard)
 `html { font-size: clamp(13.5px, 11.9px + 0.45vw, 16px); }` and **all** sizes are

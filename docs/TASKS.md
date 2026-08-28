@@ -2,21 +2,29 @@
 
 > **Status (2026-08-28): public menu is feature-complete on DEMO content.** Done:
 > foundation, DB model, public menu (venues / categories / single-scroll /
-> bilingual TR+EN / per-venue visibility + ordering), legal footer, SEO + JSON-LD,
-> security headers, Figma + **legacy** visual fidelity (fonts from `theme.js`,
-> letter-spacing, card/table layouts, TR/EN-same-font rule), mobile-first
-> responsive grids + **fluid typography**, PWA (installable), a11y polish, Vitest
-> unit+integration + Playwright e2e + CI, and this docs set (see `JOURNEY.md`).
-> **Deferred / not built:** admin+auth (T11 = no-admin decided), and the **language
-> switcher** (currently TR+EN shown together; RU in data but unreachable — `I18N.md`).
-> **Pending owner:** real prices/descriptions (`U5` / `DEMO_MENU.md`) and executing
-> the deploy (`DEPLOY.md`).
+> per-venue visibility + ordering), **real `/[locale]` language switcher
+> (tr/en/ru)** — one language at a time, tr fallback, localized static UI chrome
+> (`messages.ts`) + product text source (`translations.ts`), legal footer, SEO +
+> JSON-LD, security headers, Figma + **legacy** visual fidelity (fonts from
+> `theme.js`, letter-spacing, card/table layouts), mobile-first responsive grids +
+> **fluid typography**, PWA (installable), a11y polish, Vitest unit+integration +
+> Playwright e2e + CI, and this docs set (see `JOURNEY.md`).
+> **Deferred / not built:** admin+auth (T11 = no-admin decided).
+> **Pending owner:** real prices (`prices.ts`) + EN/RU translations & descriptions
+> (`translations.ts`) — `U5` / `DEMO_MENU.md`, and executing the deploy
+> (`DEPLOY.md`).
 
 The plan below is the original ordered breakdown (kept for reference). Order is
 adjusted to the audit: the legacy proved a **shared catalog + per-venue
 visibility/order** model and **data-driven venues**, so those constraints are
 front-loaded (schema, seed, dynamic venue route) and admin/auth is deferred and
 gated on a real decision.
+
+> **Note (2026-08-28):** the per-task text below predates the i18n rework. Two
+> things changed since: routes are now locale-prefixed (`/[locale]/[venueSlug]/…`,
+> not `/[venueSlug]/…`), and the menu renders **one language at a time** via the
+> language switcher (not "bilingual TR+EN together"). The status banner above and
+> `I18N.md` are authoritative; these task entries are kept as the historical record.
 
 Each task: **Objective / Scope / Dependencies / Acceptance criteria.**
 

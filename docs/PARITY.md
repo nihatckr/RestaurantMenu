@@ -34,7 +34,6 @@ These are accepted trade-offs of the rewrite, not defects.
 ## Reproduced (behavior + close visual intent)
 - Landing → single-scroll category page (chosen category first).
 - Per-venue visibility (category **and** item), ordering, wordmark.
-- Bilingual TR + EN display.
 - Food/cocktail image cards (image or pink placeholder), 3-col-ish grid.
 - Drink colour chips (`color` field) on imageless drink rows.
 - Beer serving measure (`cl`), wine glass/bottle, spirit multi-measure pricing.
@@ -44,7 +43,8 @@ These are accepted trade-offs of the rewrite, not defects.
 ## Remaining known differences
 | Item | Status | Note |
 |---|---|---|
-| Rich item descriptions / subtitle (TR+EN) | **Data gap** | Legacy CMS had per-item descriptions; our seed has names only. Fills with real menu data (U5). |
+| Language display | **Intentional** | Legacy concatenated TR+EN together; we render **one language at a time** via a `/[locale]` switcher (tr/en/ru), tr fallback (`I18N.md`). |
+| Rich item descriptions / subtitle | **Data gap** | Legacy CMS had per-item descriptions; our seed has names only. Fill per language in `prisma/data/translations.ts` with real menu data (U5). |
 | Wine `DLC` badge | **UNKNOWN** | Legacy showed a "DLC" badge from a `dlc` boolean whose meaning is undocumented; not modelled. Do not invent (AGENTS 5–6). |
 | Exact spacing/typography px | **Intentional** | Responsive scale, not the fixed 390px px values. |
 | Animations | **Intentional** | No motion library. |

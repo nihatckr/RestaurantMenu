@@ -323,7 +323,11 @@ HTML; no writes). Findings:
   Terrace, soft-drink subsets) or the menus will visibly change.
 - **R4** The multi-measure drink pricing (4/8 cl, bottle/glass, tags) is real
   product complexity that a naive `price: number` model would lose.
-- **R5** Bilingual content must not regress into single-language.
+- **R5** ~~Bilingual content must not regress into single-language.~~
+  **SUPERSEDED (2026-08-28):** the rebuild intentionally shows **one language at a
+  time** via a `/[locale]` switcher (tr/en/ru) with tr fallback, instead of the
+  legacy TR+EN-together concatenation. No content is lost — every language is
+  reachable by URL. See `I18N.md` / `PARITY.md`.
 
 ---
 
@@ -349,7 +353,9 @@ Only requirements provable from the legacy code are listed. No new features.
   shows the chosen category first, then the rest** on one scroll.
 - **PR8** Categories render in a **defined order**, and that order can differ per
   venue.
-- **PR9** Content is **bilingual** (Turkish + English) shown together.
+- **PR9** ~~Content is **bilingual** (Turkish + English) shown together.~~
+  **DIVERGED (2026-08-28):** rebuild renders **one language at a time** via the
+  `/[locale]` switcher (tr/en/ru), not both together — see R5 note above.
 - **PR10** Branding is fixed: **Mono** wordmark, `MonoTRegular` font, per-venue
   sub-wordmark (e.g. Mono-Terrace), phone-framed layout.
 - **PR11** When an item has no image, a **placeholder** is shown (never a broken

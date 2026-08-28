@@ -72,11 +72,13 @@ Prisma → Postgres. No client data fetching, no GraphQL.
 
 ```mermaid
 flowchart TD
-  A["/ (root)"] --> B["/[venueSlug] landing"]
-  B -->|tap a category| C["/[venueSlug]/[categorySlug]"]
+  A["/ (root)"] -->|redirect| L["/[locale] chooser"]
+  L --> B["/[locale]/[venueSlug] landing"]
+  B -->|tap a category| C["/[locale]/[venueSlug]/[categorySlug]"]
+  B -.->|switch language| B
 
-  B --> DA1["listVenueCategories()"]
-  B --> DA2["getVenueMenu() → JSON-LD"]
+  B --> DA1["listVenueCategories(slug, locale)"]
+  B --> DA2["getVenueMenu(slug, locale) → JSON-LD"]
   C --> DA2
 
   subgraph DAL["data-access (src/lib/data/menu.ts, 'use cache')"]

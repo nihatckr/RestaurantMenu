@@ -94,14 +94,14 @@ Garden = its Garden MenuItem is available. This is exactly the legacy
 
 ## How are Terrace and Garden separated?
 By **Venue records (data)**, not by code branches. Each Venue has a slug
-(`terrace`, `garden`, …) that drives a dynamic route (`/[venueSlug]`). All
+(`terrace`, `garden`, …) that drives a dynamic route (`/[locale]/[venueSlug]`). All
 per-venue differences observed in legacy — hidden Breakfast, drink ordering,
 soft-drink subsets — are expressed as **Menu/Category/MenuItem data** for that
 venue, never as `if (venue === 'terrace')`.
 
 ## Which behaviors are shared?
 - The browsing flow (landing category list → category detail).
-- Card/product presentation and bilingual display.
+- Card/product presentation and single-language display (locale from the route).
 - Branding, fonts, placeholder-on-missing-image.
 - The catalog of Products itself.
 - Category set and item schema.
@@ -127,7 +127,6 @@ venue, never as `if (venue === 'terrace')`.
 - Guest accounts / auth for guests.
 - Search and filtering (none exists in legacy).
 - Product detail pages (legacy has none — single-scroll only).
-- Multi-language runtime toggle (legacy shows both languages at once; keep that).
 - Real-time stock/quantity availability (legacy has only boolean visibility).
 - Importing/mirroring the live WordPress content in real time.
 
@@ -155,7 +154,9 @@ venue, never as `if (venue === 'terrace')`.
   (see `LEGACY_AUDIT.md` **U11**).
 
 ### Facts now confirmed by the live-site check (no longer assumptions)
-- Currency: **TRY** (single). Languages: **tr / en / ru** (default tr).
+- Currency: **TRY** (single). Languages: **tr / en / ru** (default tr) — the menu
+  renders in **one language at a time**, chosen via a route-based switcher
+  (`/[locale]/…`); missing translations fall back to Turkish (`I18N.md`).
 - Current category set is the 12 listed in `LEGACY_AUDIT.md` → Live Site
   Investigation (Breakfast dropped; Çerezler added).
 - Categories support **order** and **parent/child hierarchy**.
