@@ -13,6 +13,7 @@ import { ActivitySection } from "./ActivitySection";
 import { PasswordForm } from "./PasswordForm";
 import { QRSection } from "./QRSection";
 import { BusinessForm } from "./BusinessForm";
+import { VenueManager } from "./VenueManager";
 import { SettingsTabs } from "./SettingsTabs";
 
 // Admin-only; never indexed.
@@ -55,10 +56,11 @@ async function SettingsView({
       {/* Server-rendered panels handed to a client tab switcher. */}
       <SettingsTabs
         tabs={[
+          { id: "marka", label: "Marka", panel: <SettingsForms logo={settings.logo} /> },
           {
-            id: "marka",
-            label: "Marka & Mekanlar",
-            panel: <SettingsForms logo={settings.logo} venues={settings.venues} />,
+            id: "mekanlar",
+            label: "Mekanlar",
+            panel: <VenueManager venues={settings.venues} />,
           },
           {
             id: "isletme",

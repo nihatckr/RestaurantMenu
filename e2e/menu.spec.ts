@@ -446,6 +446,41 @@ test("import rejects a file that isn't a valid workbook", async ({ page }) => {
   await expect(page.getByText(/Dosya okunamadı/)).toBeVisible();
 });
 
+test("admin adds a venue (appears in the chooser) and deletes it", async ({
+  page,
+}) => {
+  const name = `E2EMekan ${Date.now()}`;
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+
+  // Add a venue via the Mekanlar tab.
+  await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "Mekanlar" }).click();
+  await page.getByRole("button", { name: "Mekan ekle" }).click();
+  await page.getByLabel("Mekan adı").fill(name);
+  await page.getByRole("button", { name: "Ekle", exact: true }).click();
+
+  // Its row (with a delete control) shows in the manager.
+  await expect(page.getByRole("button", { name: `${name} sil` })).toBeVisible();
+
+  // …and it's live in the public venue chooser.
+  await page.goto("/tr");
+  await expect(page.getByRole("link", { name })).toBeVisible();
+
+  // Delete it → confirm → gone from the manager and the chooser.
+  await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "Mekanlar" }).click();
+  await page.getByRole("button", { name: `${name} sil` }).click();
+  await page.getByRole("button", { name: "Kalıcı olarak sil" }).click();
+  await expect(page.getByRole("button", { name: `${name} sil` })).toHaveCount(0);
+
+  await page.goto("/tr");
+  await expect(page.getByRole("link", { name })).toHaveCount(0);
+});
+
 test("admin sets and clears the business footer note", async ({ page }) => {
   const note = `E2ENot ${Date.now()}`;
 

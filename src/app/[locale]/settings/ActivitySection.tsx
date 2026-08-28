@@ -19,6 +19,7 @@ const ENTITIES: Record<string, string> = {
   trash: "Çöp kutusu",
   password: "Şifre",
   business: "İşletme",
+  venue: "Mekan",
 };
 
 // Recent admin activity (audit trail). Server-rendered, read-only.

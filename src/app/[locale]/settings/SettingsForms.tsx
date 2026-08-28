@@ -2,15 +2,11 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Image as ImageIcon, Store, Check } from "lucide-react";
+import { Image as ImageIcon, Check } from "lucide-react";
 import { ImageField } from "@/components/ui/ImageField";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
-import {
-  updateBrandLogoAction,
-  updateVenueWordmarkAction,
-  type SettingsFormState,
-} from "./settings-actions";
+import { updateBrandLogoAction, type SettingsFormState } from "./settings-actions";
 
 function ImageUploadForm({
   action,
@@ -47,47 +43,15 @@ function ImageUploadForm({
   );
 }
 
-export function SettingsForms({
-  logo,
-  venues,
-}: {
-  logo: string | null;
-  venues: { slug: string; name: string; wordmark: string | null }[];
-}) {
+export function SettingsForms({ logo }: { logo: string | null }) {
   return (
-    <div className="flex flex-col gap-4">
-      <Card id="marka">
-        <CardHeader
-          icon={ImageIcon}
-          title="Marka logosu"
-          description="Menünün üstünde ve favicon’da görünen marka işareti. Boş bırakılırsa varsayılan Mono işareti kullanılır."
-        />
-        <ImageUploadForm
-          action={updateBrandLogoAction}
-          initial={logo}
-          label="Marka logosu"
-        />
-      </Card>
-
-      <Card id="mekanlar">
-        <CardHeader
-          icon={Store}
-          title="Mekan wordmark’ları"
-          description="Her mekanın alt kısmında görünen wordmark. Boşsa marka işareti kullanılır."
-        />
-        <div className="grid gap-5 sm:grid-cols-2">
-          {venues.map((v) => (
-            <div key={v.slug} className="flex flex-col gap-1">
-              <h3 className="font-body text-sm">{v.name}</h3>
-              <ImageUploadForm
-                action={updateVenueWordmarkAction.bind(null, v.slug)}
-                initial={v.wordmark}
-                label={`${v.name} wordmark`}
-              />
-            </div>
-          ))}
-        </div>
-      </Card>
-    </div>
+    <Card id="marka">
+      <CardHeader
+        icon={ImageIcon}
+        title="Marka logosu"
+        description="Menünün üstünde ve favicon’da görünen marka işareti. Boş bırakılırsa varsayılan Mono işareti kullanılır. (Mekan wordmark’ları “Mekanlar” sekmesinde.)"
+      />
+      <ImageUploadForm action={updateBrandLogoAction} initial={logo} label="Marka logosu" />
+    </Card>
   );
 }
