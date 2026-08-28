@@ -249,7 +249,7 @@ react-hook-form + native `<dialog>` + a small `cn()` (no UI kit, no Redux/Zustan
 React Query — Server Actions + Next cache cover it); auth is magic-link; images/logos/
 favicon upload to blob storage (optimized via sharp), not `public/`. Crucially, the
 seed→DB shift adds a new **must-have — data safety** (verified backups, soft-delete/
-trash, JSON export, login break-glass) since the seed is no longer the safety net, and
+trash, Excel `.xlsx` export/import, login break-glass) since the seed is no longer the safety net, and
 a consolidated **security hardening** checklist (`ADMIN_PLAN.md` §4b).
 
 For the task-by-task record see `TASKS.md`; the full admin design is `ADMIN_PLAN.md`;
