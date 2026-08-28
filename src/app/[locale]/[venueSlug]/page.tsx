@@ -46,11 +46,12 @@ export async function generateMetadata({
   if (!venue) return {};
   const t = getMessages(locale);
   const title = `${venue.name} — ${t.metaMenuSuffix}`;
+  // No explicit `openGraph` — og:title falls back to `title`, and dropping it lets
+  // the shared opengraph-image (parent segment) flow through as og:image.
   return {
     title,
     description: t.venueMenuDescription(venue.name),
     alternates: buildAlternates(locale, `/${venueSlug}`),
-    openGraph: { title },
   };
 }
 

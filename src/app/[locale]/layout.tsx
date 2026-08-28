@@ -32,6 +32,9 @@ export const metadata: Metadata = {
   title: "Mono Terrace — Menu",
   description: "Mono Terrace hotel, rooftop bar & garden menu.",
   icons: { icon: "/icon-192.png", apple: "/icon-192.png" },
+  // Large share card; the image comes from opengraph-image.tsx (og:image, which
+  // Twitter falls back to when no dedicated twitter image is set).
+  twitter: { card: "summary_large_image" },
 };
 
 // PWA/browser chrome colour (installable menu — app/manifest.ts). Black matches

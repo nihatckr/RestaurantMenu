@@ -48,11 +48,12 @@ export async function generateMetadata({
   ]);
   const category = menu?.find((c) => c.slug === categorySlug);
   if (!venue || !category) return {};
+  // No explicit `openGraph` — og:title falls back to `title`, and dropping it lets
+  // the shared opengraph-image (parent segment) flow through as og:image.
   return {
     title: `${category.name} · ${venue.name}`,
     description: `${venue.name} — ${category.name}`,
     alternates: buildAlternates(locale, `/${venueSlug}/${categorySlug}`),
-    openGraph: { title: `${category.name} · ${venue.name}` },
   };
 }
 

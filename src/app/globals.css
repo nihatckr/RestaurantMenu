@@ -68,6 +68,20 @@ body {
   color: var(--foreground);
 }
 
+/* Respect the OS "reduce motion" setting (a11y). This is the canonical motion
+   reset — `!important` here is the accepted exception (it must override utility
+   transitions) and is scoped to animation/transition only, not layout. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Keyboard-only focus ring (a11y) — invisible for mouse/touch users. */
 a:focus-visible,
 button:focus-visible {
