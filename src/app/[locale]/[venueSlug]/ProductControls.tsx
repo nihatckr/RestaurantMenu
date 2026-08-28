@@ -226,6 +226,26 @@ function ProductFormModal({
     if (state.ok) onDone();
   }, [state.ok, onDone]);
 
+  // Dynamic labelled measures (Kadeh/Şişe). Controlled so add/remove is reliable;
+  // each row posts as parallel priceLabel/priceAmount fields. Keys are max+1 so
+  // they stay unique across removals (no ref mutation during render).
+  const [measures, setMeasures] = useState(() =>
+    (initial.prices ?? []).map((p, i) => ({
+      id: i,
+      label: p.label,
+      amount: String(p.amount),
+    })),
+  );
+  const addMeasure = () =>
+    setMeasures((m) => [
+      ...m,
+      { id: (m.length ? Math.max(...m.map((x) => x.id)) : -1) + 1, label: "", amount: "" },
+    ]);
+  const removeMeasure = (id: number) =>
+    setMeasures((m) => m.filter((x) => x.id !== id));
+  const setMeasure = (id: number, field: "label" | "amount", value: string) =>
+    setMeasures((m) => m.map((x) => (x.id === id ? { ...x, [field]: value } : x)));
+
   return (
     <Modal open onClose={onClose} title={title}>
       <form action={formAction} className="flex flex-col gap-3">
@@ -253,7 +273,7 @@ function ProductFormModal({
             <option value="DRINK">İçecek</option>
           </Select>
         </Field>
-        <Field label="Fiyat (opsiyonel)" error={state.fieldErrors?.price}>
+        <Field label="Tek fiyat (opsiyonel)" error={state.fieldErrors?.price}>
           <Input
             name="price"
             type="number"
@@ -262,6 +282,57 @@ function ProductFormModal({
             defaultValue={initial.price ?? ""}
           />
         </Field>
+
+        {/* Optional measure prices (Kadeh/Şişe, CL sizes). When any exist, they
+            supersede the single price. */}
+        <div className="flex flex-col gap-2">
+          <span className="font-body text-xs text-muted">
+            Ölçülü fiyatlar (Kadeh/Şişe — opsiyonel)
+          </span>
+          {measures.map((m) => (
+            <div key={m.id} className="flex items-center gap-2">
+              <Input
+                name="priceLabel"
+                placeholder="Ölçü (ör. Kadeh)"
+                value={m.label}
+                onChange={(e) => setMeasure(m.id, "label", e.target.value)}
+                className="flex-1"
+              />
+              <Input
+                name="priceAmount"
+                type="number"
+                min={0}
+                step="0.01"
+                placeholder="Fiyat"
+                value={m.amount}
+                onChange={(e) => setMeasure(m.id, "amount", e.target.value)}
+                className="w-24"
+              />
+              <button
+                type="button"
+                aria-label="Ölçüyü kaldır"
+                onClick={() => removeMeasure(m.id)}
+                className="text-muted transition-colors hover:text-mono-red"
+              >
+                <Trash2 size={14} aria-hidden />
+              </button>
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="ghost"
+            className="flex items-center gap-1 self-start px-2 py-1 text-xs"
+            onClick={addMeasure}
+          >
+            <Plus size={14} aria-hidden /> Ölçü ekle
+          </Button>
+          {measures.length > 0 && (
+            <p className="font-body text-[0.6875rem] text-muted">
+              Ölçü eklendiğinde tek fiyat yok sayılır.
+            </p>
+          )}
+        </div>
+
         <Field label="Alt grup / etiket (opsiyonel)" error={state.fieldErrors?.tag}>
           <Input name="tag" defaultValue={initial.tag} />
         </Field>

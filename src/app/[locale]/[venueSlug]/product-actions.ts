@@ -20,6 +20,15 @@ export type ProductFormState = {
 
 function parse(formData: FormData) {
   const priceRaw = formData.get("price");
+  // Measure rows arrive as parallel priceLabel[]/priceAmount[] fields; zip them,
+  // dropping blank rows (a measure needs a label).
+  const labels = formData.getAll("priceLabel").map(String);
+  const amounts = formData.getAll("priceAmount").map(String);
+  const prices = labels
+    .map((label, i) => ({ label: label.trim(), amount: amounts[i] ?? "" }))
+    .filter((r) => r.label !== "")
+    .map((r) => ({ label: r.label, amount: Number(r.amount || 0) }));
+
   return productSchema.safeParse({
     titleTr: String(formData.get("titleTr") ?? ""),
     titleEn: String(formData.get("titleEn") ?? ""),
@@ -28,6 +37,7 @@ function parse(formData: FormData) {
     kind: String(formData.get("kind") ?? "FOOD"),
     tag: String(formData.get("tag") ?? ""),
     price: priceRaw ? Number(priceRaw) : undefined,
+    prices: prices.length ? prices : undefined,
   });
 }
 

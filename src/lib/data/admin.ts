@@ -210,6 +210,7 @@ export type ProductAdminRow = {
   kind: ProductKind;
   tag: string;
   price: number | null;
+  prices: { label: string; amount: number }[]; // labelled measures (empty = single price)
 };
 
 /** Category options (slug + Turkish name) for the product form's picker. */
@@ -234,6 +235,10 @@ export async function getProductsAdmin(
             orderBy: { sortOrder: "asc" },
             select: {
               price: true,
+              prices: {
+                orderBy: { sortOrder: "asc" },
+                select: { label: true, amount: true },
+              },
               category: { select: { slug: true } },
               product: {
                 select: {
@@ -260,6 +265,7 @@ export async function getProductsAdmin(
       kind: it.product.kind,
       tag: it.product.tag ?? "",
       price: it.price === null ? null : Number(it.price),
+      prices: it.prices.map((p) => ({ label: p.label, amount: Number(p.amount) })),
     };
   });
 }
@@ -308,14 +314,19 @@ export async function createProduct(venueSlug: string, input: ProductInput) {
       translations: { create: titleRows(input) },
     },
   });
+  const measures = input.prices ?? [];
   await prisma.menuItem.create({
     data: {
       menuId: venue.menu.id,
       productId: product.id,
       categoryId: category.id,
-      price: input.price ?? null,
+      // Measures supersede the single price (schema comment: leave price null).
+      price: measures.length ? null : (input.price ?? null),
       available: true,
       sortOrder: (max._max.sortOrder ?? 0) + 1,
+      prices: measures.length
+        ? { create: measures.map((m, i) => ({ label: m.label, amount: m.amount, sortOrder: i })) }
+        : undefined,
     },
   });
 }
@@ -358,10 +369,26 @@ export async function updateProduct(
       await prisma.productTranslation.deleteMany({ where: { productId, locale } });
     }
   }
-  await prisma.menuItem.updateMany({
+  // Replace this venue's menu-item facts (category, price/measures). Prices are a
+  // full replace: clear then recreate from the form.
+  const item = await prisma.menuItem.findFirst({
     where: { menuId: venue.menu.id, productId },
-    data: { categoryId: category.id, price: input.price ?? null },
+    select: { id: true },
   });
+  if (item) {
+    const measures = input.prices ?? [];
+    await prisma.menuItemPrice.deleteMany({ where: { menuItemId: item.id } });
+    await prisma.menuItem.update({
+      where: { id: item.id },
+      data: {
+        categoryId: category.id,
+        price: measures.length ? null : (input.price ?? null),
+        prices: measures.length
+          ? { create: measures.map((m, i) => ({ label: m.label, amount: m.amount, sortOrder: i })) }
+          : undefined,
+      },
+    });
+  }
 }
 
 /** Soft-delete (trash) a product — hidden from the public menu, recoverable. */
