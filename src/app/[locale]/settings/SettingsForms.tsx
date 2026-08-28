@@ -2,8 +2,10 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Image as ImageIcon, Store, Check } from "lucide-react";
 import { ImageField } from "@/components/ui/ImageField";
 import { Button } from "@/components/ui/Button";
+import { Card, CardHeader } from "@/components/ui/Card";
 import {
   updateBrandLogoAction,
   updateVenueWordmarkAction,
@@ -31,9 +33,16 @@ function ImageUploadForm({
       {state.error && (
         <p className="font-body text-xs text-mono-red">{state.error}</p>
       )}
-      <Button type="submit" disabled={pending}>
-        {pending ? "Kaydediliyor…" : "Kaydet"}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button type="submit" disabled={pending}>
+          {pending ? "Kaydediliyor…" : "Kaydet"}
+        </Button>
+        {state.ok && !pending && (
+          <span className="flex items-center gap-1 font-body text-xs text-muted">
+            <Check size={13} aria-hidden /> Kaydedildi
+          </span>
+        )}
+      </div>
     </form>
   );
 }
@@ -46,36 +55,39 @@ export function SettingsForms({
   venues: { slug: string; name: string; wordmark: string | null }[];
 }) {
   return (
-    <div className="flex flex-col gap-10">
-      <section className="flex flex-col gap-2">
-        <h2 className="type-tag text-base">Marka logosu</h2>
-        <p className="font-body text-xs text-muted">
-          Menünün üstünde görünen marka işareti. Boş bırakılırsa varsayılan Mono
-          işareti kullanılır.
-        </p>
+    <>
+      <Card id="marka">
+        <CardHeader
+          icon={ImageIcon}
+          title="Marka logosu"
+          description="Menünün üstünde ve favicon’da görünen marka işareti. Boş bırakılırsa varsayılan Mono işareti kullanılır."
+        />
         <ImageUploadForm
           action={updateBrandLogoAction}
           initial={logo}
           label="Marka logosu"
         />
-      </section>
+      </Card>
 
-      <section className="flex flex-col gap-4">
-        <h2 className="type-tag text-base">Mekan wordmark’ları</h2>
-        <p className="font-body text-xs text-muted">
-          Her mekanın alt kısmında görünen wordmark. Boşsa marka işareti kullanılır.
-        </p>
-        {venues.map((v) => (
-          <div key={v.slug} className="flex flex-col gap-1">
-            <h3 className="font-body text-sm">{v.name}</h3>
-            <ImageUploadForm
-              action={updateVenueWordmarkAction.bind(null, v.slug)}
-              initial={v.wordmark}
-              label={`${v.name} wordmark`}
-            />
-          </div>
-        ))}
-      </section>
-    </div>
+      <Card id="mekanlar">
+        <CardHeader
+          icon={Store}
+          title="Mekan wordmark’ları"
+          description="Her mekanın alt kısmında görünen wordmark. Boşsa marka işareti kullanılır."
+        />
+        <div className="grid gap-5 sm:grid-cols-2">
+          {venues.map((v) => (
+            <div key={v.slug} className="flex flex-col gap-1">
+              <h3 className="font-body text-sm">{v.name}</h3>
+              <ImageUploadForm
+                action={updateVenueWordmarkAction.bind(null, v.slug)}
+                initial={v.wordmark}
+                label={`${v.name} wordmark`}
+              />
+            </div>
+          ))}
+        </div>
+      </Card>
+    </>
   );
 }

@@ -1,4 +1,6 @@
+import { History } from "lucide-react";
 import { getRecentAudit } from "@/lib/data/audit";
+import { Card, CardHeader } from "@/components/ui/Card";
 
 const ACTIONS: Record<string, string> = {
   create: "oluşturuldu",
@@ -21,8 +23,12 @@ export async function ActivitySection() {
   const rows = await getRecentAudit(20);
   if (rows.length === 0) return null;
   return (
-    <section className="flex flex-col gap-2 border-t border-muted/20 pt-6">
-      <h2 className="type-tag text-base">Son işlemler</h2>
+    <Card id="islemler">
+      <CardHeader
+        icon={History}
+        title="Son işlemler"
+        description="Menüde yapılan son değişiklikler."
+      />
       <ul className="flex flex-col">
         {rows.map((r) => (
           <li
@@ -39,6 +45,6 @@ export async function ActivitySection() {
           </li>
         ))}
       </ul>
-    </section>
+    </Card>
   );
 }

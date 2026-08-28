@@ -2,7 +2,9 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Download, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Card, CardHeader } from "@/components/ui/Card";
 import { importBackupAction } from "./settings-actions";
 
 export function BackupSection() {
@@ -13,24 +15,24 @@ export function BackupSection() {
   }, [state.ok, router]);
 
   return (
-    <section className="flex flex-col gap-4 border-t border-muted/20 pt-6">
-      <div className="flex flex-col gap-2">
-        <h2 className="type-tag text-base">Yedek</h2>
-        <p className="font-body text-xs text-muted">
-          Tüm menüyü Excel (.xlsx) olarak indir; düzenleyip geri yükle.
-          Kategoriler, ürünler ve mekan yerleşimleri ayrı sayfalarda.
-        </p>
+    <Card id="yedek" className="flex flex-col gap-4">
+      <CardHeader
+        icon={Download}
+        title="Yedek"
+        description="Tüm menüyü Excel (.xlsx) olarak indir; düzenleyip geri yükle. Kategoriler, ürünler ve mekan yerleşimleri ayrı sayfalarda."
+      />
+      <div>
         {/* Plain <a download>: /admin/export is a file-download route handler. */}
         <a
           href="/admin/export"
           download
-          className="self-start rounded border border-muted/40 px-3 py-2 font-body text-sm text-foreground transition-colors hover:border-foreground"
+          className="inline-flex items-center gap-2 rounded border border-muted/40 px-3 py-2 font-body text-sm text-foreground transition-colors hover:border-foreground"
         >
-          Yedek indir (Excel)
+          <Download size={14} aria-hidden /> Yedek indir (Excel)
         </a>
       </div>
 
-      <form action={formAction} className="flex flex-col items-start gap-2">
+      <form action={formAction} className="flex flex-col items-start gap-2 border-t border-muted/15 pt-4">
         <span className="font-body text-xs text-muted">
           Yedeği içe aktar (mevcut kayıtlar slug ile güncellenir; silme yapılmaz)
         </span>
@@ -45,9 +47,9 @@ export function BackupSection() {
         </Button>
 
         {state.ok && state.counts && (
-          <p className="font-body text-xs text-foreground">
-            İçe aktarıldı: {state.counts.categories} kategori,{" "}
-            {state.counts.products} ürün, {state.counts.items} yerleşim.
+          <p className="flex items-center gap-1 font-body text-xs text-foreground">
+            <Check size={13} aria-hidden /> İçe aktarıldı: {state.counts.categories}{" "}
+            kategori, {state.counts.products} ürün, {state.counts.items} yerleşim.
           </p>
         )}
         {state.error && (
@@ -62,6 +64,6 @@ export function BackupSection() {
           </ul>
         )}
       </form>
-    </section>
+    </Card>
   );
 }

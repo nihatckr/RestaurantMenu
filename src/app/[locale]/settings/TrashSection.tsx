@@ -1,5 +1,6 @@
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Trash2 } from "lucide-react";
 import { getTrash, type TrashItem } from "@/lib/data/admin";
+import { Card, CardHeader } from "@/components/ui/Card";
 import { restoreCategoryAction } from "@/app/[locale]/[venueSlug]/category-actions";
 import { restoreProductAction } from "@/app/[locale]/[venueSlug]/product-actions";
 
@@ -48,16 +49,22 @@ function TrashList({
 // restore is a plain form action (no client state).
 export async function TrashSection() {
   const { categories, products } = await getTrash();
+  const empty = categories.length === 0 && products.length === 0;
   return (
-    <section className="flex flex-col gap-4 border-t border-muted/20 pt-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="type-tag text-base">Çöp kutusu</h2>
-        <p className="font-body text-xs text-muted">
-          Silinen kategori ve ürünler burada saklanır; geri alınabilir.
-        </p>
-      </div>
-      <TrashList title="Kategoriler" items={categories} action={restoreCategoryAction} />
-      <TrashList title="Ürünler" items={products} action={restoreProductAction} />
-    </section>
+    <Card id="cop" className="flex flex-col gap-4">
+      <CardHeader
+        icon={Trash2}
+        title="Çöp kutusu"
+        description="Silinen kategori ve ürünler burada saklanır; geri alınabilir."
+      />
+      {empty ? (
+        <p className="font-body text-sm text-muted">Çöp kutusu boş.</p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <TrashList title="Kategoriler" items={categories} action={restoreCategoryAction} />
+          <TrashList title="Ürünler" items={products} action={restoreProductAction} />
+        </div>
+      )}
+    </Card>
   );
 }
