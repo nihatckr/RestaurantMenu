@@ -1,5 +1,6 @@
 import { PrismaClient, ProductKind } from "@prisma/client";
 import { PRICES } from "./data/prices";
+import { TRANSLATIONS } from "./data/translations";
 
 const prisma = new PrismaClient();
 
@@ -33,86 +34,86 @@ const CATEGORIES: { slug: string; name: Tr; columns?: number }[] = [
   { slug: "breakfast", name: { tr: "Kahvaltı", en: "Breakfast", ru: "Завтрак" }, columns: 2 },
 ];
 
-// Products carry identity only (name, kind, category, tag). Prices come from
-// PRICES (./data/prices.ts) — one source of truth, easy to update.
+// Products carry identity only (kind, category, tag). Prices come from PRICES
+// (./data/prices.ts) and all localized text from TRANSLATIONS
+// (./data/translations.ts) — one source of truth each, easy to update.
 type ProductSeed = {
   slug: string;
   kind: ProductKind;
   category: string;
   tag?: string;
-  title: Tr;
 };
 
 const PRODUCTS: ProductSeed[] = [
-  { slug: "kalamar", kind: "FOOD", category: "starters", title: { tr: "Kalamar", en: "Calamari" } },
-  { slug: "falafel", kind: "FOOD", category: "starters", title: { tr: "Falafel", en: "Falafel" } },
-  { slug: "karisik-kizartma", kind: "FOOD", category: "starters", title: { tr: "Karışık Kızartma", en: "Mixed Fries" } },
-  { slug: "spring-rolls", kind: "FOOD", category: "starters", title: { tr: "Spring Rolls", en: "Spring Rolls" } },
+  { slug: "kalamar", kind: "FOOD", category: "starters" },
+  { slug: "falafel", kind: "FOOD", category: "starters" },
+  { slug: "karisik-kizartma", kind: "FOOD", category: "starters" },
+  { slug: "spring-rolls", kind: "FOOD", category: "starters" },
 
-  { slug: "roka-salatasi", kind: "FOOD", category: "salads", title: { tr: "Roka Salatası", en: "Arugula Salad", ru: "Салат из рукколы" } },
-  { slug: "mono-fit", kind: "FOOD", category: "salads", title: { tr: "Mono Fit", en: "Mono Fit Salad" } },
-  { slug: "tavuklu-sezar", kind: "FOOD", category: "salads", title: { tr: "Tavuklu Sezar Salata", en: "Chicken Caesar Salad" } },
+  { slug: "roka-salatasi", kind: "FOOD", category: "salads" },
+  { slug: "mono-fit", kind: "FOOD", category: "salads" },
+  { slug: "tavuklu-sezar", kind: "FOOD", category: "salads" },
 
-  { slug: "spagetti-bolognese", kind: "FOOD", category: "pastas", title: { tr: "Spagetti Bolognese", en: "Spaghetti Bolognese" } },
-  { slug: "fettucini-alfredo", kind: "FOOD", category: "pastas", title: { tr: "Fettucini Alfredo", en: "Fettuccine Alfredo" } },
-  { slug: "penne-arabiata", kind: "FOOD", category: "pastas", title: { tr: "Penne Arabiata", en: "Penne Arrabbiata" } },
-  { slug: "manti", kind: "FOOD", category: "pastas", title: { tr: "Mantı", en: "Turkish Mantı" } },
+  { slug: "spagetti-bolognese", kind: "FOOD", category: "pastas" },
+  { slug: "fettucini-alfredo", kind: "FOOD", category: "pastas" },
+  { slug: "penne-arabiata", kind: "FOOD", category: "pastas" },
+  { slug: "manti", kind: "FOOD", category: "pastas" },
 
-  { slug: "mono-burger", kind: "FOOD", category: "wraps-burgers", title: { tr: "Mono Burger", en: "Mono Burger", ru: "Моно Бургер" } },
-  { slug: "cheeseburger", kind: "FOOD", category: "wraps-burgers", title: { tr: "Cheeseburger", en: "Cheeseburger" } },
-  { slug: "vegan-wrap", kind: "FOOD", category: "wraps-burgers", title: { tr: "Vegan Wrap", en: "Vegan Wrap" } },
-  { slug: "tavuklu-quesedilla", kind: "FOOD", category: "wraps-burgers", title: { tr: "Tavuklu Quesadilla", en: "Chicken Quesadilla" } },
+  { slug: "mono-burger", kind: "FOOD", category: "wraps-burgers" },
+  { slug: "cheeseburger", kind: "FOOD", category: "wraps-burgers" },
+  { slug: "vegan-wrap", kind: "FOOD", category: "wraps-burgers" },
+  { slug: "tavuklu-quesedilla", kind: "FOOD", category: "wraps-burgers" },
 
-  { slug: "dana-antrikot", kind: "FOOD", category: "main-courses", title: { tr: "Dana Antrikot", en: "Beef Entrecôte" } },
-  { slug: "somon-izgara", kind: "FOOD", category: "main-courses", title: { tr: "Somon Izgara", en: "Grilled Salmon" } },
-  { slug: "kuzu-incik", kind: "FOOD", category: "main-courses", title: { tr: "Kuzu İncik", en: "Lamb Shank" } },
-  { slug: "cokertme-kebabi", kind: "FOOD", category: "main-courses", title: { tr: "Çökertme Kebabı", en: "Çökertme Kebab" } },
+  { slug: "dana-antrikot", kind: "FOOD", category: "main-courses" },
+  { slug: "somon-izgara", kind: "FOOD", category: "main-courses" },
+  { slug: "kuzu-incik", kind: "FOOD", category: "main-courses" },
+  { slug: "cokertme-kebabi", kind: "FOOD", category: "main-courses" },
 
-  { slug: "san-sebastian", kind: "FOOD", category: "desserts", title: { tr: "San Sebastian Cheesecake", en: "San Sebastian Cheesecake", ru: "Чизкейк Сан-Себастьян" } },
-  { slug: "baileys-tiramisu", kind: "FOOD", category: "desserts", title: { tr: "Bailey's Tiramisu", en: "Bailey's Tiramisu" } },
-  { slug: "meyve-tabagi", kind: "FOOD", category: "desserts", title: { tr: "Meyve Tabağı", en: "Fruit Plate" } },
+  { slug: "san-sebastian", kind: "FOOD", category: "desserts" },
+  { slug: "baileys-tiramisu", kind: "FOOD", category: "desserts" },
+  { slug: "meyve-tabagi", kind: "FOOD", category: "desserts" },
 
-  { slug: "aperol-spritz", kind: "DRINK", category: "cocktails", tag: "Cocktail", title: { tr: "Aperol Spritz", en: "Aperol Spritz" } },
-  { slug: "mojito", kind: "DRINK", category: "cocktails", tag: "Cocktail", title: { tr: "Mojito", en: "Mojito" } },
-  { slug: "negroni", kind: "DRINK", category: "cocktails", tag: "Cocktail", title: { tr: "Negroni", en: "Negroni" } },
-  { slug: "margarita", kind: "DRINK", category: "cocktails", tag: "Cocktail", title: { tr: "Margarita", en: "Margarita" } },
+  { slug: "aperol-spritz", kind: "DRINK", category: "cocktails", tag: "Cocktail" },
+  { slug: "mojito", kind: "DRINK", category: "cocktails", tag: "Cocktail" },
+  { slug: "negroni", kind: "DRINK", category: "cocktails", tag: "Cocktail" },
+  { slug: "margarita", kind: "DRINK", category: "cocktails", tag: "Cocktail" },
 
   // ── DEMO drinks (placeholder, NOT evidenced) ──────────────────────────────
   // Structurally faithful to the legacy drink displays so the UI works: beers
   // show a serving cl; wines show bottle/glass + a DLC (label) badge; spirits are
   // grouped by `tag` sub-category (Viski/Rakı/…) with multi-cl pricing; soft
   // drinks use colour chips. Replace names/prices with the real list (U5).
-  { slug: "fici-bira", kind: "DRINK", category: "beers", tag: "Beer", title: { tr: "Fıçı Bira", en: "Draft Beer" } },
-  { slug: "sise-bira", kind: "DRINK", category: "beers", tag: "Beer", title: { tr: "Şişe Bira", en: "Bottled Beer" } },
+  { slug: "fici-bira", kind: "DRINK", category: "beers", tag: "Beer" },
+  { slug: "sise-bira", kind: "DRINK", category: "beers", tag: "Beer" },
 
-  { slug: "kirmizi-sarap-ev", kind: "DRINK", category: "wines", title: { tr: "Ev Şarabı (Kırmızı)", en: "House Wine (Red)" } },
-  { slug: "beyaz-sarap-ev", kind: "DRINK", category: "wines", title: { tr: "Ev Şarabı (Beyaz)", en: "House Wine (White)" } },
-  { slug: "kirmizi-sarap-sise", kind: "DRINK", category: "wines", title: { tr: "Kırmızı Şarap (Şişe)", en: "Red Wine (Bottle)" } },
+  { slug: "kirmizi-sarap-ev", kind: "DRINK", category: "wines" },
+  { slug: "beyaz-sarap-ev", kind: "DRINK", category: "wines" },
+  { slug: "kirmizi-sarap-sise", kind: "DRINK", category: "wines" },
 
-  { slug: "viski-standart", kind: "DRINK", category: "hard-drinks", tag: "Viski", title: { tr: "Viski (Standart)", en: "Whisky (Standard)" } },
-  { slug: "viski-premium", kind: "DRINK", category: "hard-drinks", tag: "Viski", title: { tr: "Viski (Premium)", en: "Whisky (Premium)" } },
-  { slug: "raki", kind: "DRINK", category: "hard-drinks", tag: "Rakı", title: { tr: "Rakı", en: "Rakı" } },
-  { slug: "raki-ozel", kind: "DRINK", category: "hard-drinks", tag: "Rakı", title: { tr: "Rakı (Özel Seri)", en: "Rakı (Special)" } },
-  { slug: "votka", kind: "DRINK", category: "hard-drinks", tag: "Votka", title: { tr: "Votka", en: "Vodka" } },
-  { slug: "votka-premium", kind: "DRINK", category: "hard-drinks", tag: "Votka", title: { tr: "Votka (Premium)", en: "Vodka (Premium)" } },
-  { slug: "cin", kind: "DRINK", category: "hard-drinks", tag: "Cin", title: { tr: "Cin", en: "Gin" } },
-  { slug: "cin-premium", kind: "DRINK", category: "hard-drinks", tag: "Cin", title: { tr: "Cin (Premium)", en: "Gin (Premium)" } },
-  { slug: "viski-single-malt", kind: "DRINK", category: "hard-drinks", tag: "Viski", title: { tr: "Viski (Single Malt)", en: "Whisky (Single Malt)" } },
-  { slug: "tekila", kind: "DRINK", category: "hard-drinks", tag: "Tekila", title: { tr: "Tekila (Blanco)", en: "Tequila (Blanco)" } },
-  { slug: "tekila-anejo", kind: "DRINK", category: "hard-drinks", tag: "Tekila", title: { tr: "Tekila (Añejo)", en: "Tequila (Añejo)" } },
-  { slug: "rom-beyaz", kind: "DRINK", category: "hard-drinks", tag: "Rom", title: { tr: "Rom (Beyaz)", en: "Rum (White)" } },
-  { slug: "rom-esmer", kind: "DRINK", category: "hard-drinks", tag: "Rom", title: { tr: "Rom (Esmer)", en: "Rum (Dark)" } },
-  { slug: "konyak", kind: "DRINK", category: "hard-drinks", tag: "Konyak", title: { tr: "Konyak", en: "Cognac" } },
-  { slug: "likor", kind: "DRINK", category: "hard-drinks", tag: "Likör", title: { tr: "Likör", en: "Liqueur" } },
+  { slug: "viski-standart", kind: "DRINK", category: "hard-drinks", tag: "Viski" },
+  { slug: "viski-premium", kind: "DRINK", category: "hard-drinks", tag: "Viski" },
+  { slug: "raki", kind: "DRINK", category: "hard-drinks", tag: "Rakı" },
+  { slug: "raki-ozel", kind: "DRINK", category: "hard-drinks", tag: "Rakı" },
+  { slug: "votka", kind: "DRINK", category: "hard-drinks", tag: "Votka" },
+  { slug: "votka-premium", kind: "DRINK", category: "hard-drinks", tag: "Votka" },
+  { slug: "cin", kind: "DRINK", category: "hard-drinks", tag: "Cin" },
+  { slug: "cin-premium", kind: "DRINK", category: "hard-drinks", tag: "Cin" },
+  { slug: "viski-single-malt", kind: "DRINK", category: "hard-drinks", tag: "Viski" },
+  { slug: "tekila", kind: "DRINK", category: "hard-drinks", tag: "Tekila" },
+  { slug: "tekila-anejo", kind: "DRINK", category: "hard-drinks", tag: "Tekila" },
+  { slug: "rom-beyaz", kind: "DRINK", category: "hard-drinks", tag: "Rom" },
+  { slug: "rom-esmer", kind: "DRINK", category: "hard-drinks", tag: "Rom" },
+  { slug: "konyak", kind: "DRINK", category: "hard-drinks", tag: "Konyak" },
+  { slug: "likor", kind: "DRINK", category: "hard-drinks", tag: "Likör" },
 
-  { slug: "kola", kind: "DRINK", category: "soft-drinks", title: { tr: "Kola", en: "Cola" } },
-  { slug: "soda", kind: "DRINK", category: "soft-drinks", title: { tr: "Soda", en: "Sparkling Water" } },
-  { slug: "ayran", kind: "DRINK", category: "soft-drinks", title: { tr: "Ayran", en: "Ayran" } },
-  { slug: "su", kind: "DRINK", category: "soft-drinks", title: { tr: "Su", en: "Water" } },
+  { slug: "kola", kind: "DRINK", category: "soft-drinks" },
+  { slug: "soda", kind: "DRINK", category: "soft-drinks" },
+  { slug: "ayran", kind: "DRINK", category: "soft-drinks" },
+  { slug: "su", kind: "DRINK", category: "soft-drinks" },
 
-  { slug: "serpme-kahvalti", kind: "FOOD", category: "breakfast", title: { tr: "Serpme Kahvaltı", en: "Turkish Breakfast", ru: "Турецкий завтрак" } },
-  { slug: "mono-kahvalti", kind: "FOOD", category: "breakfast", title: { tr: "Mono Kahvaltı", en: "Mono Breakfast" } },
-  { slug: "pankek", kind: "FOOD", category: "breakfast", title: { tr: "Pankek", en: "Pancakes" } },
+  { slug: "serpme-kahvalti", kind: "FOOD", category: "breakfast" },
+  { slug: "mono-kahvalti", kind: "FOOD", category: "breakfast" },
+  { slug: "pankek", kind: "FOOD", category: "breakfast" },
 ];
 
 // Real product photos ported from the legacy assets (public/products/<slug>).
@@ -282,11 +283,22 @@ async function main() {
       create: { businessId: business.id, slug: p.slug, kind: p.kind, tag: p.tag ?? null, image, color, dlc },
     });
     productIdBySlug.set(p.slug, prod.id);
-    for (const [locale, title] of Object.entries(p.title)) {
+    const text = TRANSLATIONS[p.slug];
+    if (!text) throw new Error(`Missing TRANSLATIONS entry for product "${p.slug}"`);
+    // TRANSLATIONS is authoritative per locale: a filled title upserts the row;
+    // a blank ("") title removes any stale row so the app falls back to Turkish.
+    for (const locale of ["tr", "en", "ru"] as const) {
+      const title = text.title[locale]?.trim();
+      if (!title) {
+        await prisma.productTranslation.deleteMany({ where: { productId: prod.id, locale } });
+        continue;
+      }
+      const subtitle = text.subtitle?.[locale]?.trim() || null;
+      const description = text.description?.[locale]?.trim() || null;
       await prisma.productTranslation.upsert({
         where: { productId_locale: { productId: prod.id, locale } },
-        update: { title },
-        create: { productId: prod.id, locale, title },
+        update: { title, subtitle, description },
+        create: { productId: prod.id, locale, title, subtitle, description },
       });
     }
   }
