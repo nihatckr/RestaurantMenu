@@ -223,12 +223,36 @@ The same `ImageField` also uploads **brand logos**, not just product photos:
   server-side** before storing. Default recommendation: **PNG/WebP upload** for
   owner-supplied logos; keep the crafted brand SVG as the bundled fallback.
 
+## 6d. Data safety — the MUST-HAVE the seed→DB shift creates
+
+Until now the **seed was the safety net**: content lived in git and could be
+re-seeded anytime. Moving the source of truth to the DB **removes that net** — a lost
+DB or an accidental delete would erase the menu with no way to regenerate it. So data
+safety is non-negotiable and ships *with* the admin, not after:
+
+- **Automated DB backups — #1.** Use the managed Postgres provider's **PITR / daily
+  snapshots**; **verify they're enabled** and test a restore once. (Non-codeable but
+  mandatory — belongs in `OPS.md`/`DEPLOY.md`.)
+- **Delete safety:** confirm + explain consequences; **soft-delete / trash** for
+  products & categories (restore within N days) — or at minimum **block deleting a
+  non-empty category**. No silent cascade wipes.
+- **Export / import:** one-click **export the whole menu to JSON** — an owner-held
+  backup and a re-import path; this restores the "content is portable" property we
+  gave up by leaving the seed. (Doubles as migration/reseed.)
+- **Login lockout recovery:** if the magic-link email fails or `ADMIN_EMAIL` is wrong,
+  the owner must not be locked out — a documented break-glass (env-based re-grant or a
+  small CLI) to restore access.
+- **Housekeeping:** delete the old blob when an image is replaced/removed (no orphan
+  storage). **Admin UI language:** Turkish (the owner's language) — the admin chrome
+  is not part of the tr/en/ru public switcher.
+
 ## 7. Phased tasks & acceptance
 
 | Task | Scope | Done when |
 |------|-------|-----------|
 | **A. Seedless deploy** | Deploy runs migrate only; remove reconcile; demote content seed to `seed:demo` (dev-only) | A fresh prod DB comes up **empty**; re-runs never delete/overwrite |
 | **B. Cache tags** | `cacheTag` in data-access; a `revalidateMenu()` helper | An edit reflects on the public page after `revalidateTag` |
+| **C. Data safety (must-have)** | Verify managed-Postgres backups/PITR; soft-delete/trash for products & categories (or block non-empty delete); JSON export/import; login break-glass; blob orphan cleanup | Backups verified + restore tested; a deleted item is recoverable; owner can export the menu; no lockout path |
 | **T12 Auth + first run** | Auth.js magic-link; `ADMIN_EMAIL`; first-run creates admin + Business/Venue on empty DB | On an empty DB, the owner logs in and reaches `/admin`; no seed used |
 | **T13 CRUD (create-first, inline)** | Inline Edit/Delete + "＋ Add" controls on the live pages (admin-session islands) opening **modal forms**; server actions + zod for **add/edit/delete categories & products**, prices, translations, per-venue visibility/order; auto-slug; revalidate on write | On an empty DB the owner **builds a full menu in place** (＋ Add category → ＋ Add product in a modal → set price → appears live); guests see none of it; validation blocks bad input |
 | **T14 Images & logos** | `ImageField` (tap-pick + preview + remove, optional desktop drag-drop); upload to blob storage; `remotePatterns`; `Product.image` = URL; **logos too** (venue wordmark + brand mark → data); PNG/WebP for logos (SVG XSS) | Owner uploads a product photo **and a logo/wordmark** → both render on the menu |
