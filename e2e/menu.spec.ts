@@ -285,6 +285,20 @@ test("admin opens settings from the header and uploads a brand logo", async ({
   await page.getByRole("button", { name: "Kaydet" }).first().click();
 });
 
+test("admin downloads the Excel backup from settings", async ({ page }) => {
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/settings");
+
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("link", { name: "Yedek indir (Excel)" }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^menu-yedek-.*\.xlsx$/);
+});
+
 test("admin uploads a product photo", async ({ page }) => {
   const title = `E2EFoto ${Date.now()}`;
   // A tiny valid 8×8 PNG so sharp can decode + re-encode it.
