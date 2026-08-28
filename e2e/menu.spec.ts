@@ -300,6 +300,39 @@ test("admin downloads the Excel backup from settings", async ({ page }) => {
   expect(download.suggestedFilename()).toMatch(/^menu-yedek-.*\.xlsx$/);
 });
 
+test("admin routes reject unauthenticated requests (401)", async ({ page }) => {
+  // No login — the request carries no admin session cookie.
+  expect((await page.request.get("/admin/export")).status()).toBe(401);
+  expect((await page.request.get("/admin/qr/terrace")).status()).toBe(401);
+});
+
+test("product image upload rejects a non-image file", async ({ page }) => {
+  const title = `E2ERed ${Date.now()}`;
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/terrace/starters");
+
+  const section = page.locator("section", {
+    has: page.getByRole("heading", { name: "Başlangıçlar" }),
+  });
+  await section.getByRole("button", { name: "Ürün ekle" }).first().click();
+  await page.getByLabel("Ad (Türkçe)").fill(title);
+  // A text file (accept="image/*" is bypassed by setInputFiles) → server rejects.
+  await page.locator('input[type="file"][name="image"]').setInputFiles({
+    name: "notimage.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("definitely not an image"),
+  });
+  await page.getByRole("button", { name: "Kaydet" }).click();
+
+  await expect(page.getByText(/Görsel dosyası seçin/)).toBeVisible();
+  // The product was NOT created (rejected before the write).
+  await page.getByRole("button", { name: "İptal" }).click();
+  await expect(page.getByText(title)).toHaveCount(0);
+});
+
 test("the login page is marked noindex", async ({ page }) => {
   await page.goto("/tr/login");
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
