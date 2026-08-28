@@ -31,7 +31,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Mono Terrace — Menu",
   description: "Mono Terrace hotel, rooftop bar & garden menu.",
-  icons: { icon: "/icon-192.png", apple: "/icon-192.png" },
+  // Favicon is generated from the admin-uploaded brand logo (/brand-icon route);
+  // apple-touch keeps the static PWA icon.
+  icons: { icon: "/brand-icon", apple: "/icon-192.png" },
   // Large share card; the image comes from opengraph-image.tsx (og:image, which
   // Twitter falls back to when no dedicated twitter image is set).
   twitter: { card: "summary_large_image" },

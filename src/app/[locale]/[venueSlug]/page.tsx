@@ -9,6 +9,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { AdminSessionControls } from "@/components/AdminSessionControls";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
+import { getBrandLogo } from "@/lib/data/settings";
 import { buildMenuJsonLd } from "@/lib/jsonld";
 import { LOCALES, isLocale, buildAlternates, type Locale } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
@@ -76,7 +77,10 @@ async function VenueLanding({
   const venue = await getVenueBySlug(venueSlug);
   if (!venue) notFound();
 
-  const menu = await getVenueMenu(venueSlug, locale);
+  const [menu, brandLogo] = await Promise.all([
+    getVenueMenu(venueSlug, locale),
+    getBrandLogo(),
+  ]);
   const jsonLd = menu ? buildMenuJsonLd(venue.name, menu, locale) : null;
   return (
     <>
@@ -92,7 +96,7 @@ async function VenueLanding({
         </Suspense>
         <LanguageSwitcher current={locale as Locale} />
       </div>
-      <VenueHeader name={venue.name} homeHref={`/${locale}`} />
+      <VenueHeader name={venue.name} homeHref={`/${locale}`} mark={brandLogo || BRAND.mark} />
       {/* One category list — guests see plain links, an admin sees the same list
           with inline edit/delete/add (session-aware island, Suspense-isolated). */}
       <Suspense fallback={<Spinner />}>

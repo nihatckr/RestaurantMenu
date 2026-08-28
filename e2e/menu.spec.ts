@@ -247,6 +247,44 @@ test("admin adds a product with labelled measure prices", async ({ page }) => {
   await expect(page.getByText(title)).toHaveCount(0);
 });
 
+test("guests are redirected away from the settings page", async ({ page }) => {
+  await page.goto("/tr/settings");
+  await expect(page).toHaveURL(/\/login$/);
+});
+
+test("admin opens settings from the header and uploads a brand logo", async ({
+  page,
+}) => {
+  const png = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEUlEQVQImWM4EaCBFTEMLQkAaplQAdEjY8UAAAAASUVORK5CYII=",
+    "base64",
+  );
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+
+  // Settings is reachable from the admin header chip.
+  await page.getByRole("link", { name: "Ayarlar" }).click();
+  await expect(page).toHaveURL(/\/tr\/settings$/);
+  await expect(page.getByRole("heading", { name: "Ayarlar" })).toBeVisible();
+
+  // Upload a brand logo via the first (brand) image form.
+  await page
+    .locator('input[type="file"][name="image"]')
+    .first()
+    .setInputFiles({ name: "logo.png", mimeType: "image/png", buffer: png });
+  await expect(page.getByRole("button", { name: "Kaydet" }).first()).toBeEnabled();
+  await page.getByRole("button", { name: "Kaydet" }).first().click();
+  // Preview persists after the save round-trip (state.ok → refresh).
+  await expect(page.locator('img[alt=""]').first()).toBeVisible();
+
+  // Clean up: remove the logo again so the default mark is restored.
+  await page.getByRole("button", { name: "Marka logosu kaldır" }).click();
+  await page.getByRole("button", { name: "Kaydet" }).first().click();
+});
+
 test("admin uploads a product photo", async ({ page }) => {
   const title = `E2EFoto ${Date.now()}`;
   // A tiny valid 8×8 PNG so sharp can decode + re-encode it.

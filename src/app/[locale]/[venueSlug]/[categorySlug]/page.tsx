@@ -9,6 +9,7 @@ import { AdminSessionControls } from "@/components/AdminSessionControls";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
+import { getBrandLogo } from "@/lib/data/settings";
 import { LOCALES, isLocale, buildAlternates, type Locale } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
 import { BRAND } from "@/lib/brand";
@@ -86,7 +87,10 @@ async function CategoryView({
   const venue = await getVenueBySlug(venueSlug);
   if (!venue) notFound();
 
-  const menu = await getVenueMenu(venueSlug, locale);
+  const [menu, brandLogo] = await Promise.all([
+    getVenueMenu(venueSlug, locale),
+    getBrandLogo(),
+  ]);
   if (!menu) notFound();
 
   const chosen = menu.find((c) => c.slug === categorySlug);
@@ -125,7 +129,7 @@ async function CategoryView({
           className="relative block h-16 w-14"
         >
           <Image
-            src={BRAND.mark}
+            src={brandLogo || BRAND.mark}
             alt={BRAND.name}
             fill
             className="object-contain"
