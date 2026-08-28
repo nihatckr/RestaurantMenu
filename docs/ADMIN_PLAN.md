@@ -156,12 +156,19 @@ the denied list:
   `class-variance-authority` (cva) only **if** button/badge variants multiply — not
   needed for v1. Optional dev-only: `prettier-plugin-tailwindcss` (class sorting).
 
-**State management — deliberately NONE.** `Redux` and `Zustand` are on the project's
-**denied-dependency list** (`AGENTS.md` rule 8), and are unnecessary here: this admin
-has no cross-page global client state. Local UI state (modal open, form fields) uses
-React `useState`/`useReducer`; server state is Server Components + **server actions**
-(`useActionState` / `useFormStatus`) + `revalidateTag`. No client store or data-fetch
-library.
+**State management & data fetching — deliberately NONE.** `Redux`/`Zustand` are on the
+**denied-dependency list** (`AGENTS.md` rule 8); a client data-fetch/cache library
+(**React Query / TanStack Query**) is **not needed either** — in the App Router +
+Server Actions model it duplicates Next's own caching and would pull data fetching to
+the client (against the SSR / minimal-JS ethos). What covers it, all built-in:
+- **Fetch + cache:** Server Components + `use cache` / `cacheTag`.
+- **Refresh after a write:** `revalidateTag` / `revalidatePath`.
+- **Form/submit state:** `useActionState` / `useFormStatus`.
+- **Optimistic UI:** React 19 `useOptimistic` (no library).
+- **Local UI state** (modal open, form fields): `useState` / `useReducer`.
+
+(**TanStack Table** likewise isn't needed — the admin uses simple lists, not heavy
+sortable/filterable tables; revisit only if a large management grid ever appears.)
 
 ## 6. Images (T14)
 
