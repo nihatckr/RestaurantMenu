@@ -181,7 +181,26 @@ sortable/filterable tables; revisit only if a large management grid ever appears
   (Vercel Blob or S3-compatible) with upload from the admin.
 - `Product.image` stores the URL; add the storage host to `next.config` image
   `remotePatterns` (currently empty — SECURITY.md §1 allowlist).
-- Validate type/size on upload; strip EXIF; no arbitrary remote fetch.
+- Validate type/size on upload; no arbitrary remote fetch. Optional: **downscale
+  server-side with `sharp`** (already used for the PWA icons) — no client library.
+- **UX — one `ImageField` component, no upload library.** Must-have: **tap/click to
+  pick** (opens camera/gallery on phones — the owner's likely device) + **live
+  preview** + **Replace / Remove**. **Drag-and-drop is an optional desktop
+  enhancement** on the *same* field (hand-rolled HTML5 drag events, ~20 lines) — not
+  a need, since it's useless on mobile. No `react-dropzone`/`filepond`/`uploadthing`.
+
+### Logo / wordmark upload (included)
+The same `ImageField` also uploads **brand logos**, not just product photos:
+- **Venue wordmark** (`Venue.wordmark`) — already a data field; just wire the upload
+  in the venue edit form.
+- **Brand mark** — today it's the `BRAND.mark` **code constant** (`/brand/mono.svg`).
+  To let the owner upload it, **promote it to data** (e.g. `Business.logo`, falling
+  back to the bundled SVG default). `BRAND.black/white/name` stay constants.
+- **SVG security caveat:** logos are often SVG, and SVG can carry scripts →
+  uploading raw SVG is an XSS risk (`next/image` keeps `dangerouslyAllowSVG` **off**
+  by design). So either accept **PNG/WebP** for uploaded logos, or **sanitize SVG
+  server-side** before storing. Default recommendation: **PNG/WebP upload** for
+  owner-supplied logos; keep the crafted brand SVG as the bundled fallback.
 
 ## 7. Phased tasks & acceptance
 
@@ -191,7 +210,7 @@ sortable/filterable tables; revisit only if a large management grid ever appears
 | **B. Cache tags** | `cacheTag` in data-access; a `revalidateMenu()` helper | An edit reflects on the public page after `revalidateTag` |
 | **T12 Auth + first run** | Auth.js magic-link; `ADMIN_EMAIL`; first-run creates admin + Business/Venue on empty DB | On an empty DB, the owner logs in and reaches `/admin`; no seed used |
 | **T13 CRUD (create-first, inline)** | Inline Edit/Delete + "＋ Add" controls on the live pages (admin-session islands) opening **modal forms**; server actions + zod for **add/edit/delete categories & products**, prices, translations, per-venue visibility/order; auto-slug; revalidate on write | On an empty DB the owner **builds a full menu in place** (＋ Add category → ＋ Add product in a modal → set price → appears live); guests see none of it; validation blocks bad input |
-| **T14 Images** | Upload to blob storage; `remotePatterns`; `Product.image` = URL | Owner uploads a photo → it renders on the menu |
+| **T14 Images & logos** | `ImageField` (tap-pick + preview + remove, optional desktop drag-drop); upload to blob storage; `remotePatterns`; `Product.image` = URL; **logos too** (venue wordmark + brand mark → data); PNG/WebP for logos (SVG XSS) | Owner uploads a product photo **and a logo/wordmark** → both render on the menu |
 | **Sec + tests** | Rate-limit, audit log, noindex; e2e of the human flow (login → add category → add product → see it live) | SECURITY.md §2 controls present; e2e green |
 
 ## 8. Open questions (confirm with owner)
