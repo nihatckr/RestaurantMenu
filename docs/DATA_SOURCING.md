@@ -70,5 +70,6 @@
 - **U5** (source of the real product list/prices) — resolved by step 1 or 2 above.
 - **U-data-1** Are product images owned by the business (reusable) or SaaS-hosted
   (must be re-hosted)? Re-host to our own asset store to avoid the CDN dependency.
-- **U-data-2** Is there an ongoing edit need post-launch (→ pulls admin, T11
-  forward) or is seed-then-static acceptable?
+- **~~U-data-2~~ RESOLVED (2026-08-28):** yes — the owner needs ongoing
+  self-service editing, so the **admin is being built** (Path B, `ADMIN_PLAN.md`) and
+  the DB becomes the content source (not seed-then-static).

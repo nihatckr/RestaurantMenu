@@ -3,8 +3,8 @@
 > Scope-matched to `PRODUCT.md` + `ARCHITECTURE.md`: a **read-only public menu**
 > (Server Components → Prisma → PostgreSQL) with an **optional, later** admin.
 > No guest accounts, no payments, no ordering. Security effort is sized to that
-> reality — most risk lives in the (deferred) admin/write path, not the public
-> read path. Controls are mapped to the `TASKS.md` stages.
+> reality — most risk lives in the admin/write path (now being built, Path B — see
+> `ADMIN_PLAN.md`), not the public read path. Controls are mapped to `TASKS.md`.
 
 ---
 
@@ -22,8 +22,8 @@
 ## Trust boundaries
 - **Public (untrusted):** anonymous guests hitting `/[venueSlug]` reads. No
   writes reachable.
-- **Admin (trusted, deferred):** authenticated staff performing mutations via
-  Server Actions / Route Handlers.
+- **Admin (trusted, being built — Path B):** authenticated staff performing
+  mutations via Server Actions / Route Handlers.
 - **Server ↔ DB:** app server is the only DB client; DB is never public.
 
 ---
@@ -46,7 +46,10 @@
 - **Venue slug tampering** → resolve slug to a Venue record; unknown/inactive →
   `notFound()`. Never trust the slug beyond a lookup key (AGENTS rule 10).
 
-### 2. Admin / write path (deferred — build only with T11=go)
+### 2. Admin / write path (NOW BEING BUILT — Path B, 2026-08-28)
+> No longer deferred: the owner will self-update the menu, so the admin is planned
+> and ships **with** these controls. The consolidated hardening checklist lives in
+> `ADMIN_PLAN.md` §4b; this section remains the governing spec.
 - **AuthN** → Auth.js; admin-only. No guest auth. Strong password or SSO;
   secrets via env, never in repo. Secure, `HttpOnly`, `SameSite` session cookies.
 - **AuthZ** → every Server Action / Route Handler **re-checks the session +
@@ -121,5 +124,5 @@
 Every mutation is authenticated + authorized server-side and schema-validated;
 the public path exposes no writes and leaks no errors/PII; secrets live only in
 env; security headers + `next/image` allowlist are in place; CI runs a dependency
-audit. Deferred items (admin, analytics) carry their controls **as a
-precondition of being built**, per `AGENTS.md`.
+audit. Additive items (the admin now being built; analytics still deferred) carry
+their controls **as a precondition of being built**, per `AGENTS.md`.

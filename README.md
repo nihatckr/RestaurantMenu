@@ -36,10 +36,12 @@ npm run db:seed                        # load seed content (idempotent)
 npm run dev                            # http://localhost:3000
 ```
 
-Content is managed via seed data — there is no admin UI. Single-source data files:
-prices in `prisma/data/prices.ts`, all product text (tr/en/ru titles + optional
-descriptions) in `prisma/data/translations.ts`; the rest of the seed is
-`prisma/seed.ts`. After editing: `npm run db:seed` then `rm -rf .next` (to bust the
+Content is **currently** managed via seed data — there is no admin UI yet. (An
+owner self-service **admin is planned** — Path B, `docs/ADMIN_PLAN.md` — after which
+the DB becomes the content source.) Single-source data files today: prices in
+`prisma/data/prices.ts`, all product text (tr/en/ru titles + optional descriptions)
+in `prisma/data/translations.ts`; the rest of the seed is `prisma/seed.ts`. After
+editing: `npm run db:seed` then `rm -rf .next` (to bust the
 `use cache` layer).
 
 ## Scripts

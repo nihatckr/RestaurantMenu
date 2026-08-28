@@ -27,9 +27,13 @@ these are the steps to run; an agent cannot perform account/DNS actions.
 4. **Deploy.** Vercel runs the `vercel-build` script automatically:
    `prisma generate && prisma migrate deploy && prisma db seed (tsx) && next build`.
    So **migrations + seed run on every deploy** — the seed is idempotent and is the
-   single content source (no admin, `PRODUCT.md` A3). Updating content =
+   single content source (no admin **yet** — see the Path B note below). Updating content =
    edit the repo (`prisma/data/prices.ts`, `prisma/data/translations.ts`,
    `prisma/seed.ts`) + redeploy.
+   > **Changing with Path B (admin):** once the admin ships, the DB becomes the
+   > content source — `vercel-build` drops to **migrate-only** (no `db seed`, or it
+   > runs only on an empty DB) so deploys never overwrite owner edits, and content is
+   > managed in the admin. See `ADMIN_PLAN.md` §1.
 5. **Verify:** `/` (→ redirects to `/tr`), `/tr` (venue chooser), `/tr/terrace`,
    `/en/terrace`, `/ru/terrace`, a category page, `/api/health` → `{status:"ok"}`,
    `/robots.txt`, `/sitemap.xml`, and the security headers (CSP, HSTS, nosniff).

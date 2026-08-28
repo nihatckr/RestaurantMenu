@@ -19,8 +19,8 @@
 The plan below is the original ordered breakdown (kept for reference). Order is
 adjusted to the audit: the legacy proved a **shared catalog + per-venue
 visibility/order** model and **data-driven venues**, so those constraints are
-front-loaded (schema, seed, dynamic venue route) and admin/auth is deferred and
-gated on a real decision.
+front-loaded (schema, seed, dynamic venue route). Admin/auth was originally deferred
+and gated on a decision — that gate is now **GO** (Path B, 2026-08-28; T11 below).
 
 > **Note (2026-08-28):** the per-task text below predates the i18n rework. Two
 > things changed since: routes are now locale-prefixed (`/[locale]/[venueSlug]/…`,
@@ -214,35 +214,31 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **Acceptance:** documented parity check passes; deviations are intentional and
   recorded.
 
-### T11 — Admin need assessment — ✅ DECIDED: NO ADMIN (2026-08-27)
-- **Decision (user):** Admin is **not needed**. Content is managed via **seed
-  data** (`prisma/seed.ts`). **T12 (Auth), T13 (Product management), T14 (Menu
-  assignment) are deferred / out of MVP.** Revisit only if ongoing self-service
-  editing becomes a real need. The seed is now the canonical content source
-  (12 categories, 38 real-named products across both venues; prices placeholder
-  pending U5).
-- **Objective:** Decide whether an admin/authoring UI is in scope now, or seed
-  data suffices for launch (A3).
-- **Scope:** short written decision; if "no", stop here for content management.
-- **Dependencies:** T10.
-- **Acceptance:** explicit go/no-go recorded; downstream tasks T12–T14 only
-  proceed if "go".
+### T11 — Admin need assessment — DECIDED no-admin (2026-08-27) → ✅ REVERSED: GO (2026-08-28)
+- **Reversal (user, 2026-08-28):** the owner **will** self-update the menu, so the
+  admin **is being built** (Path B). This flips the original no-admin call: **T12–T14
+  are now IN scope**, and the content source moves seed → DB. The full design lives
+  in **`ADMIN_PLAN.md`** (surface, auth, CRUD, data safety, security §4b); this plan's
+  T12–T14 below are the high-level tasks.
+- **Original decision (2026-08-27, superseded):** admin not needed; content via seed
+  (`prisma/seed.ts`). Kept for the record.
+- **Acceptance:** go/no-go recorded → **GO**; T12–T14 proceed per `ADMIN_PLAN.md`.
 
-### T12 — Auth (only if T11 = go)
+### T12 — Auth (T11 = GO)
 - **Objective:** Admin-only authentication via Auth.js (ARCHITECTURE).
 - **Scope:** admin login; no guest auth; protect admin routes only.
 - **Dependencies:** T11 = go.
 - **Acceptance:** admin routes require auth; public menu unaffected; secrets via
   env.
 
-### T13 — Product management (only if T11 = go)
+### T13 — Product management (T11 = GO)
 - **Objective:** CRUD for Business-level Products via Server Actions.
 - **Scope:** create/edit/delete Products (venue-independent fields only).
 - **Dependencies:** T12.
 - **Acceptance:** Product edits reflect across venues; write path is Server
   Action → data-access → Prisma; AGENTS rule 12 upheld.
 
-### T14 — Menu assignment (only if T11 = go)
+### T14 — Menu assignment (T11 = GO)
 - **Objective:** Manage MenuItems: assign Products to a venue's menu/category,
   set price, availability, order.
 - **Scope:** per-venue MenuItem management; the concrete UI for PR4/PR8.
@@ -307,6 +303,7 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **`SECURITY.md`** → all stages (see its "Mapping to TASKS.md").
 
 **Blocked-until-answered:** T2 needs A1/A4/A5 **and the i18n model (`I18N.md`)**;
-T4 needs U5 **and the venue count U11**; T8 needs U4; T11 is the A3 gate; launch
+T4 needs U5 **and the venue count U11**; T8 needs U4; T11 (the A3 gate) is now
+**GO** → T12–T14 unblocked (Path B); launch
 (T16) needs the alcohol/allergen legal check **U12**. See the "critical
 questions" in the handoff summary.

@@ -71,9 +71,9 @@ proceeding.
     leak-free (no raw errors, no `dangerouslySetInnerHTML`, `next/image` host
     allowlist). Every mutation is authenticated + authorized **server-side** and
     schema-validated; no mass assignment; no raw/unsafe SQL. Secrets only via
-    env — never committed, never in the client bundle. Deferred features (admin,
-    auth, analytics/trackers) may only be built **together with** their
-    `docs/SECURITY.md` controls, not before.
+    env — never committed, never in the client bundle. Not-yet-built features (the
+    admin/auth now underway — Path B, analytics/trackers still later) may only be
+    built **together with** their `docs/SECURITY.md` controls, not before.
 
 ## Working style
 - Keep Prisma access behind the thin data-access layer (`docs/ARCHITECTURE.md`); no

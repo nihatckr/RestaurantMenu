@@ -89,8 +89,8 @@ The seed is data-driven off `Business.locales` (no hard-coded language list); no
   Prerendering / `cacheComponents`** — a static shell served instantly, with any
   genuinely per-request bit isolated in its **own `<Suspense>` leaf** so one
   dynamic fetch doesn't make the whole page dynamic. Cache catalog reads with
-  `use cache` + tag-based **`revalidateTag`/`revalidatePath`** so deferred admin
-  edits refresh public pages without a redeploy. (Plain `export const revalidate`
+  `use cache` + tag-based **`revalidateTag`/`revalidatePath`** so admin
+  edits (Path B) refresh public pages without a redeploy. (Plain `export const revalidate`
   ISR is an acceptable fallback.) No client data-cache library (no SWR/TanStack)
   — Server Components + caching/revalidation only.
 - **Images:** `next/image` with **`remotePatterns`** host allowlist (the older

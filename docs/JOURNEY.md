@@ -71,8 +71,8 @@ Key behaviors, all **data-driven**:
   measure-count decide the layout (see §4), never a hard-coded category string.
 
 **Decisions taken here:** `U11` = two venues (Terrace + Garden). `T11` = **no admin**
-— content is managed via seed data in the repo (auth/admin CRUD are out of MVP and,
-per `SECURITY.md`, may only be built together with their controls).
+— content managed via seed data in the repo. *(Reversed 2026-08-28: the owner will
+self-update, so the admin is now being built — Path B, see §9 and `ADMIN_PLAN.md`.)*
 
 ---
 
@@ -232,5 +232,26 @@ unit+integration tests, Playwright e2e, CI.
   accounts.
 - **Alcohol/allergen legal copy** where applicable (`U12` / `COMPLIANCE.md`).
 
-For the task-by-task record see `TASKS.md`; for HTML/CSS-inherent differences from
-the legacy (intentional divergences) see `PARITY.md`.
+## 9. Deciding to build the admin (Path B, 2026-08-28)
+
+A design review of the architecture surfaced one real tension: we'd built a
+relational DB **and** decided **no admin** (T11) — paying the DB's cost while the
+owner still couldn't self-update, and the seed being the content source meant every
+change was a code edit + redeploy. Presented two coherent paths: **A** (drop the DB,
+render statically from the data files) or **B** (keep the DB, build the admin). The
+owner confirmed they'll maintain the menu themselves → **Path B**.
+
+Consequences (full design in `ADMIN_PLAN.md`): the **content source moves seed → DB**
+(seed demotes to a dev-only demo importer; deploys go migrate-only so they never wipe
+owner edits); the admin is an **inline edit mode** on the live pages (guests still get
+the static page) with **modal** create/edit forms; stack is Lucide + zod +
+react-hook-form + native `<dialog>` + a small `cn()` (no UI kit, no Redux/Zustand, no
+React Query — Server Actions + Next cache cover it); auth is magic-link; images/logos/
+favicon upload to blob storage (optimized via sharp), not `public/`. Crucially, the
+seed→DB shift adds a new **must-have — data safety** (verified backups, soft-delete/
+trash, JSON export, login break-glass) since the seed is no longer the safety net, and
+a consolidated **security hardening** checklist (`ADMIN_PLAN.md` §4b).
+
+For the task-by-task record see `TASKS.md`; the full admin design is `ADMIN_PLAN.md`;
+every request→decision→approval is logged in `DECISIONS.md`; HTML/CSS-inherent
+differences from the legacy are in `PARITY.md`.
