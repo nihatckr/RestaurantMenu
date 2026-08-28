@@ -1,6 +1,8 @@
 import "server-only";
+import { cacheTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, localized, pickLocalized } from "@/lib/i18n";
+import { MENU_TAG, venueTag } from "@/lib/cache";
 
 // Thin, typed data-access layer (ARCHITECTURE.md). Components/pages call these
 // functions; they never touch `prisma.*` directly. Reads are venue-scoped by
@@ -22,6 +24,7 @@ export type CategoryLink = {
 /** All venue slugs, ordered — for generateStaticParams. */
 export async function listVenueSlugs(): Promise<string[]> {
   "use cache";
+  cacheTag(MENU_TAG);
   const venues = await prisma.venue.findMany({
     select: { slug: true },
     orderBy: { sortOrder: "asc" },
@@ -32,6 +35,7 @@ export async function listVenueSlugs(): Promise<string[]> {
 /** Venues for the root chooser, ordered. */
 export async function listVenues(): Promise<VenueSummary[]> {
   "use cache";
+  cacheTag(MENU_TAG);
   const venues = await prisma.venue.findMany({
     select: { slug: true, name: true, wordmark: true },
     orderBy: { sortOrder: "asc" },
@@ -42,6 +46,7 @@ export async function listVenues(): Promise<VenueSummary[]> {
 /** A single venue by slug, or null if it does not exist. */
 export async function getVenueBySlug(slug: string): Promise<VenueSummary | null> {
   "use cache";
+  cacheTag(MENU_TAG, venueTag(slug));
   return prisma.venue.findUnique({
     where: { slug },
     select: { slug: true, name: true, wordmark: true },
@@ -54,6 +59,7 @@ export async function listVenueCategories(
   locale: string = DEFAULT_LOCALE,
 ): Promise<CategoryLink[]> {
   "use cache";
+  cacheTag(MENU_TAG, venueTag(venueSlug));
   const venue = await prisma.venue.findUnique({
     where: { slug: venueSlug },
     select: {
@@ -138,6 +144,7 @@ export async function getVenueMenu(
   locale: string = DEFAULT_LOCALE,
 ): Promise<MenuCategoryView[] | null> {
   "use cache";
+  cacheTag(MENU_TAG, venueTag(venueSlug));
   const venue = await prisma.venue.findUnique({
     where: { slug: venueSlug },
     select: {

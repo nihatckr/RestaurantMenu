@@ -267,11 +267,12 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
 - [x] Demote content seed to `npm run seed:demo` (dev-only). *Done:* script added.
 - [x] `vercel-build` → **migrate-only** (dropped `db seed`); DEPLOY.md updated.
 
-**Phase B — Cache tagging**
-- [ ] Add `cacheTag("menu","venue:<slug>")` to the data-access reads. *Done when:*
-  reads carry tags.
-- [ ] `revalidateMenu(venueSlug?)` helper over `revalidateTag`. *Done when:* calling
-  it refreshes the affected public pages.
+**Phase B — Cache tagging** — ✅ DONE
+- [x] Added `cacheTag(MENU_TAG, venueTag(slug))` to all `use cache` reads in
+  `src/lib/data/menu.ts` (tags in one place — `src/lib/cache.ts`).
+- [x] `revalidateMenu(venueSlug?)` helper (`revalidateTag(tag, "max")`;
+  `updateTag` noted for read-your-own-writes from Server Actions). *Verified:*
+  typecheck/lint/17 tests/build green.
 
 **Phase C — Data safety** *(before any write feature goes live)*
 - [ ] Verify managed-Postgres **backups/PITR** enabled + test one restore (OPS).
