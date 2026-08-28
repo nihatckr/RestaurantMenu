@@ -13,10 +13,13 @@
 > CRUD, per-venue visibility + reorder, measure prices, image/logo/favicon uploads
 > (Vercel Blob + sharp), a tabbed Settings page, Excel backup export/import,
 > trash+restore+**empty**, and an audit log + `noindex` on admin surfaces. **Settings
-> extras:** password change, per-venue QR codes, business name + footer note, full
-> **venue CRUD** (add/rename/wordmark/reorder/delete), default-password warning.
-> The owner self-updates the menu; source of truth is DB←seed. 28 Playwright e2e
-> cover the human flows. See **`ADMIN_PLAN.md`** / **`DECISIONS.md`** (B.1–B.33) and
+> extras:** password change, per-venue QR codes, business info (name + footer note +
+> hours/phone/Instagram/map), full **venue CRUD** (add/rename/wordmark/reorder/delete),
+> default-password warning. **Menu enrichments (group A):** per-language description +
+> calories + diet/allergen badges on the card. **Analytics (group B):** PII-free
+> menu-open counts (`PageView` + `/api/track` beacon) in Settings → Analitik.
+> The owner self-updates the menu; source of truth is DB←seed. 37 Playwright e2e
+> cover the human flows. See **`ADMIN_PLAN.md`** / **`DECISIONS.md`** (B.1–B.37) and
 > **`YAYIN_ONCESI.md`** (owner pre-launch checklist).
 > **Pending owner:** real prices (`prices.ts`) + EN/RU translations & descriptions
 > (`translations.ts`) — `U5` / `DEMO_MENU.md`, and executing the deploy

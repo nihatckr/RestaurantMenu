@@ -55,6 +55,13 @@ Server Action (or Route Handler)
 ```
 - Mutations go through Server Actions or Route Handlers, then the same
   data-access layer. No Prisma calls scattered across the component tree.
+- **Analytics beacon exception (keeps the public page static):** the venue landing
+  must stay statically prerenderable, so it cannot write a page-view on the server.
+  Instead a tiny `"use client"` component (`TrackView`) fires a fire-and-forget
+  `POST /api/track` on mount; the Route Handler validates the payload (known venue
+  slug + supported locale) and inserts a `PageView` via the data-access layer,
+  always returning `204`. No PII is sent or stored (no IP, no user agent, no
+  cookies). Read side: `getAnalytics()` aggregates counts for the Settings panel.
 
 ## Data-access layer — the middle ground
 - Keep Prisma calls behind a **thin set of typed functions** (e.g.
@@ -162,6 +169,10 @@ Mirror `PRODUCT.md`: `Business`, `Venue`, `Menu`, `Category`, `Product`,
   off free-text display names (legacy's core mistake).
 - Sort order is explicit and can differ per venue.
 - Preserve drink measure/pricing as **structured fields**, not free text.
+- **Operational (not part of the shared catalog):** `AdminUser` (single owner),
+  `AuditLog` (admin action trail), and `PageView` (PII-free menu-open counts for
+  analytics — `venueSlug`, `locale`, `createdAt` only). These sit beside the
+  catalog model, never on `Product`/`MenuItem`.
 
 ## Rendering / presentation
 - Port legacy **design tokens** (type scale, brand greys, the `MonoTRegular`

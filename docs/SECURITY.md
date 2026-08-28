@@ -108,7 +108,16 @@
 - **Data minimization** → collect no guest PII; do not log `clientIp` or set
   tracking cookies without a documented lawful basis + consent (KVKK/GDPR; TR
   business, EU-language visitors).
-- If analytics are later added → consent banner + CSP entries + privacy notice.
+- **First-party analytics (SHIPPED 2026-08-28)** → menu-open counts via a
+  first-party beacon (`POST /api/track` → `PageView`). By design it stores **only**
+  `venueSlug`, `locale`, `createdAt` — **no IP, user agent, cookies, device or
+  guest identifier**, so it is not personal data and needs no consent banner or
+  third-party CSP entry. The endpoint **validates** the payload (known venue slug +
+  supported locale), ignores anything else, and always returns `204` (no data
+  leaked back). Aggregation (`getAnalytics`) is admin-only, behind `requireAdmin`.
+- If a *third-party* analytics/tracker is ever added → consent banner + CSP entries
+  + privacy notice (still required; the first-party beacon above does not trigger
+  this because it collects no PII).
 
 ---
 

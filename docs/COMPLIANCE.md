@@ -23,6 +23,10 @@ resolves `LEGACY_AUDIT.md` **U12**.
   text.
 - **Clear, legible names & prices**, easily visible (responsive, adequate
   contrast/size — `DESIGN.md`).
+- **Privacy-preserving analytics.** The only usage data collected is aggregate
+  menu-open counts (`venueSlug`, `locale`, `createdAt`) — no IP, cookies, device or
+  guest identifier, so it is not personal data under KVKK/GDPR and needs no consent
+  banner. See `SECURITY.md` §5.
 
 ## Operational — the business must ensure (not codeable)
 - **QR menu is supplementary.** A physical/printed menu must be available on

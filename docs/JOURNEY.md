@@ -258,7 +258,7 @@ differences from the legacy are in `PARITY.md`.
 
 ## 10. Admin shipped + finalized (2026-08-28)
 
-The admin was **built and tested** (typecheck · lint · Vitest · 33 Playwright e2e).
+The admin was **built and tested** (typecheck · lint · Vitest · 37 Playwright e2e).
 What landed:
 
 - **Auth:** `iron-session` + bcrypt, single owner, **username + password**
