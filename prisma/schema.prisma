@@ -151,6 +151,11 @@ model MenuCategory {
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   sortOrder  Int      @default(0)
   visible    Boolean  @default(true) // e.g. Breakfast hidden on Terrace
+  // Optional daily visibility window in Europe/Istanbul, "HH:MM" 24h (e.g. show
+  // Breakfast 06:00–11:00). Both null = always visible. from < to = same-day;
+  // from > to = overnight (wraps midnight). Gates the public menu navigation only.
+  visibleFrom String?
+  visibleTo   String?
 
   @@unique([menuId, categoryId])
 }

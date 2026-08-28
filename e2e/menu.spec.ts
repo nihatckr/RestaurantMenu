@@ -191,6 +191,65 @@ test("admin creates and deletes a category inline", async ({ page }) => {
   await expect(page.getByRole("link", { name })).toHaveCount(0);
 });
 
+test("a scheduled category is hidden from guests outside its time window", async ({
+  page,
+}) => {
+  const name = `E2EZaman ${Date.now()}`;
+
+  // Build a window that is CLOSED right now: a 10-min slice starting 1h ahead
+  // (Istanbul). "Now" is 60 min before the start, so it can never fall inside.
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/Istanbul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date());
+  const hh = Number(parts.find((p) => p.type === "hour")!.value);
+  const mm = Number(parts.find((p) => p.type === "minute")!.value);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const hhmm = (m: number) => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+  const start = (hh * 60 + mm + 60) % 1440;
+  const from = hhmm(start);
+  const to = hhmm((start + 10) % 1440);
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/terrace");
+
+  // Add a category with the (currently-closed) visibility window.
+  await page.getByRole("button", { name: "Kategori ekle" }).click();
+  await page.getByLabel("Ad (Türkçe)").fill(name);
+  await page.getByLabel("Başlangıç saati").fill(from);
+  await page.getByLabel("Bitiş saati").fill(to);
+  await page.getByRole("button", { name: "Kaydet" }).click();
+
+  // Admin always sees it (with the schedule badge visible).
+  await expect(page.getByRole("link", { name })).toBeVisible();
+
+  try {
+    // A guest (no session) does NOT see it — it's outside its window right now.
+    await page.context().clearCookies();
+    await page.goto("/tr/terrace");
+    await expect(page.getByRole("link", { name })).toHaveCount(0);
+    // Sanity: an always-on category is still present for the guest.
+    await expect(
+      page.getByRole("navigation", { name: "Menu categories" }).getByRole("link").first(),
+    ).toBeVisible();
+  } finally {
+    // Cleanup: log back in and delete the test category.
+    await page.goto("/tr/login");
+    await page.getByLabel("Şifre").fill("1234");
+    await page.getByRole("button", { name: "Giriş" }).click();
+    await expect(page).toHaveURL(/\/tr$/);
+    await page.goto("/tr/terrace");
+    await page.getByRole("button", { name: `${name} sil` }).click();
+    await page.getByRole("button", { name: "Sil", exact: true }).click();
+    await expect(page.getByRole("link", { name })).toHaveCount(0);
+  }
+});
+
 test("admin reorders categories with the up/down arrows", async ({ page }) => {
   await page.goto("/tr/login");
   await page.getByLabel("Şifre").fill("1234");

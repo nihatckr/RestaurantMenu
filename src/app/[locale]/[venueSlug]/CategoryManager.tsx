@@ -3,13 +3,14 @@
 import { useActionState, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, Clock } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { ReorderButtons } from "@/components/ui/ReorderButtons";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/form";
 import type { CategoryAdminRow } from "@/lib/data/admin";
+import { formatWindow } from "@/lib/schedule";
 import {
   createCategoryAction,
   updateCategoryAction,
@@ -62,6 +63,16 @@ export function CategoryManager({
             >
               {displayName(row)}
             </Link>
+            {/* Scheduled-visibility badge — only shown when a window is set. */}
+            {formatWindow(row.visibleFrom, row.visibleTo) && (
+              <span
+                className="flex items-center gap-1 whitespace-nowrap font-body text-[10px] text-muted"
+                title="Bu saat aralığında menüde görünür"
+              >
+                <Clock size={11} aria-hidden />
+                {formatWindow(row.visibleFrom, row.visibleTo)}
+              </span>
+            )}
             {/* Reorder within the venue menu (up/down; edges disabled). */}
             <ReorderButtons
               label={row.nameTr}
@@ -205,6 +216,29 @@ function CategoryFormModal({
             max={6}
             defaultValue={initial?.columns ?? ""}
           />
+        </Field>
+        <Field
+          label="Görünürlük saati (opsiyonel)"
+          hint="Kategori yalnızca bu saat aralığında menüde görünür (örn. Kahvaltı 06:00–11:00). İkisini de boş bırakırsan her zaman görünür. Gece yarısını aşan aralık için başlangıç bitişten büyük olabilir (örn. 22:00–02:00)."
+          error={state.fieldErrors?.visibleTo}
+        >
+          <div className="flex items-center gap-2">
+            <Input
+              name="visibleFrom"
+              type="time"
+              aria-label="Başlangıç saati"
+              defaultValue={initial?.visibleFrom ?? ""}
+              className="flex-1"
+            />
+            <span className="font-body text-xs text-muted">–</span>
+            <Input
+              name="visibleTo"
+              type="time"
+              aria-label="Bitiş saati"
+              defaultValue={initial?.visibleTo ?? ""}
+              className="flex-1"
+            />
+          </div>
         </Field>
         {state.error && (
           <p className="font-body text-xs text-mono-red">{state.error}</p>

@@ -9,6 +9,7 @@ import {
   updateCategory,
   softDeleteCategory,
   setCategoryVisibility,
+  setCategorySchedule,
   moveCategory,
   restoreCategory,
   type MoveDirection,
@@ -27,6 +28,8 @@ function parse(formData: FormData) {
     nameEn: String(formData.get("nameEn") ?? ""),
     nameRu: String(formData.get("nameRu") ?? ""),
     columns: columnsRaw ? Number(columnsRaw) : undefined,
+    visibleFrom: String(formData.get("visibleFrom") ?? ""),
+    visibleTo: String(formData.get("visibleTo") ?? ""),
   });
 }
 
@@ -63,6 +66,7 @@ export async function updateCategoryAction(
     return { error: "Geçersiz giriş", fieldErrors: zodFieldErrors(parsed.error.issues) };
   }
   await updateCategory(id, parsed.data);
+  await setCategorySchedule(venueSlug, id, parsed.data.visibleFrom, parsed.data.visibleTo);
   await audit("update", "category", parsed.data.nameTr);
   revalidateMenu(venueSlug);
   return { ok: true };

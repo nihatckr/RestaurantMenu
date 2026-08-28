@@ -17,6 +17,8 @@ export type CategoryAdminRow = {
   slug: string;
   columns: number | null;
   visible: boolean;
+  visibleFrom: string | null;
+  visibleTo: string | null;
   nameTr: string;
   nameEn: string;
   nameRu: string;
@@ -36,6 +38,8 @@ export async function getCategoriesAdmin(
             orderBy: { sortOrder: "asc" },
             select: {
               visible: true,
+              visibleFrom: true,
+              visibleTo: true,
               category: {
                 select: {
                   id: true,
@@ -57,6 +61,8 @@ export async function getCategoriesAdmin(
       slug: mc.category.slug,
       columns: mc.category.columns,
       visible: mc.visible,
+      visibleFrom: mc.visibleFrom,
+      visibleTo: mc.visibleTo,
       nameTr: t.tr ?? "",
       nameEn: t.en ?? "",
       nameRu: t.ru ?? "",
@@ -105,6 +111,28 @@ export async function setCategoryVisibility(
   });
 }
 
+/** Set (or clear) a category's daily visibility window on this venue's menu.
+ *  Empty/blank bounds clear the window (category is then always visible). */
+export async function setCategorySchedule(
+  venueSlug: string,
+  categoryId: string,
+  visibleFrom: string | null | undefined,
+  visibleTo: string | null | undefined,
+) {
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: { menu: { select: { id: true } } },
+  });
+  if (!venue?.menu) throw new Error("Venue menu not found");
+  await prisma.menuCategory.updateMany({
+    where: { menuId: venue.menu.id, categoryId },
+    data: {
+      visibleFrom: visibleFrom?.trim() || null,
+      visibleTo: visibleTo?.trim() || null,
+    },
+  });
+}
+
 function translationRows(input: CategoryInput) {
   const rows = [{ locale: "tr", name: input.nameTr.trim() }];
   if (input.nameEn?.trim()) rows.push({ locale: "en", name: input.nameEn.trim() });
@@ -146,6 +174,8 @@ export async function createCategory(venueSlug: string, input: CategoryInput) {
           menuId: venue.menu.id,
           sortOrder: (max._max.sortOrder ?? 0) + 1,
           visible: true,
+          visibleFrom: input.visibleFrom?.trim() || null,
+          visibleTo: input.visibleTo?.trim() || null,
         },
       },
     },

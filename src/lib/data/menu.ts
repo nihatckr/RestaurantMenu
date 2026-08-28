@@ -21,6 +21,9 @@ export type VenueSummary = { slug: string; name: string; wordmark: string | null
 export type CategoryLink = {
   slug: string;
   name: string;
+  // Optional daily visibility window ("HH:MM", Europe/Istanbul); null = always on.
+  visibleFrom: string | null;
+  visibleTo: string | null;
 };
 
 /** All venue slugs, ordered — for generateStaticParams. */
@@ -72,6 +75,8 @@ export async function listVenueCategories(
             where: { visible: true, category: { deletedAt: null } },
             orderBy: { sortOrder: "asc" },
             select: {
+              visibleFrom: true,
+              visibleTo: true,
               category: {
                 select: {
                   slug: true,
@@ -89,6 +94,8 @@ export async function listVenueCategories(
   return cats.map((mc) => ({
     slug: mc.category.slug,
     name: localized(mc.category.translations, (r) => r.name, locale) || mc.category.slug,
+    visibleFrom: mc.visibleFrom,
+    visibleTo: mc.visibleTo,
   }));
 }
 

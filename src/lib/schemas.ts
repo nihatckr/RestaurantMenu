@@ -17,13 +17,28 @@ export function zodFieldErrors(
   return out;
 }
 
-export const categorySchema = z.object({
-  nameTr: z.string().trim().min(1, "Türkçe ad zorunlu").max(80),
-  nameEn: z.string().trim().max(80).optional().or(z.literal("")),
-  nameRu: z.string().trim().max(80).optional().or(z.literal("")),
-  // Photo-grid column override (desserts/breakfast = 2); empty = default.
-  columns: z.coerce.number().int().min(1).max(6).optional(),
-});
+const hhmm = z
+  .string()
+  .trim()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Saat SS:DD biçiminde olmalı (örn. 06:00)")
+  .optional()
+  .or(z.literal(""));
+
+export const categorySchema = z
+  .object({
+    nameTr: z.string().trim().min(1, "Türkçe ad zorunlu").max(80),
+    nameEn: z.string().trim().max(80).optional().or(z.literal("")),
+    nameRu: z.string().trim().max(80).optional().or(z.literal("")),
+    // Photo-grid column override (desserts/breakfast = 2); empty = default.
+    columns: z.coerce.number().int().min(1).max(6).optional(),
+    // Optional daily visibility window ("HH:MM", Europe/Istanbul). Both-or-neither.
+    visibleFrom: hhmm,
+    visibleTo: hhmm,
+  })
+  .refine((v) => Boolean(v.visibleFrom) === Boolean(v.visibleTo), {
+    message: "Başlangıç ve bitiş saatini birlikte girin (ya da ikisini de boş bırakın)",
+    path: ["visibleTo"],
+  });
 
 export type CategoryInput = z.infer<typeof categorySchema>;
 

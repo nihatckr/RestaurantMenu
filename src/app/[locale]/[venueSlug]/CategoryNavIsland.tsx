@@ -1,6 +1,7 @@
 import { isAdmin } from "@/lib/auth";
 import { getCategoriesAdmin } from "@/lib/data/admin";
 import { listVenueCategories } from "@/lib/data/menu";
+import { isOpenAt, nowHHMMInIstanbul } from "@/lib/schedule";
 import { CategoryNav } from "@/components/CategoryNav";
 import { CategoryManager } from "./CategoryManager";
 
@@ -19,6 +20,11 @@ export async function CategoryNavIsland({
     const rows = await getCategoriesAdmin(venueSlug);
     return <CategoryManager locale={locale} venueSlug={venueSlug} categories={rows} />;
   }
+  // Guest branch is request-time (the `isAdmin()` above reads cookies), so reading
+  // the current wall-clock is safe here. Scheduled categories (e.g. Breakfast
+  // 06:00–11:00) drop out of the navigation outside their window.
   const categories = await listVenueCategories(venueSlug, locale);
-  return <CategoryNav locale={locale} venueSlug={venueSlug} categories={categories} />;
+  const now = nowHHMMInIstanbul();
+  const open = categories.filter((c) => isOpenAt(c.visibleFrom, c.visibleTo, now));
+  return <CategoryNav locale={locale} venueSlug={venueSlug} categories={open} />;
 }
