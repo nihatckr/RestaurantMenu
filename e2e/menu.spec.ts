@@ -66,6 +66,14 @@ test("switching to Russian localizes categories and falls back to Turkish for un
   await expect(page.getByText("Kalamar", { exact: true })).toBeVisible();
 });
 
+test("tapping the brand logo returns to the venue landing", async ({ page }) => {
+  await page.goto("/tr/terrace/desserts");
+  // The top MO/NO mark links "home" (the venue landing).
+  await page.getByRole("link", { name: "Mono", exact: true }).click();
+  await expect(page).toHaveURL(/\/tr\/terrace$/);
+  await expect(page.getByRole("link", { name: /Başlangıçlar/ })).toBeVisible();
+});
+
 test("desserts render two-up (legacy per-category grid)", async ({ page }) => {
   await page.goto("/tr/terrace/desserts");
   const section = page.locator("section", {

@@ -104,7 +104,11 @@ async function CategoryView({
           </Link>
           <LanguageSwitcher current={locale as Locale} />
         </div>
-        <div className="relative h-16 w-14">
+        <Link
+          href={`/${locale}/${venueSlug}`}
+          aria-label={BRAND.name}
+          className="relative block h-16 w-14"
+        >
           <Image
             src={BRAND.mark}
             alt={BRAND.name}
@@ -112,23 +116,28 @@ async function CategoryView({
             className="object-contain"
             priority
           />
-        </div>
+        </Link>
       </div>
 
       {ordered.map((category) => (
         <CategorySection key={category.slug} category={category} />
       ))}
 
-      {/* Brand footer (Figma: MONO TERRACE wordmark centered at the bottom). */}
+      {/* Brand footer (Figma: MONO TERRACE wordmark centered at the bottom).
+          Links back to the venue landing (the menu "home"). */}
       <footer className="flex justify-center py-8">
-        <div className="relative h-10 w-36">
+        <Link
+          href={`/${locale}/${venueSlug}`}
+          aria-label={venue.name}
+          className="relative block h-10 w-36"
+        >
           <Image
             src={venue.wordmark || BRAND.mark}
             alt={venue.name}
             fill
             className="object-contain"
           />
-        </div>
+        </Link>
       </footer>
     </div>
   );

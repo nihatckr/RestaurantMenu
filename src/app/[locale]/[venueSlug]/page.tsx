@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { VenueHeader } from "@/components/VenueHeader";
 import { CategoryNav } from "@/components/CategoryNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -95,18 +96,19 @@ async function VenueLanding({
       <div className="flex w-full max-w-sm justify-end">
         <LanguageSwitcher current={locale as Locale} />
       </div>
-      <VenueHeader name={venue.name} />
+      <VenueHeader name={venue.name} homeHref={`/${locale}`} />
       <CategoryNav locale={locale} venueSlug={venueSlug} categories={categories} />
-      {/* Figma: MONO TERRACE wordmark anchored at the bottom of the landing. */}
+      {/* Figma: MONO TERRACE wordmark anchored at the bottom of the landing.
+          Links to the venue chooser (the locale root "home"). */}
       <footer className="mt-4 flex justify-center pb-2">
-        <div className="relative h-10 w-36">
+        <Link href={`/${locale}`} aria-label={venue.name} className="relative block h-10 w-36">
           <Image
             src={venue.wordmark || BRAND.mark}
             alt={venue.name}
             fill
             className="object-contain"
           />
-        </div>
+        </Link>
       </footer>
     </>
   );
