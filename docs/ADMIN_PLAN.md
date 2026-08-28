@@ -45,8 +45,18 @@ for simplicity/ease over a dashboard.
 - **Create & Edit open a modal form** (accessible dialog: focus-trap, ESC/backdrop
   close, `aria-modal`); **Delete asks to confirm** in a small modal. No page
   navigation for routine edits.
-- Structural/rare bits (first-run, venues) use the same modal pattern; there's no
-  sprawling second UI.
+- **Two homes, by nature of the data:** per-item **menu content** (categories,
+  products, prices, translations, visibility/order) is edited **inline**; **global /
+  brand / site settings** (logo, wordmark, **favicon**, venue details) live on a
+  small **Settings page** — they're global and rare, so inline doesn't fit. One
+  compact page, not a sprawling dashboard.
+- **Login / logout:**
+  - **Login** is a discreet route (e.g. `/login`) — **not linked anywhere public**;
+    the owner bookmarks it. Magic-link flow.
+  - Once logged in, the **sticky header** shows a small account control —
+    **Settings** + **Logout** (a `LogOut` icon) — visible only to the admin, never
+    to guests. Inline edit controls simply appear while logged in (no separate
+    "edit mode" toggle in v1).
 
 ## 2b. Caching — static public, invalidated on write
 
@@ -177,12 +187,23 @@ sortable/filterable tables; revisit only if a large management grid ever appears
 
 ## 6. Images (T14)
 
-- Product photos move from **committed `public/products/*`** to **object storage**
-  (Vercel Blob or S3-compatible) with upload from the admin.
-- `Product.image` stores the URL; add the storage host to `next.config` image
-  `remotePatterns` (currently empty — SECURITY.md §1 allowlist).
-- Validate type/size on upload; no arbitrary remote fetch. Optional: **downscale
-  server-side with `sharp`** (already used for the PWA icons) — no client library.
+- **Not the `public/` folder.** `public/` is **build-time and read-only in
+  production** (Vercel/serverless has no writable app FS) — runtime uploads can't go
+  there. Uploads go to **object storage (Vercel Blob / S3-compatible)**; the current
+  committed `public/products/*` are just the initial demo assets.
+- `Product.image` stores the returned **URL**; add the storage host to `next.config`
+  image `remotePatterns` (currently empty — SECURITY.md §1 allowlist).
+- **Optimized on upload:** re-encode + resize server-side with **`sharp`** (to WebP,
+  sane max dimensions, strip metadata) *before* storing — then `next/image` optimizes
+  again on delivery. Validate type/size; no arbitrary remote fetch. No client library.
+- **Organized by key, not folders:** store under tidy keys (e.g.
+  `products/<category>/<slug>-<hash>.webp`, `logos/<venue>/…`) for housekeeping —
+  purely cosmetic. The **DB URL is the source of truth**; a product changing category
+  does **not** require moving the file (URL is stable), so paths carry no logic.
+- **Favicon + PWA icons (included):** generated from the owner's uploaded brand logo
+  with `sharp` (favicon + 192/512/maskable/apple-touch — same pipeline as today's
+  icons), served via dynamic metadata/icon routes + `manifest.ts` reading the stored
+  asset (they stop being static files once owner-managed).
 - **UX — one `ImageField` component, no upload library.** Must-have: **tap/click to
   pick** (opens camera/gallery on phones — the owner's likely device) + **live
   preview** + **Replace / Remove**. **Drag-and-drop is an optional desktop
