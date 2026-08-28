@@ -2,6 +2,7 @@ import "server-only";
 import { Prisma, type ProductKind } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { slugify, uniqueSlug } from "@/lib/slug";
+import { deleteImage } from "@/lib/images";
 import type { CategoryInput, ProductInput } from "@/lib/schemas";
 
 export type MoveDirection = "up" | "down";
@@ -209,6 +210,7 @@ export type ProductAdminRow = {
   categorySlug: string;
   kind: ProductKind;
   tag: string;
+  image: string | null;
   price: number | null;
   prices: { label: string; amount: number }[]; // labelled measures (empty = single price)
 };
@@ -245,6 +247,7 @@ export async function getProductsAdmin(
                   id: true,
                   kind: true,
                   tag: true,
+                  image: true,
                   translations: { select: { locale: true, title: true } },
                 },
               },
@@ -264,6 +267,7 @@ export async function getProductsAdmin(
       categorySlug: it.category.slug,
       kind: it.product.kind,
       tag: it.product.tag ?? "",
+      image: it.product.image,
       price: it.price === null ? null : Number(it.price),
       prices: it.prices.map((p) => ({ label: p.label, amount: Number(p.amount) })),
     };
@@ -279,7 +283,11 @@ function titleRows(input: ProductInput) {
 
 /** Create a product + its translations and add it to this venue's menu (in the
  *  chosen category, appended, available) so it appears immediately. */
-export async function createProduct(venueSlug: string, input: ProductInput) {
+export async function createProduct(
+  venueSlug: string,
+  input: ProductInput,
+  image?: string | null,
+) {
   const venue = await prisma.venue.findUnique({
     where: { slug: venueSlug },
     select: { businessId: true, menu: { select: { id: true } } },
@@ -311,6 +319,7 @@ export async function createProduct(venueSlug: string, input: ProductInput) {
       slug,
       kind: input.kind as ProductKind,
       tag: input.tag?.trim() || null,
+      image: image ?? null,
       translations: { create: titleRows(input) },
     },
   });
@@ -336,6 +345,8 @@ export async function updateProduct(
   productId: string,
   venueSlug: string,
   input: ProductInput,
+  // undefined = leave image unchanged; string = new URL; null = remove.
+  image?: string | null,
 ) {
   const venue = await prisma.venue.findUnique({
     where: { slug: venueSlug },
@@ -348,10 +359,27 @@ export async function updateProduct(
   });
   if (!category) throw new Error("Category not found");
 
+  // When the image changes, delete the old blob (best-effort) after the write.
+  let oldImage: string | null = null;
+  if (image !== undefined) {
+    oldImage = (
+      await prisma.product.findUnique({
+        where: { id: productId },
+        select: { image: true },
+      })
+    )?.image ?? null;
+  }
   await prisma.product.update({
     where: { id: productId },
-    data: { kind: input.kind as ProductKind, tag: input.tag?.trim() || null },
+    data: {
+      kind: input.kind as ProductKind,
+      tag: input.tag?.trim() || null,
+      ...(image !== undefined ? { image } : {}),
+    },
   });
+  if (image !== undefined && oldImage && oldImage !== image) {
+    await deleteImage(oldImage);
+  }
   const values: [string, string | undefined][] = [
     ["tr", input.titleTr],
     ["en", input.titleEn],

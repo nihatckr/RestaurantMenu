@@ -14,6 +14,7 @@ import {
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Field, Select } from "@/components/ui/form";
+import { ImageField } from "@/components/ui/ImageField";
 import type { ProductAdminRow } from "@/lib/data/admin";
 import {
   createProductAction,
@@ -273,6 +274,7 @@ function ProductFormModal({
             <option value="DRINK">İçecek</option>
           </Select>
         </Field>
+        <ImageField name="image" initial={initial.image} label="Ürün görseli" />
         <Field label="Tek fiyat (opsiyonel)" error={state.fieldErrors?.price}>
           <Input
             name="price"

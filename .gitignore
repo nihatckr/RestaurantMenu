@@ -47,3 +47,6 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Local dev image uploads (blob fallback; production uses Vercel Blob)
+/public/uploads/

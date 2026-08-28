@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
+import { uploadImage, ImageError } from "@/lib/images";
 import { productSchema } from "@/lib/schemas";
 import {
   createProduct,
@@ -50,6 +51,19 @@ function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
   return out;
 }
 
+// Resolve the image side-effect from the form: a new file → optimize+upload and
+// return its URL; "removeImage" checked → null (clear); otherwise undefined
+// (leave unchanged). Throws ImageError with a Turkish message on bad input.
+async function resolveImage(
+  formData: FormData,
+): Promise<string | null | undefined> {
+  const file = formData.get("image");
+  if (file instanceof File && file.size > 0) {
+    return uploadImage(file, "products");
+  }
+  return formData.get("removeImage") === "on" ? null : undefined;
+}
+
 // Bound with (locale, venueSlug) → (prevState, formData).
 export async function createProductAction(
   locale: string,
@@ -62,7 +76,13 @@ export async function createProductAction(
   if (!parsed.success) {
     return { error: "Geçersiz giriş", fieldErrors: fieldErrors(parsed.error.issues) };
   }
-  await createProduct(venueSlug, parsed.data);
+  let image: string | null | undefined;
+  try {
+    image = await resolveImage(formData);
+  } catch (e) {
+    return { error: e instanceof ImageError ? e.message : "Görsel yüklenemedi" };
+  }
+  await createProduct(venueSlug, parsed.data, image ?? null);
   revalidateMenu(venueSlug);
   return { ok: true };
 }
@@ -80,7 +100,13 @@ export async function updateProductAction(
   if (!parsed.success) {
     return { error: "Geçersiz giriş", fieldErrors: fieldErrors(parsed.error.issues) };
   }
-  await updateProduct(id, venueSlug, parsed.data);
+  let image: string | null | undefined;
+  try {
+    image = await resolveImage(formData);
+  } catch (e) {
+    return { error: e instanceof ImageError ? e.message : "Görsel yüklenemedi" };
+  }
+  await updateProduct(id, venueSlug, parsed.data, image);
   revalidateMenu(venueSlug);
   return { ok: true };
 }

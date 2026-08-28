@@ -13,10 +13,12 @@ const nextConfig: NextConfig = {
   },
 
   // Only optimize images from an explicit host allowlist (SECURITY.md §1).
-  // Add real product-image hosts here once the catalog source is decided
-  // (DATA_SOURCING.md). Empty = no remote images allowed yet.
+  // Admin-uploaded photos live in Vercel Blob; dev/e2e uploads fall back to a
+  // local /public/uploads path (same-origin, no pattern needed).
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
+    ],
   },
 
   // Forward browser console errors to the terminal during dev (agent-friendly).
@@ -38,7 +40,7 @@ const nextConfig: NextConfig = {
       "default-src 'self'",
       `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      "img-src 'self' data: blob: https://*.public.blob.vercel-storage.com",
       "font-src 'self'",
       "object-src 'none'",
       "base-uri 'self'",

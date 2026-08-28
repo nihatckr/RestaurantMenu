@@ -247,6 +247,43 @@ test("admin adds a product with labelled measure prices", async ({ page }) => {
   await expect(page.getByText(title)).toHaveCount(0);
 });
 
+test("admin uploads a product photo", async ({ page }) => {
+  const title = `E2EFoto ${Date.now()}`;
+  // A tiny valid 8×8 PNG so sharp can decode + re-encode it.
+  const png = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAEUlEQVQImWM4EaCBFTEMLQkAaplQAdEjY8UAAAAASUVORK5CYII=",
+    "base64",
+  );
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/terrace/starters");
+
+  const section = page.locator("section", {
+    has: page.getByRole("heading", { name: "Başlangıçlar" }),
+  });
+  await section.getByRole("button", { name: "Ürün ekle" }).first().click();
+  await page.getByLabel("Ad (Türkçe)").fill(title);
+  await page
+    .locator('input[type="file"][name="image"]')
+    .setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: png });
+
+  // The picker shows a live preview inside the modal before saving.
+  await expect(page.getByRole("dialog").locator("img")).toBeVisible();
+  await page.getByRole("button", { name: "Kaydet" }).click();
+
+  // The saved product renders as an image card (photo persisted + served).
+  await expect(page.getByText(title)).toBeVisible();
+  await expect(page.locator("article", { hasText: title }).locator("img")).toBeVisible();
+
+  // Clean up.
+  await page.getByRole("button", { name: `${title} sil` }).click();
+  await page.getByRole("button", { name: "Sil", exact: true }).click();
+  await expect(page.getByText(title)).toHaveCount(0);
+});
+
 test("admin creates and deletes a product inline on a category page", async ({
   page,
 }) => {
