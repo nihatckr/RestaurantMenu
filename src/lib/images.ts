@@ -68,6 +68,20 @@ export async function uploadImage(file: File, keyPrefix: string): Promise<string
   return `/${rel}`;
 }
 
+/**
+ * Resolve the image side-effect from a submitted form (shared by the product and
+ * settings actions): a new `image` file → optimize+upload and return its URL;
+ * `removeImage=on` → null (clear); neither → undefined (leave unchanged).
+ */
+export async function resolveUploadedImage(
+  formData: FormData,
+  prefix: string,
+): Promise<string | null | undefined> {
+  const file = formData.get("image");
+  if (file instanceof File && file.size > 0) return uploadImage(file, prefix);
+  return formData.get("removeImage") === "on" ? null : undefined;
+}
+
 /** Best-effort delete of a previously uploaded image (orphan cleanup). Never
  *  throws — a failed cleanup must not block the mutation that triggered it. */
 export async function deleteImage(url: string | null | undefined): Promise<void> {

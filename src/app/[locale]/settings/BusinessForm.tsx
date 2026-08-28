@@ -2,10 +2,11 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Check } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { Input, Field } from "@/components/ui/form";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { SavedHint } from "@/components/ui/SavedHint";
 import { updateBusinessInfoAction } from "./settings-actions";
 
 export function BusinessForm({
@@ -49,11 +50,7 @@ export function BusinessForm({
           <Button type="submit" disabled={pending}>
             {pending ? "Kaydediliyor…" : "Kaydet"}
           </Button>
-          {state.ok && !pending && (
-            <span className="flex items-center gap-1 font-body text-xs text-muted">
-              <Check size={13} aria-hidden /> Kaydedildi
-            </span>
-          )}
+          {state.ok && !pending && <SavedHint />}
         </div>
       </form>
     </Card>

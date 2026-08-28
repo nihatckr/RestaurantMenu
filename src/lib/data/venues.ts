@@ -2,12 +2,13 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import { slugify, uniqueSlug } from "@/lib/slug";
 import { deleteImage } from "@/lib/images";
+import { reorder, type MoveDirection } from "@/lib/reorder";
 
 // Venue CRUD for the admin Settings → Mekanlar tab. A venue owns exactly one
 // Menu (created with it); deleting a venue cascades its Menu (categories/items
 // links) but never the business-level Product/Category catalog.
 
-export type MoveDirection = "up" | "down";
+export type { MoveDirection };
 
 /** Create a venue (auto-slug) with its empty Menu, appended to the chooser order. */
 export async function createVenue(name: string) {
@@ -53,13 +54,10 @@ export async function moveVenue(venueSlug: string, dir: MoveDirection) {
     orderBy: { sortOrder: "asc" },
     select: { id: true, slug: true },
   });
-  const idx = rows.findIndex((r) => r.slug === venueSlug);
-  if (idx < 0) return;
-  const swap = dir === "up" ? idx - 1 : idx + 1;
-  if (swap < 0 || swap >= rows.length) return;
-  const next = [...rows];
-  [next[idx], next[swap]] = [next[swap], next[idx]];
-  await prisma.$transaction(
-    next.map((r, i) => prisma.venue.update({ where: { id: r.id }, data: { sortOrder: i } })),
+  await reorder(
+    rows.map((r) => ({ id: r.id, key: r.slug })),
+    venueSlug,
+    dir,
+    (id, sortOrder) => prisma.venue.update({ where: { id }, data: { sortOrder } }),
   );
 }

@@ -2,10 +2,11 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { UserRound, Check } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { Input, Field } from "@/components/ui/form";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { SavedHint } from "@/components/ui/SavedHint";
 import { changeUsernameAction } from "./settings-actions";
 
 export function UsernameForm({ currentUsername }: { currentUsername: string }) {
@@ -38,11 +39,7 @@ export function UsernameForm({ currentUsername }: { currentUsername: string }) {
           <Button type="submit" disabled={pending}>
             {pending ? "Kaydediliyor…" : "Kullanıcı adını kaydet"}
           </Button>
-          {state.ok && !pending && (
-            <span className="flex items-center gap-1 font-body text-xs text-muted">
-              <Check size={13} aria-hidden /> Kaydedildi
-            </span>
-          )}
+          {state.ok && !pending && <SavedHint />}
         </div>
       </form>
     </Card>

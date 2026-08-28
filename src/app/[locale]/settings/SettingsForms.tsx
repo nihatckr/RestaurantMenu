@@ -2,10 +2,11 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Image as ImageIcon, Check } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 import { ImageField } from "@/components/ui/ImageField";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { SavedHint } from "@/components/ui/SavedHint";
 import { updateBrandLogoAction, type SettingsFormState } from "./settings-actions";
 
 function ImageUploadForm({
@@ -33,11 +34,7 @@ function ImageUploadForm({
         <Button type="submit" disabled={pending}>
           {pending ? "Kaydediliyor…" : "Kaydet"}
         </Button>
-        {state.ok && !pending && (
-          <span className="flex items-center gap-1 font-body text-xs text-muted">
-            <Check size={13} aria-hidden /> Kaydedildi
-          </span>
-        )}
+        {state.ok && !pending && <SavedHint />}
       </div>
     </form>
   );

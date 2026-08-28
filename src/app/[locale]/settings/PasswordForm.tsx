@@ -1,10 +1,11 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { KeyRound, Check } from "lucide-react";
+import { KeyRound } from "lucide-react";
 import { Input, Field } from "@/components/ui/form";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { SavedHint } from "@/components/ui/SavedHint";
 import { changePasswordAction } from "./settings-actions";
 
 export function PasswordForm() {
@@ -38,11 +39,7 @@ export function PasswordForm() {
           <Button type="submit" disabled={pending}>
             {pending ? "Kaydediliyor…" : "Şifreyi değiştir"}
           </Button>
-          {state.ok && !pending && (
-            <span className="flex items-center gap-1 font-body text-xs text-muted">
-              <Check size={13} aria-hidden /> Şifre değiştirildi
-            </span>
-          )}
+          {state.ok && !pending && <SavedHint label="Şifre değiştirildi" />}
         </div>
       </form>
     </Card>

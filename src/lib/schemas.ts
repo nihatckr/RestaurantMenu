@@ -3,6 +3,19 @@ import { z } from "zod";
 // Validation schemas shared by the client forms and the server actions (the server
 // re-validates — never trusts the client). Admin content (ADMIN_PLAN.md §5).
 
+/** Map zod issues → { field: firstMessage } for form field-level errors. Shared
+ *  by the category/product server actions. */
+export function zodFieldErrors(
+  issues: { path: PropertyKey[]; message: string }[],
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const i of issues) {
+    const key = String(i.path[0] ?? "");
+    if (key && !out[key]) out[key] = i.message;
+  }
+  return out;
+}
+
 export const categorySchema = z.object({
   nameTr: z.string().trim().min(1, "Türkçe ad zorunlu").max(80),
   nameEn: z.string().trim().max(80).optional().or(z.literal("")),

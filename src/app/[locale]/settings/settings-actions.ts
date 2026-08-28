@@ -2,7 +2,7 @@
 
 import { requireAdmin, verifyPassword, setPassword, setUsername } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
-import { uploadImage, ImageError } from "@/lib/images";
+import { resolveUploadedImage, ImageError } from "@/lib/images";
 import { setBrandLogo, setVenueWordmark, setBusinessInfo } from "@/lib/data/settings";
 import { emptyTrash } from "@/lib/data/admin";
 import { importBackup } from "@/lib/data/backup-import";
@@ -17,17 +17,6 @@ export type ImportState = {
   counts?: { categories: number; products: number; items: number };
 };
 
-// Same file semantics as the product image: new file → optimize+upload; remove
-// checked → null; neither → undefined (no change).
-async function resolveImage(
-  formData: FormData,
-  prefix: string,
-): Promise<string | null | undefined> {
-  const file = formData.get("image");
-  if (file instanceof File && file.size > 0) return uploadImage(file, prefix);
-  return formData.get("removeImage") === "on" ? null : undefined;
-}
-
 // Bound in the client as (prevState, formData).
 export async function updateBrandLogoAction(
   _prev: SettingsFormState,
@@ -36,7 +25,7 @@ export async function updateBrandLogoAction(
   await requireAdmin();
   let image: string | null | undefined;
   try {
-    image = await resolveImage(formData, "brand");
+    image = await resolveUploadedImage(formData, "brand");
   } catch (e) {
     return { error: e instanceof ImageError ? e.message : "Görsel yüklenemedi" };
   }
@@ -56,7 +45,7 @@ export async function updateVenueWordmarkAction(
   await requireAdmin();
   let image: string | null | undefined;
   try {
-    image = await resolveImage(formData, `venues/${venueSlug}`);
+    image = await resolveUploadedImage(formData, `venues/${venueSlug}`);
   } catch (e) {
     return { error: e instanceof ImageError ? e.message : "Görsel yüklenemedi" };
   }

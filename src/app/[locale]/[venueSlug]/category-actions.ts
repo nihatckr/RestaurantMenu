@@ -3,7 +3,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
 import { audit } from "@/lib/data/audit";
-import { categorySchema } from "@/lib/schemas";
+import { categorySchema, zodFieldErrors } from "@/lib/schemas";
 import {
   createCategory,
   updateCategory,
@@ -30,14 +30,6 @@ function parse(formData: FormData) {
   });
 }
 
-function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
-  const out: Record<string, string> = {};
-  for (const i of issues) {
-    const key = String(i.path[0] ?? "");
-    if (key && !out[key]) out[key] = i.message;
-  }
-  return out;
-}
 
 // Bound in the client with (locale, venueSlug) → (prevState, formData).
 export async function createCategoryAction(
@@ -49,7 +41,7 @@ export async function createCategoryAction(
   await requireAdmin();
   const parsed = parse(formData);
   if (!parsed.success) {
-    return { error: "Geçersiz giriş", fieldErrors: fieldErrors(parsed.error.issues) };
+    return { error: "Geçersiz giriş", fieldErrors: zodFieldErrors(parsed.error.issues) };
   }
   await createCategory(venueSlug, parsed.data);
   await audit("create", "category", parsed.data.nameTr);
@@ -68,7 +60,7 @@ export async function updateCategoryAction(
   await requireAdmin();
   const parsed = parse(formData);
   if (!parsed.success) {
-    return { error: "Geçersiz giriş", fieldErrors: fieldErrors(parsed.error.issues) };
+    return { error: "Geçersiz giriş", fieldErrors: zodFieldErrors(parsed.error.issues) };
   }
   await updateCategory(id, parsed.data);
   await audit("update", "category", parsed.data.nameTr);

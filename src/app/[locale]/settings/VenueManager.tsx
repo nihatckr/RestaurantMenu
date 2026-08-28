@@ -2,12 +2,13 @@
 
 import { useActionState, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, ChevronUp, ChevronDown, Check, Store } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown, Store } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/form";
 import { ImageField } from "@/components/ui/ImageField";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { SavedHint } from "@/components/ui/SavedHint";
 import {
   createVenueAction,
   updateVenueNameAction,
@@ -18,14 +19,6 @@ import {
 import { updateVenueWordmarkAction, type SettingsFormState } from "./settings-actions";
 
 type Venue = { slug: string; name: string; wordmark: string | null };
-
-function Saved() {
-  return (
-    <span className="flex items-center gap-1 font-body text-xs text-muted">
-      <Check size={13} aria-hidden /> Kaydedildi
-    </span>
-  );
-}
 
 function NameForm({ venue }: { venue: Venue }) {
   const [state, action, pending] = useActionState(
@@ -46,7 +39,7 @@ function NameForm({ venue }: { venue: Venue }) {
         <Button type="submit" disabled={pending} className="text-xs">
           {pending ? "…" : "Adı kaydet"}
         </Button>
-        {state.ok && !pending && <Saved />}
+        {state.ok && !pending && <SavedHint />}
       </div>
     </form>
   );
@@ -74,7 +67,7 @@ function WordmarkForm({ venue }: { venue: Venue }) {
         <Button type="submit" disabled={pending} className="text-xs">
           {pending ? "…" : "Wordmark kaydet"}
         </Button>
-        {state.ok && !pending && <Saved />}
+        {state.ok && !pending && <SavedHint />}
       </div>
     </form>
   );

@@ -2,9 +2,9 @@
 
 import { requireAdmin } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
-import { uploadImage, ImageError } from "@/lib/images";
+import { resolveUploadedImage, ImageError } from "@/lib/images";
 import { audit } from "@/lib/data/audit";
-import { productSchema } from "@/lib/schemas";
+import { productSchema, zodFieldErrors } from "@/lib/schemas";
 import {
   createProduct,
   updateProduct,
@@ -44,28 +44,6 @@ function parse(formData: FormData) {
   });
 }
 
-function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
-  const out: Record<string, string> = {};
-  for (const i of issues) {
-    const key = String(i.path[0] ?? "");
-    if (key && !out[key]) out[key] = i.message;
-  }
-  return out;
-}
-
-// Resolve the image side-effect from the form: a new file → optimize+upload and
-// return its URL; "removeImage" checked → null (clear); otherwise undefined
-// (leave unchanged). Throws ImageError with a Turkish message on bad input.
-async function resolveImage(
-  formData: FormData,
-): Promise<string | null | undefined> {
-  const file = formData.get("image");
-  if (file instanceof File && file.size > 0) {
-    return uploadImage(file, "products");
-  }
-  return formData.get("removeImage") === "on" ? null : undefined;
-}
-
 // Bound with (locale, venueSlug) → (prevState, formData).
 export async function createProductAction(
   locale: string,
@@ -76,11 +54,11 @@ export async function createProductAction(
   await requireAdmin();
   const parsed = parse(formData);
   if (!parsed.success) {
-    return { error: "Geçersiz giriş", fieldErrors: fieldErrors(parsed.error.issues) };
+    return { error: "Geçersiz giriş", fieldErrors: zodFieldErrors(parsed.error.issues) };
   }
   let image: string | null | undefined;
   try {
-    image = await resolveImage(formData);
+    image = await resolveUploadedImage(formData, "products");
   } catch (e) {
     return { error: e instanceof ImageError ? e.message : "Görsel yüklenemedi" };
   }
@@ -101,11 +79,11 @@ export async function updateProductAction(
   await requireAdmin();
   const parsed = parse(formData);
   if (!parsed.success) {
-    return { error: "Geçersiz giriş", fieldErrors: fieldErrors(parsed.error.issues) };
+    return { error: "Geçersiz giriş", fieldErrors: zodFieldErrors(parsed.error.issues) };
   }
   let image: string | null | undefined;
   try {
-    image = await resolveImage(formData);
+    image = await resolveUploadedImage(formData, "products");
   } catch (e) {
     return { error: e instanceof ImageError ? e.message : "Görsel yüklenemedi" };
   }
