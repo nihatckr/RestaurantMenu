@@ -24,13 +24,15 @@ export function Select({
   return <select className={cn(control, className)} {...props} />;
 }
 
-// Label + optional error wrapper for a single form control.
+// Label + optional hint/error wrapper for a single form control.
 export function Field({
   label,
+  hint,
   error,
   children,
 }: {
   label: string;
+  hint?: string;
   error?: string;
   children: React.ReactNode;
 }) {
@@ -38,6 +40,7 @@ export function Field({
     <label className="flex flex-col gap-1">
       <span className="font-body text-xs text-muted">{label}</span>
       {children}
+      {hint && <span className="font-body text-[0.6875rem] text-muted/80">{hint}</span>}
       {error && <span className="font-body text-xs text-mono-red">{error}</span>}
     </label>
   );

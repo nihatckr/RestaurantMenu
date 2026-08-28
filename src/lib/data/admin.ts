@@ -279,6 +279,19 @@ export type ProductAdminRow = {
   prices: { label: string; amount: number }[]; // labelled measures (empty = single price)
 };
 
+/** Distinct product tags (sub-group names) in use, for the product form's picker. */
+export async function getProductTags(): Promise<string[]> {
+  const business = await prisma.business.findFirst({ select: { id: true } });
+  if (!business) return [];
+  const rows = await prisma.product.findMany({
+    where: { businessId: business.id, deletedAt: null, tag: { not: null } },
+    select: { tag: true },
+    distinct: ["tag"],
+    orderBy: { tag: "asc" },
+  });
+  return rows.map((r) => r.tag).filter((t): t is string => !!t);
+}
+
 /** Category options (slug + Turkish name) for the product form's picker. */
 export async function getCategoryOptions(
   venueSlug: string,

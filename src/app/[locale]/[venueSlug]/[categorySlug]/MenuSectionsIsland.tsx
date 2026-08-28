@@ -1,6 +1,6 @@
 import { isAdmin } from "@/lib/auth";
 import { CategorySection } from "@/components/CategorySection";
-import { getProductsAdmin, getCategoryOptions } from "@/lib/data/admin";
+import { getProductsAdmin, getCategoryOptions, getProductTags } from "@/lib/data/admin";
 import { getVenueMenuAdmin, type MenuCategoryView } from "@/lib/data/menu";
 
 // Plain guest sections — used both as the static prerendered shell (the Suspense
@@ -34,10 +34,11 @@ export async function MenuSectionsIsland({
 
   // Admin menu includes hidden (available:false) items so the owner can see and
   // re-enable them; keep the same "chosen category first" order as the public page.
-  const [adminMenu, products, categoryOptions] = await Promise.all([
+  const [adminMenu, products, categoryOptions, tagOptions] = await Promise.all([
     getVenueMenuAdmin(venueSlug, locale),
     getProductsAdmin(venueSlug),
     getCategoryOptions(venueSlug),
+    getProductTags(),
   ]);
   const menu = adminMenu ?? ordered;
   const chosen = menu.find((c) => c.slug === categorySlug);
@@ -58,6 +59,7 @@ export async function MenuSectionsIsland({
             categorySlug: category.slug,
             rowsById,
             categoryOptions,
+            tagOptions,
           }}
         />
       ))}

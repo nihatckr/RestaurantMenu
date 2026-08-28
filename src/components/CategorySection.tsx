@@ -17,6 +17,7 @@ export type SectionAdmin = {
   categorySlug: string;
   rowsById: Record<string, ProductAdminRow>; // keyed by Product id
   categoryOptions: CategoryOption[];
+  tagOptions: string[]; // existing sub-group names (Viski, Rakı…) for the picker
 };
 
 // A responsive grid of items: imageless single-price/single-measure drinks
@@ -68,6 +69,7 @@ function ItemGrid({
                 row={row}
                 available={item.available}
                 categoryOptions={admin.categoryOptions}
+                tagOptions={admin.tagOptions}
                 overlay
                 reorder={
                   enableReorder
@@ -178,6 +180,7 @@ function DrinkTable({
                 row={admin.rowsById[item.productId]}
                 available={item.available}
                 categoryOptions={admin.categoryOptions}
+                tagOptions={admin.tagOptions}
               />
             )}
           </div>
@@ -249,6 +252,7 @@ export function CategorySection({
               venueSlug={admin.venueSlug}
               categorySlug={admin.categorySlug}
               categoryOptions={admin.categoryOptions}
+              tagOptions={admin.tagOptions}
               iconOnly
             />
           </div>
@@ -289,6 +293,7 @@ export function CategorySection({
             venueSlug={admin.venueSlug}
             categorySlug={admin.categorySlug}
             categoryOptions={admin.categoryOptions}
+            tagOptions={admin.tagOptions}
           />
         </div>
       )}

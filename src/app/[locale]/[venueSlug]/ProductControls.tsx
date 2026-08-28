@@ -38,12 +38,14 @@ export function AddProductButton({
   venueSlug,
   categorySlug,
   categoryOptions,
+  tagOptions,
   iconOnly = false,
 }: {
   locale: string;
   venueSlug: string;
   categorySlug: string;
   categoryOptions: CategoryOption[];
+  tagOptions: string[];
   iconOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -74,6 +76,7 @@ export function AddProductButton({
           action={createProductAction.bind(null, locale, venueSlug)}
           initial={{ categorySlug }}
           categoryOptions={categoryOptions}
+          tagOptions={tagOptions}
           onClose={() => setOpen(false)}
           onDone={done}
         />
@@ -90,6 +93,7 @@ export function ProductRowControls({
   row,
   available,
   categoryOptions,
+  tagOptions,
   overlay = false,
   reorder,
 }: {
@@ -98,6 +102,7 @@ export function ProductRowControls({
   row: ProductAdminRow;
   available: boolean;
   categoryOptions: CategoryOption[];
+  tagOptions: string[];
   overlay?: boolean;
   // Present → show up/down arrows; each flag enables that direction (edge = off).
   reorder?: { up: boolean; down: boolean };
@@ -191,6 +196,7 @@ export function ProductRowControls({
           action={updateProductAction.bind(null, locale, venueSlug, row.id)}
           initial={row}
           categoryOptions={categoryOptions}
+          tagOptions={tagOptions}
           onClose={() => setEditing(null)}
           onDone={done}
         />
@@ -212,6 +218,7 @@ function ProductFormModal({
   action,
   initial,
   categoryOptions,
+  tagOptions,
   onClose,
   onDone,
 }: {
@@ -219,6 +226,7 @@ function ProductFormModal({
   action: (prev: ProductFormState, formData: FormData) => Promise<ProductFormState>;
   initial: Initial;
   categoryOptions: CategoryOption[];
+  tagOptions: string[];
   onClose: () => void;
   onDone: () => void;
 }) {
@@ -268,14 +276,22 @@ function ProductFormModal({
             ))}
           </Select>
         </Field>
-        <Field label="Tür" error={state.fieldErrors?.kind}>
+        <Field
+          label="Tür"
+          hint="Görünümü belirler — Yemek: kare fotoğraf; İçecek: dar fotoğraf ya da kompakt kart."
+          error={state.fieldErrors?.kind}
+        >
           <Select name="kind" defaultValue={initial.kind ?? "FOOD"}>
             <option value="FOOD">Yemek</option>
             <option value="DRINK">İçecek</option>
           </Select>
         </Field>
         <ImageField name="image" initial={initial.image} label="Ürün görseli" />
-        <Field label="Tek fiyat (opsiyonel)" error={state.fieldErrors?.price}>
+        <Field
+          label="Tek fiyat (opsiyonel)"
+          hint="Aşağıya ölçülü fiyat eklersen bu yok sayılır."
+          error={state.fieldErrors?.price}
+        >
           <Input
             name="price"
             type="number"
@@ -290,6 +306,10 @@ function ProductFormModal({
         <div className="flex flex-col gap-2">
           <span className="font-body text-xs text-muted">
             Ölçülü fiyatlar (Kadeh/Şişe — opsiyonel)
+          </span>
+          <span className="font-body text-[0.6875rem] text-muted/80">
+            Aynı ürünün farklı ölçüleri için (örn. Kadeh ve Şişe ayrı fiyat). Eklenirse
+            yukarıdaki tek fiyat kullanılmaz.
           </span>
           {measures.map((m) => (
             <div key={m.id} className="flex items-center gap-2">
@@ -335,8 +355,21 @@ function ProductFormModal({
           )}
         </div>
 
-        <Field label="Alt grup / etiket (opsiyonel)" error={state.fieldErrors?.tag}>
-          <Input name="tag" defaultValue={initial.tag} />
+        <Field
+          label="Alt grup / etiket (opsiyonel)"
+          hint={
+            tagOptions.length
+              ? `Mevcut alt gruplar: ${tagOptions.join(", ")}. Aynı adı yazan ürünler tek başlık altında toplanır.`
+              : "Bir kategoriyi alt başlıklara ayırır (örn. içki ailesi: Viski, Rakı). Çoğu üründe boş kalır."
+          }
+          error={state.fieldErrors?.tag}
+        >
+          <Input name="tag" defaultValue={initial.tag} list="product-tags" />
+          <datalist id="product-tags">
+            {tagOptions.map((t) => (
+              <option key={t} value={t} />
+            ))}
+          </datalist>
         </Field>
         {state.error && (
           <p className="font-body text-xs text-mono-red">{state.error}</p>
