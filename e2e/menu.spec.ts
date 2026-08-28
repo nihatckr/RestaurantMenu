@@ -529,16 +529,19 @@ test("admin adds a venue (appears in the chooser) and deletes it", async ({
   // Its row (with a delete control) shows in the manager.
   await expect(page.getByRole("button", { name: `${name} sil` })).toBeVisible();
 
-  // …and it's live in the public venue chooser.
-  await page.goto("/tr");
-  await expect(page.getByRole("link", { name })).toBeVisible();
-
-  // Delete it → confirm → gone from the manager and the chooser.
-  await page.goto("/tr/settings");
-  await page.getByRole("tab", { name: "Mekanlar" }).click();
-  await page.getByRole("button", { name: `${name} sil` }).click();
-  await page.getByRole("button", { name: "Kalıcı olarak sil" }).click();
-  await expect(page.getByRole("button", { name: `${name} sil` })).toHaveCount(0);
+  try {
+    // …and it's live in the public venue chooser.
+    await page.goto("/tr");
+    await expect(page.getByRole("link", { name })).toBeVisible();
+  } finally {
+    // Always delete it (even if the cached-chooser check above flakes) so no venue
+    // is left behind — an orphan would break the "lists both venues" integration test.
+    await page.goto("/tr/settings");
+    await page.getByRole("tab", { name: "Mekanlar" }).click();
+    await page.getByRole("button", { name: `${name} sil` }).click();
+    await page.getByRole("button", { name: "Kalıcı olarak sil" }).click();
+    await expect(page.getByRole("button", { name: `${name} sil` })).toHaveCount(0);
+  }
 
   await page.goto("/tr");
   await expect(page.getByRole("link", { name })).toHaveCount(0);
