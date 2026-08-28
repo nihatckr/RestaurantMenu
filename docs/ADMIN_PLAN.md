@@ -29,15 +29,35 @@ translations, per-venue visibility/order. **No content seed is required.**
 - The only non-content bootstrap is the **first admin + the Business/Venue skeleton**
   — see §3 (First run).
 
-## 2. Caching — the public path stays static, invalidated on write
+## 2. Surface — inline "edit mode" on the live pages (no separate dashboard)
+
+The admin is **not** a separate `/admin` area — it is an **inline edit mode on the
+existing menu pages**, so the owner edits exactly what they see (WYSIWYG). Chosen
+for simplicity/ease over a dashboard.
+
+- **Guests:** the current page, unchanged — fully **static**, zero admin JS, no
+  controls.
+- **Admin (logged in):** the *same* pages render an edit mode — small **Edit / Delete**
+  controls next to each item & category, an **"＋ Add product"** under each category
+  and **"＋ Add category"** on the page. This variant is **dynamic (not cached)** and
+  the admin JS loads **only for the authenticated admin** (session checked on the
+  server) — so nothing leaks to guests and the static public cache is untouched.
+- **Create & Edit open a modal form** (accessible dialog: focus-trap, ESC/backdrop
+  close, `aria-modal`); **Delete asks to confirm** in a small modal. No page
+  navigation for routine edits.
+- Structural/rare bits (first-run, venues) use the same modal pattern; there's no
+  sprawling second UI.
+
+## 2b. Caching — static public, invalidated on write
 
 Public reads use `use cache` (PPR). For edits to appear without redeploying:
 - **Tag** the data-access reads: add `cacheTag("menu", "venue:<slug>", …)` inside
-  `src/lib/data/menu.ts` (this is the `cacheTag` work deliberately skipped earlier
-  as YAGNI — an admin is the consumer that justifies it now).
-- **Revalidate on mutation:** every admin write calls `revalidateTag(...)` (and/or
-  `revalidatePath`) so the affected public pages rebuild on next request.
-- Public pages remain fully static/cacheable between edits — no SSR regression.
+  `src/lib/data/menu.ts` (the `cacheTag` work deliberately skipped earlier as
+  YAGNI — the admin is the consumer that justifies it now).
+- **Revalidate on mutation:** every admin write (server action) calls
+  `revalidateTag(...)` so the guest-facing static pages rebuild on next request.
+- The guest render stays fully static/cacheable; only the admin's own view is
+  dynamic.
 
 ## 3. Auth (T12) + First run (empty database)
 
@@ -66,10 +86,12 @@ Public reads use `use cache` (PPR). For edits to appear without redeploying:
   data-access layer, (5) `revalidateTag`s.
 - **Controls:** CSRF (Auth.js built-in for actions/handlers), **rate-limiting** on
   auth + mutations, **audit log** (who changed what, when), secrets only in env,
-  **no raw SQL**, non-leaky errors (SECURITY.md §4). Admin routes are `noindex` and
-  excluded from `robots`/`sitemap`.
-- Admin lives under a dynamic, **non-cached** segment (e.g. `src/app/admin/…`),
-  separate from the static public tree.
+  **no raw SQL**, non-leaky errors (SECURITY.md §4).
+- **No separate admin route to secure** — the edit controls + modal forms are
+  authenticated **islands** rendered into the existing pages only when a valid admin
+  session is present (server-checked). The guest render ships none of it. The mutation
+  server actions re-check the session server-side (never trust the client), so
+  security doesn't depend on hiding the UI.
 
 ## 5. Admin CRUD surface (T13) — build a menu from nothing
 
@@ -92,10 +114,13 @@ appended order) so the common path is a few taps.
 - **Venues:** add / edit (name, wordmark, order) — rarely used; created once at first
   run.
 
-**UX principles (the "easy" bar):** one list per entity with a prominent **"+ Add"**;
-one form to edit; mobile-friendly (owner edits from a phone); no jargon (labels like
-"Name (Turkish)", "Price", "Show on Terrace"); Save → server action (zod) →
-`revalidateTag` → live. Delete asks to confirm. No multi-step wizards.
+**UX principles (the "easy" bar):** edit **in place** on the live menu — an Edit and
+a Delete control next to each item/category, an **"＋ Add product"** under each
+category, **"＋ Add category"** on the page. **Add & Edit open a modal form**
+(accessible `<dialog>`: focus-trap, ESC/backdrop to close); **Delete confirms** in a
+small modal. Mobile-friendly (owner edits from a phone); no jargon ("Name (Turkish)",
+"Price", "Show on Terrace"); Save → server action (zod) → `revalidateTag` → live. No
+multi-step wizards, no separate dashboard to learn.
 
 ## 6. Images (T14)
 
@@ -112,7 +137,7 @@ one form to edit; mobile-friendly (owner edits from a phone); no jargon (labels 
 | **A. Seedless deploy** | Deploy runs migrate only; remove reconcile; demote content seed to `seed:demo` (dev-only) | A fresh prod DB comes up **empty**; re-runs never delete/overwrite |
 | **B. Cache tags** | `cacheTag` in data-access; a `revalidateMenu()` helper | An edit reflects on the public page after `revalidateTag` |
 | **T12 Auth + first run** | Auth.js magic-link; `ADMIN_EMAIL`; first-run creates admin + Business/Venue on empty DB | On an empty DB, the owner logs in and reaches `/admin`; no seed used |
-| **T13 CRUD (create-first)** | Server actions + zod: **add/edit/delete categories & products**, prices, translations, per-venue visibility/order; auto-slug; revalidate on write | On an empty DB the owner **builds a full menu** (add category → add product → set price → appears live); validation blocks bad input |
+| **T13 CRUD (create-first, inline)** | Inline Edit/Delete + "＋ Add" controls on the live pages (admin-session islands) opening **modal forms**; server actions + zod for **add/edit/delete categories & products**, prices, translations, per-venue visibility/order; auto-slug; revalidate on write | On an empty DB the owner **builds a full menu in place** (＋ Add category → ＋ Add product in a modal → set price → appears live); guests see none of it; validation blocks bad input |
 | **T14 Images** | Upload to blob storage; `remotePatterns`; `Product.image` = URL | Owner uploads a photo → it renders on the menu |
 | **Sec + tests** | Rate-limit, audit log, noindex; e2e of the human flow (login → add category → add product → see it live) | SECURITY.md §2 controls present; e2e green |
 
