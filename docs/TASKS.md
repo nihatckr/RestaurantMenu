@@ -298,10 +298,10 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
   right password → logs in + session persists; wrong → "Şifre hatalı"; logout clears.
 - [x] **e2e** login/logout (10 e2e); CI seeds the admin (`npm run seed:admin`).
 
-**T13 — Inline CRUD (create-first)**
-- [ ] UI primitives: `cn()` (clsx+tailwind-merge), `Button`/`Input`/`Textarea`/
-  `Field`, and the `Modal` (native `<dialog>` wrapper: focus-trap, ESC, backdrop
-  close, scroll-lock). Lucide icons.
+**T13 — Inline CRUD (create-first)** — ◐ IN PROGRESS
+- [x] Deps: `clsx`, `tailwind-merge`, `lucide-react`. UI primitives: `cn()`,
+  `Button`, `Input`/`Textarea`/`Field`, and the `Modal` (native `<dialog>` wrapper:
+  focus-trap, ESC, backdrop-click close, body scroll-lock). *Verified:* build green.
 - [ ] zod schema per entity (shared client form + server action).
 - [ ] Inline Edit/Delete + "＋ Add" controls, rendered only in an admin session.
 - [ ] **Category** add/edit/delete (server action + modal: tr/en/ru, columns,
