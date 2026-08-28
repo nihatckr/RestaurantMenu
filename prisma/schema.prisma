@@ -72,6 +72,9 @@ model Category {
   items        MenuItem[]
   createdAt    DateTime              @default(now())
   updatedAt    DateTime              @updatedAt
+  // Soft-delete (admin data safety): non-null = trashed; filtered out of public
+  // reads and recoverable (ADMIN_PLAN.md §6d).
+  deletedAt    DateTime?
 
   @@unique([businessId, slug])
 }
@@ -101,6 +104,9 @@ model Product {
   menuItems    MenuItem[]
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
+  // Soft-delete (admin data safety): non-null = trashed; filtered out of public
+  // reads and recoverable (ADMIN_PLAN.md §6d).
+  deletedAt    DateTime?
 
   @@unique([businessId, slug])
 }

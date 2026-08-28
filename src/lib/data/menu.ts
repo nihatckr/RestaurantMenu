@@ -66,7 +66,8 @@ export async function listVenueCategories(
       menu: {
         select: {
           categories: {
-            where: { visible: true },
+            // Skip soft-deleted (trashed) categories in the public menu.
+            where: { visible: true, category: { deletedAt: null } },
             orderBy: { sortOrder: "asc" },
             select: {
               category: {
@@ -151,7 +152,8 @@ export async function getVenueMenu(
       menu: {
         select: {
           categories: {
-            where: { visible: true },
+            // Skip soft-deleted (trashed) categories in the public menu.
+            where: { visible: true, category: { deletedAt: null } },
             orderBy: { sortOrder: "asc" },
             select: {
               categoryId: true,
@@ -165,7 +167,8 @@ export async function getVenueMenu(
             },
           },
           items: {
-            where: { available: true },
+            // Skip items whose product has been soft-deleted (trashed).
+            where: { available: true, product: { deletedAt: null } },
             orderBy: { sortOrder: "asc" },
             select: {
               id: true,

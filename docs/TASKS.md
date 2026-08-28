@@ -274,17 +274,18 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
   `updateTag` noted for read-your-own-writes from Server Actions). *Verified:*
   typecheck/lint/17 tests/build green.
 
-**Phase C — Data safety** *(before any write feature goes live)*
-- [ ] Verify managed-Postgres **backups/PITR** enabled + test one restore (OPS).
-- [ ] **Migration:** add `deletedAt DateTime?` to Product & Category (soft-delete)
-  + filter it out in the data-access reads (or block deleting a non-empty category).
-  *Done when:* a delete is recoverable and hidden from the public menu.
-- [ ] **Excel export** (`exceljs`): workbook of categories/products/translations/
-  prices/visibility. *Done when:* owner downloads the menu as `.xlsx`.
-- [ ] **Excel import**: slug-keyed, runs zod + integrity checks, **row-level errors,
-  reject before write**; upsert default, confirmed full-replace (+auto-backup).
-  *Done when:* a valid file rebuilds the DB; a bad file is rejected with errors.
-- [ ] Document env break-glass (password reset).
+**Phase C — Data safety** *(before any write feature goes live)* — ◐ PARTIAL
+- [x] **Migration `add_soft_delete`:** `deletedAt DateTime?` on Product & Category +
+  filter in the data-access reads. *Verified:* trashing a product/category hides it
+  from the menu, restore brings it back; 17 tests green.
+- [x] **Vitest `next/cache` stub** (no-op `cacheTag`/`revalidateTag`) so the Phase-B
+  tagging doesn't throw outside the Next runtime — fixes the integration suite.
+- [ ] Verify managed-Postgres **backups/PITR** + test one restore — **owner/ops
+  action** (non-codeable; OPS.md).
+- [ ] Env break-glass (password reset) — with T12.
+- [ ] **Excel export/import** (`exceljs`, slug-keyed, zod+integrity, upsert/
+  full-replace) — **moved to build WITH T12 (auth)**: admin endpoints must be
+  authenticated, so they can't safely ship before login exists.
 
 **T12 — Auth + first run**
 - [ ] Add deps `iron-session` + `argon2`; env `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`.
