@@ -25,8 +25,9 @@ these are the steps to run; an agent cannot perform account/DNS actions.
 ## First deploy (Vercel + managed Postgres)
 1. **Provision Postgres** (Neon / Vercel Postgres / Supabase-Postgres). Copy the
    **pooled** URL → `DATABASE_URL` and the **direct/unpooled** URL → `DIRECT_URL`.
-2. **Import the repo** into Vercel (`github.com/nihatckr/RestaurantMenu`); set
-   **Root Directory = `RestaurantMenu`**. Framework auto-detects as Next.js.
+2. **Import the repo** into Vercel (`github.com/nihatckr/RestaurantMenu`). The Next
+   app (`package.json`) is at the **repo root**, so leave **Root Directory = `./`**
+   (default). Framework auto-detects as Next.js.
 3. **Set env vars** — all required ones from the table above:
    `DATABASE_URL`, `DIRECT_URL`, `SESSION_SECRET`, `ADMIN_PASSWORD`,
    `BLOB_READ_WRITE_TOKEN`, `NEXT_PUBLIC_SITE_URL` (+ optional `ADMIN_USERNAME`,
