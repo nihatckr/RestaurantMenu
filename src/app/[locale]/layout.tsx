@@ -17,8 +17,10 @@ const mono = localFont({
 });
 
 // Body/description font (matches legacy `theme.js` which used Inter for copy).
+// Cyrillic subset so Russian menu text renders in Inter (the brand Mono font has
+// no Cyrillic glyphs) at a consistent size instead of a system fallback.
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   variable: "--font-body",
   display: "swap",
 });

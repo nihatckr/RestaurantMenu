@@ -121,3 +121,17 @@ button:focus-visible {
     @apply font-body text-muted;
   }
 }
+
+/*
+ * Russian: MonoTRegular (brand font) has NO Cyrillic glyphs, so brand-font text
+ * would fall back to a system font whose metrics don't match Mono's size-adjust
+ * → it renders visibly larger. Inter carries Cyrillic, so on Russian pages the
+ * text-bearing brand roles use the body font (the Mono look is already
+ * unavailable for Cyrillic). Prices / measure labels stay Mono — they're Latin
+ * digits and abbreviations that Mono renders fine.
+ */
+html[lang="ru"] .type-heading,
+html[lang="ru"] .type-subheading,
+html[lang="ru"] .type-tag {
+  font-family: var(--font-body);
+}
