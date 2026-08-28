@@ -2,7 +2,8 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { isAdmin } from "@/lib/auth";
+import { AlertTriangle } from "lucide-react";
+import { isAdmin, verifyPassword } from "@/lib/auth";
 import { isLocale } from "@/lib/i18n";
 import { getSettings } from "@/lib/data/settings";
 import { Spinner } from "@/components/Spinner";
@@ -43,7 +44,10 @@ async function SettingsView({
   // Reading the session makes this dynamic; guests are bounced to login.
   if (!(await isAdmin())) redirect(`/${locale}/login`);
 
-  const settings = await getSettings();
+  const [settings, usingDefaultPassword] = await Promise.all([
+    getSettings(),
+    verifyPassword("1234"),
+  ]);
   return (
     <>
       <div className="flex items-center justify-between">
@@ -52,6 +56,17 @@ async function SettingsView({
           &lsaquo; Menüye dön
         </Link>
       </div>
+
+      {/* Security nudge: the seeded default password is still active. */}
+      {usingDefaultPassword && (
+        <div className="flex items-start gap-2 rounded-lg border border-mono-red/40 bg-mono-red/5 p-3">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-mono-red" aria-hidden />
+          <p className="font-body text-xs text-foreground">
+            Varsayılan şifre (<strong>1234</strong>) hâlâ aktif. Güvenlik için{" "}
+            <strong>Güvenlik</strong> sekmesinden değiştirin.
+          </p>
+        </div>
+      )}
 
       {/* Server-rendered panels handed to a client tab switcher. */}
       <SettingsTabs

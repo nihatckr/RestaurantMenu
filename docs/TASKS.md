@@ -11,10 +11,13 @@
 > Playwright e2e + CI, and this docs set (see `JOURNEY.md`).
 > **Admin ✅ DONE (2026-08-28):** T12–T14 shipped — auth, inline category/product
 > CRUD, per-venue visibility + reorder, measure prices, image/logo/favicon uploads
-> (Vercel Blob + sharp), a Settings page, Excel backup export/import, trash+restore,
-> and an audit log + `noindex` on admin surfaces. The owner self-updates the menu;
-> source of truth is DB←seed. 23 Playwright e2e cover the human flows.
-> See **`ADMIN_PLAN.md`** / **`DECISIONS.md`** (B.1–B.28).
+> (Vercel Blob + sharp), a tabbed Settings page, Excel backup export/import,
+> trash+restore+**empty**, and an audit log + `noindex` on admin surfaces. **Settings
+> extras:** password change, per-venue QR codes, business name + footer note, full
+> **venue CRUD** (add/rename/wordmark/reorder/delete), default-password warning.
+> The owner self-updates the menu; source of truth is DB←seed. 28 Playwright e2e
+> cover the human flows. See **`ADMIN_PLAN.md`** / **`DECISIONS.md`** (B.1–B.33) and
+> **`YAYIN_ONCESI.md`** (owner pre-launch checklist).
 > **Pending owner:** real prices (`prices.ts`) + EN/RU translations & descriptions
 > (`translations.ts`) — `U5` / `DEMO_MENU.md`, and executing the deploy
 > (`DEPLOY.md`).
