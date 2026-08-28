@@ -108,6 +108,35 @@ Public reads use `use cache` (PPR). For edits to appear without redeploying:
   server actions re-check the session server-side (never trust the client), so
   security doesn't depend on hiding the UI.
 
+## 4b. Security hardening checklist (admin write surface) — SECURITY.md §2
+
+The consolidated "so nobody hacks us" list. All must be present before the admin
+goes live.
+
+- **Auth:** magic-link tokens **short-lived + single-use**; `ADMIN_EMAIL` allow-list;
+  cookies httpOnly + secure + SameSite; **rate-limit the login/magic-link request**
+  (anti email-bomb / user-enumeration → generic responses either way).
+- **Authorization:** every mutation re-checks the session + `role === "admin"`
+  **server-side**; queries scoped to this business's rows (no IDOR); security never
+  relies on hiding the UI.
+- **Input & stored XSS:** zod-validate every field with an **explicit allow-list**
+  (no mass assignment). Content fields are **plain text** → **React auto-escaping**
+  prevents stored XSS; **no rich-text/HTML** rendering; JSON-LD is emitted via React
+  children (escaped), never `dangerouslySetInnerHTML`.
+- **Uploads:** **server-mediated + authenticated only** (no public bucket write);
+  validate MIME + size; **re-encode with `sharp`** (strips EXIF / neutralizes
+  polyglots); SVG → PNG/WebP or sanitized; store with the correct content-type;
+  storage holds only public images (no secrets).
+- **Transport / headers (already shipped):** HTTPS + HSTS, CSP, `X-Frame-Options:
+  DENY`, `nosniff`, Referrer-Policy, Permissions-Policy. **Residual:** `script-src
+  'unsafe-inline'` is an accepted trade for the static PPR shell; low practical risk
+  (no HTML-injection vector) — revisit a nonce if the surface grows.
+- **Data / secrets:** Prisma parameterized (**no raw SQL**); **least-privilege DB
+  user** (not superuser); secrets only in env (never committed / never in the client
+  bundle); admin views `noindex` + excluded from robots/sitemap.
+- **Ops:** **audit log** of mutations (who/what/when); non-leaky errors; dependency
+  hygiene (`npm audit`, keep Auth.js/adapters current); backups per §6d.
+
 ## 5. Admin CRUD surface (T13) — build a menu from nothing
 
 Full **create / edit / delete**, so the owner can stand up the whole menu on an
