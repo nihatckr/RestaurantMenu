@@ -1,7 +1,7 @@
 import { isAdmin } from "@/lib/auth";
 import { CategorySection } from "@/components/CategorySection";
 import { getProductsAdmin, getCategoryOptions } from "@/lib/data/admin";
-import type { MenuCategoryView } from "@/lib/data/menu";
+import { getVenueMenuAdmin, type MenuCategoryView } from "@/lib/data/menu";
 
 // Plain guest sections — used both as the static prerendered shell (the Suspense
 // fallback) and as what the island returns for guests, so the two are identical
@@ -22,23 +22,33 @@ export function GuestSections({ ordered }: { ordered: MenuCategoryView[] }) {
 export async function MenuSectionsIsland({
   locale,
   venueSlug,
+  categorySlug,
   ordered,
 }: {
   locale: string;
   venueSlug: string;
+  categorySlug: string;
   ordered: MenuCategoryView[];
 }) {
   if (!(await isAdmin())) return <GuestSections ordered={ordered} />;
 
-  const [products, categoryOptions] = await Promise.all([
+  // Admin menu includes hidden (available:false) items so the owner can see and
+  // re-enable them; keep the same "chosen category first" order as the public page.
+  const [adminMenu, products, categoryOptions] = await Promise.all([
+    getVenueMenuAdmin(venueSlug, locale),
     getProductsAdmin(venueSlug),
     getCategoryOptions(venueSlug),
   ]);
+  const menu = adminMenu ?? ordered;
+  const chosen = menu.find((c) => c.slug === categorySlug);
+  const adminOrdered = chosen
+    ? [chosen, ...menu.filter((c) => c.slug !== categorySlug)]
+    : menu;
   const rowsById = Object.fromEntries(products.map((p) => [p.id, p]));
 
   return (
     <>
-      {ordered.map((category) => (
+      {adminOrdered.map((category) => (
         <CategorySection
           key={category.slug}
           category={category}

@@ -62,11 +62,15 @@ function ItemGrid({
                 locale={admin.locale}
                 venueSlug={admin.venueSlug}
                 row={row}
+                available={item.available}
                 categoryOptions={admin.categoryOptions}
                 overlay
               />
             )}
-            <MenuItemCard item={item} />
+            {/* Grey the card (not the controls) when hidden from the public menu. */}
+            <div className={item.available ? "" : "opacity-40"}>
+              <MenuItemCard item={item} />
+            </div>
           </div>
         );
       })}
@@ -150,7 +154,7 @@ function DrinkTable({
       {items.map((item) => (
         <Fragment key={item.id}>
           <div className="min-w-0 py-1 leading-tight">
-            <span className="type-item text-sm">
+            <span className={`type-item text-sm ${item.available ? "" : "opacity-40"}`}>
               {item.title}
               {item.dlc && (
                 <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[0.5625rem] text-muted">
@@ -163,6 +167,7 @@ function DrinkTable({
                 locale={admin.locale}
                 venueSlug={admin.venueSlug}
                 row={admin.rowsById[item.productId]}
+                available={item.available}
                 categoryOptions={admin.categoryOptions}
               />
             )}

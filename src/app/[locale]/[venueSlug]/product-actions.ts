@@ -7,6 +7,7 @@ import {
   createProduct,
   updateProduct,
   softDeleteProduct,
+  setProductAvailability,
 } from "@/lib/data/admin";
 
 export type ProductFormState = {
@@ -80,5 +81,17 @@ export async function deleteProductAction(
 ): Promise<void> {
   await requireAdmin();
   await softDeleteProduct(id);
+  revalidateMenu(venueSlug);
+}
+
+// Bound with (locale, venueSlug, id, available) → used as a <form action>.
+export async function toggleProductAvailabilityAction(
+  locale: string,
+  venueSlug: string,
+  id: string,
+  available: boolean,
+): Promise<void> {
+  await requireAdmin();
+  await setProductAvailability(venueSlug, id, available);
   revalidateMenu(venueSlug);
 }

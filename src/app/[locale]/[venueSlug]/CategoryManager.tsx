@@ -3,7 +3,7 @@
 import { useActionState, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/form";
@@ -12,6 +12,7 @@ import {
   createCategoryAction,
   updateCategoryAction,
   deleteCategoryAction,
+  toggleCategoryVisibilityAction,
   type CategoryFormState,
 } from "./category-actions";
 
@@ -48,10 +49,13 @@ export function CategoryManager({
       <ul className="flex flex-col">
         {categories.map((row) => (
           <li key={row.id} className="flex items-center gap-2 py-1">
-            {/* Same category link as guests see, plus inline admin controls. */}
+            {/* Same category link as guests see, plus inline admin controls.
+                Hidden categories are greyed so the owner can still reach them. */}
             <Link
               href={`/${locale}/${venueSlug}/${row.slug}`}
-              className="type-heading flex-1 py-2 text-sm tracking-[0.6em] text-foreground transition-colors hover:text-muted"
+              className={`type-heading flex-1 py-2 text-sm tracking-[0.6em] transition-colors hover:text-muted ${
+                row.visible ? "text-foreground" : "text-foreground opacity-40"
+              }`}
             >
               {displayName(row)}
             </Link>
@@ -71,6 +75,25 @@ export function CategoryManager({
             >
               <Trash2 size={16} aria-hidden />
             </button>
+            {/* Show/hide in the public menu — a tiny form (works without JS). */}
+            <form
+              action={toggleCategoryVisibilityAction.bind(
+                null,
+                locale,
+                venueSlug,
+                row.id,
+                !row.visible,
+              )}
+              className="flex"
+            >
+              <button
+                type="submit"
+                aria-label={row.visible ? `${row.nameTr} gizle` : `${row.nameTr} göster`}
+                className="text-muted transition-colors hover:text-foreground"
+              >
+                {row.visible ? <Eye size={16} aria-hidden /> : <EyeOff size={16} aria-hidden />}
+              </button>
+            </form>
           </li>
         ))}
       </ul>

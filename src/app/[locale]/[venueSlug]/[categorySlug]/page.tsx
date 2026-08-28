@@ -138,7 +138,12 @@ async function CategoryView({
           fallback); an admin gets the same list with inline product edit/delete
           + add (session-gated island, so no admin controls leak to guests). */}
       <Suspense fallback={<GuestSections ordered={ordered} />}>
-        <MenuSectionsIsland locale={locale} venueSlug={venueSlug} ordered={ordered} />
+        <MenuSectionsIsland
+          locale={locale}
+          venueSlug={venueSlug}
+          categorySlug={categorySlug}
+          ordered={ordered}
+        />
       </Suspense>
 
       {/* Brand footer (Figma: MONO TERRACE wordmark centered at the bottom).

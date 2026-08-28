@@ -1,5 +1,6 @@
 import "server-only";
 import { cacheTag } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, localized, pickLocalized } from "@/lib/i18n";
 import { MENU_TAG, venueTag } from "@/lib/cache";
@@ -126,14 +127,99 @@ export type MenuItemView = {
   tagLabel: string | null; // localized tag name shown as the sub-header
   dlc: boolean; // wine has a valid label (legacy "DLC" badge)
   featured: boolean; // spans full width in its category (legacy featured breakfast)
+  available: boolean; // per-venue visibility; public reads only ever return true
 };
 
 export type MenuCategoryView = {
   slug: string;
   name: string; // localized to the requested locale (tr fallback)
   columns: number | null; // grid column override for photo cards (null = default)
+  visible: boolean; // per-venue visibility; public reads only ever return true
   items: MenuItemView[];
 };
+
+// Shared Prisma selects so the public (cached) and admin (fresh) menu reads map
+// from identical row shapes — one mapper, no drift (centralized per code-quality).
+const menuCategorySelect = {
+  categoryId: true,
+  visible: true,
+  category: {
+    select: {
+      slug: true,
+      columns: true,
+      translations: { select: { locale: true, name: true } },
+    },
+  },
+} satisfies Prisma.MenuCategorySelect;
+
+const menuItemSelect = {
+  id: true,
+  price: true,
+  categoryId: true,
+  featured: true,
+  available: true,
+  prices: {
+    orderBy: { sortOrder: "asc" },
+    select: { label: true, amount: true },
+  },
+  product: {
+    select: {
+      id: true,
+      image: true,
+      kind: true,
+      tag: true,
+      color: true,
+      dlc: true,
+      translations: {
+        select: { locale: true, title: true, subtitle: true, description: true },
+      },
+    },
+  },
+} satisfies Prisma.MenuItemSelect;
+
+type MenuCategoryRow = Prisma.MenuCategoryGetPayload<{ select: typeof menuCategorySelect }>;
+type MenuItemRow = Prisma.MenuItemGetPayload<{ select: typeof menuItemSelect }>;
+
+/** Map raw menu rows → localized, serializable category views (shared by the
+ *  public and admin reads). */
+function mapMenu(
+  categories: MenuCategoryRow[],
+  items: MenuItemRow[],
+  locale: string,
+): MenuCategoryView[] {
+  const itemsByCategory = new Map<string, MenuItemView[]>();
+  for (const item of items) {
+    const t = pickLocalized(item.product.translations, locale);
+    const view: MenuItemView = {
+      id: item.id,
+      productId: item.product.id,
+      title: localized(item.product.translations, (r) => r.title, locale) || "",
+      subtitle: t?.subtitle ?? null,
+      description: t?.description ?? null,
+      price: item.price === null ? null : Number(item.price),
+      prices: item.prices.map((po) => ({ label: po.label, amount: Number(po.amount) })),
+      image: item.product.image,
+      color: item.product.color,
+      kind: item.product.kind,
+      tag: item.product.tag,
+      tagLabel: item.product.tag ? tagLabel(item.product.tag, locale) : null,
+      dlc: item.product.dlc,
+      featured: item.featured,
+      available: item.available,
+    };
+    const bucket = itemsByCategory.get(item.categoryId) ?? [];
+    bucket.push(view);
+    itemsByCategory.set(item.categoryId, bucket);
+  }
+
+  return categories.map((mc) => ({
+    slug: mc.category.slug,
+    name: localized(mc.category.translations, (r) => r.name, locale) || mc.category.slug,
+    columns: mc.category.columns,
+    visible: mc.visible,
+    items: itemsByCategory.get(mc.categoryId) ?? [],
+  }));
+}
 
 /**
  * Full menu for a venue: visible categories in order, each with its available
@@ -153,47 +239,16 @@ export async function getVenueMenu(
       menu: {
         select: {
           categories: {
-            // Skip soft-deleted (trashed) categories in the public menu.
+            // Public menu: visible, non-trashed categories only.
             where: { visible: true, category: { deletedAt: null } },
             orderBy: { sortOrder: "asc" },
-            select: {
-              categoryId: true,
-              category: {
-                select: {
-                  slug: true,
-                  columns: true,
-                  translations: { select: { locale: true, name: true } },
-                },
-              },
-            },
+            select: menuCategorySelect,
           },
           items: {
-            // Skip items whose product has been soft-deleted (trashed).
+            // Public menu: available items whose product isn't trashed.
             where: { available: true, product: { deletedAt: null } },
             orderBy: { sortOrder: "asc" },
-            select: {
-              id: true,
-              price: true,
-              categoryId: true,
-              featured: true,
-              prices: {
-                orderBy: { sortOrder: "asc" },
-                select: { label: true, amount: true },
-              },
-              product: {
-                select: {
-                  id: true,
-                  image: true,
-                  kind: true,
-                  tag: true,
-                  color: true,
-                  dlc: true,
-                  translations: {
-                    select: { locale: true, title: true, subtitle: true, description: true },
-                  },
-                },
-              },
-            },
+            select: menuItemSelect,
           },
         },
       },
@@ -201,35 +256,40 @@ export async function getVenueMenu(
   });
 
   if (!venue?.menu) return null;
+  return mapMenu(venue.menu.categories, venue.menu.items, locale);
+}
 
-  const itemsByCategory = new Map<string, MenuItemView[]>();
-  for (const item of venue.menu.items) {
-    const t = pickLocalized(item.product.translations, locale);
-    const view: MenuItemView = {
-      id: item.id,
-      productId: item.product.id,
-      title: localized(item.product.translations, (r) => r.title, locale) || "",
-      subtitle: t?.subtitle ?? null,
-      description: t?.description ?? null,
-      price: item.price === null ? null : Number(item.price),
-      prices: item.prices.map((po) => ({ label: po.label, amount: Number(po.amount) })),
-      image: item.product.image,
-      color: item.product.color,
-      kind: item.product.kind,
-      tag: item.product.tag,
-      tagLabel: item.product.tag ? tagLabel(item.product.tag, locale) : null,
-      dlc: item.product.dlc,
-      featured: item.featured,
-    };
-    const bucket = itemsByCategory.get(item.categoryId) ?? [];
-    bucket.push(view);
-    itemsByCategory.set(item.categoryId, bucket);
-  }
+/**
+ * Admin view of a venue's menu: visible categories (order preserved) but ALL
+ * their items — including hidden (available:false) ones — so the owner can see
+ * and re-enable what they've hidden. Fresh (uncached): admin edits must read
+ * their own writes. Trashed (soft-deleted) categories/products stay excluded.
+ */
+export async function getVenueMenuAdmin(
+  venueSlug: string,
+  locale: string = DEFAULT_LOCALE,
+): Promise<MenuCategoryView[] | null> {
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: {
+      menu: {
+        select: {
+          categories: {
+            where: { visible: true, category: { deletedAt: null } },
+            orderBy: { sortOrder: "asc" },
+            select: menuCategorySelect,
+          },
+          items: {
+            // No `available` filter — hidden items are shown (greyed) to the admin.
+            where: { product: { deletedAt: null } },
+            orderBy: { sortOrder: "asc" },
+            select: menuItemSelect,
+          },
+        },
+      },
+    },
+  });
 
-  return venue.menu.categories.map((mc) => ({
-    slug: mc.category.slug,
-    name: localized(mc.category.translations, (r) => r.name, locale) || mc.category.slug,
-    columns: mc.category.columns,
-    items: itemsByCategory.get(mc.categoryId) ?? [],
-  }));
+  if (!venue?.menu) return null;
+  return mapMenu(venue.menu.categories, venue.menu.items, locale);
 }

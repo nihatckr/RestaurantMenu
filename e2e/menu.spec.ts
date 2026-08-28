@@ -179,6 +179,12 @@ test("admin creates and deletes a category inline", async ({ page }) => {
   // It appears in the public category nav immediately (updateTag read-your-own-writes).
   await expect(page.getByRole("link", { name })).toBeVisible();
 
+  // Hide it → toggle flips to "göster"; show it again (round-trips visibility).
+  await page.getByRole("button", { name: `${name} gizle` }).click();
+  await expect(page.getByRole("button", { name: `${name} göster` })).toBeVisible();
+  await page.getByRole("button", { name: `${name} göster` }).click();
+  await expect(page.getByRole("button", { name: `${name} gizle` })).toBeVisible();
+
   // Delete it → confirm → it's gone from the nav again.
   await page.getByRole("button", { name: `${name} sil` }).click();
   await page.getByRole("button", { name: "Sil", exact: true }).click();
@@ -209,6 +215,12 @@ test("admin creates and deletes a product inline on a category page", async ({
 
   // It shows up in the section immediately (updateTag read-your-own-writes).
   await expect(page.getByText(title)).toBeVisible();
+
+  // Hide it from the public menu → the toggle flips to "göster"; show it again.
+  await page.getByRole("button", { name: `${title} gizle` }).click();
+  await expect(page.getByRole("button", { name: `${title} göster` })).toBeVisible();
+  await page.getByRole("button", { name: `${title} göster` }).click();
+  await expect(page.getByRole("button", { name: `${title} gizle` })).toBeVisible();
 
   // Delete it via the inline card control → confirm → gone.
   await page.getByRole("button", { name: `${title} sil` }).click();

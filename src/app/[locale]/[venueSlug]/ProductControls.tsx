@@ -2,7 +2,7 @@
 
 import { useActionState, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input, Field, Select } from "@/components/ui/form";
@@ -11,6 +11,7 @@ import {
   createProductAction,
   updateProductAction,
   deleteProductAction,
+  toggleProductAvailabilityAction,
   type ProductFormState,
 } from "./product-actions";
 
@@ -77,12 +78,14 @@ export function ProductRowControls({
   locale,
   venueSlug,
   row,
+  available,
   categoryOptions,
   overlay = false,
 }: {
   locale: string;
   venueSlug: string;
   row: ProductAdminRow;
+  available: boolean;
   categoryOptions: CategoryOption[];
   overlay?: boolean;
 }) {
@@ -118,6 +121,25 @@ export function ProductRowControls({
         >
           <Trash2 size={14} aria-hidden />
         </button>
+        {/* Show/hide toggle — a tiny form so it works without JS too. */}
+        <form
+          action={toggleProductAvailabilityAction.bind(
+            null,
+            locale,
+            venueSlug,
+            row.id,
+            !available,
+          )}
+          className="flex"
+        >
+          <button
+            type="submit"
+            aria-label={available ? `${row.titleTr} gizle` : `${row.titleTr} göster`}
+            className="text-muted transition-colors hover:text-foreground"
+          >
+            {available ? <Eye size={14} aria-hidden /> : <EyeOff size={14} aria-hidden />}
+          </button>
+        </form>
       </span>
 
       {editing === "edit" && (

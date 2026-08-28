@@ -12,6 +12,7 @@ export type CategoryAdminRow = {
   id: string;
   slug: string;
   columns: number | null;
+  visible: boolean;
   nameTr: string;
   nameEn: string;
   nameRu: string;
@@ -30,6 +31,7 @@ export async function getCategoriesAdmin(
             where: { category: { deletedAt: null } },
             orderBy: { sortOrder: "asc" },
             select: {
+              visible: true,
               category: {
                 select: {
                   id: true,
@@ -50,10 +52,28 @@ export async function getCategoriesAdmin(
       id: mc.category.id,
       slug: mc.category.slug,
       columns: mc.category.columns,
+      visible: mc.visible,
       nameTr: t.tr ?? "",
       nameEn: t.en ?? "",
       nameRu: t.ru ?? "",
     };
+  });
+}
+
+/** Show/hide a category in this venue's menu (per-venue MenuCategory.visible). */
+export async function setCategoryVisibility(
+  venueSlug: string,
+  categoryId: string,
+  visible: boolean,
+) {
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: { menu: { select: { id: true } } },
+  });
+  if (!venue?.menu) throw new Error("Venue menu not found");
+  await prisma.menuCategory.updateMany({
+    where: { menuId: venue.menu.id, categoryId },
+    data: { visible },
   });
 }
 
@@ -304,5 +324,22 @@ export async function softDeleteProduct(productId: string) {
   await prisma.product.update({
     where: { id: productId },
     data: { deletedAt: new Date() },
+  });
+}
+
+/** Show/hide a product in this venue's menu (per-venue MenuItem.available). */
+export async function setProductAvailability(
+  venueSlug: string,
+  productId: string,
+  available: boolean,
+) {
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: { menu: { select: { id: true } } },
+  });
+  if (!venue?.menu) throw new Error("Venue menu not found");
+  await prisma.menuItem.updateMany({
+    where: { menuId: venue.menu.id, productId },
+    data: { available },
   });
 }

@@ -7,6 +7,7 @@ import {
   createCategory,
   updateCategory,
   softDeleteCategory,
+  setCategoryVisibility,
 } from "@/lib/data/admin";
 
 export type CategoryFormState = {
@@ -77,5 +78,17 @@ export async function deleteCategoryAction(
 ): Promise<void> {
   await requireAdmin();
   await softDeleteCategory(id);
+  revalidateMenu(venueSlug);
+}
+
+// Bound with (locale, venueSlug, id, visible) → used as a <form action>.
+export async function toggleCategoryVisibilityAction(
+  locale: string,
+  venueSlug: string,
+  id: string,
+  visible: boolean,
+): Promise<void> {
+  await requireAdmin();
+  await setCategoryVisibility(venueSlug, id, visible);
   revalidateMenu(venueSlug);
 }
