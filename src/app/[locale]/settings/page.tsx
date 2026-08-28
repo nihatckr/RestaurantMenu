@@ -11,6 +11,7 @@ import { BackupSection } from "./BackupSection";
 import { TrashSection } from "./TrashSection";
 import { ActivitySection } from "./ActivitySection";
 import { PasswordForm } from "./PasswordForm";
+import { QRSection } from "./QRSection";
 import { SettingsTabs } from "./SettingsTabs";
 
 // Admin-only; never indexed.
@@ -58,6 +59,7 @@ async function SettingsView({
             label: "Marka & Mekanlar",
             panel: <SettingsForms logo={settings.logo} venues={settings.venues} />,
           },
+          { id: "qr", label: "QR kodları", panel: <QRSection venues={settings.venues} /> },
           { id: "yedek", label: "Yedek", panel: <BackupSection /> },
           { id: "cop", label: "Çöp kutusu", panel: <TrashSection /> },
           { id: "guvenlik", label: "Güvenlik", panel: <PasswordForm /> },

@@ -440,6 +440,23 @@ test("import rejects a file that isn't a valid workbook", async ({ page }) => {
   await expect(page.getByText(/Dosya okunamadı/)).toBeVisible();
 });
 
+test("admin sees and downloads a venue QR code", async ({ page }) => {
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "QR kodları" }).click();
+
+  await expect(page.getByRole("img", { name: "Mono Terrace QR kodu" })).toBeVisible();
+
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("link", { name: /İndir/ }).first().click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^qr-.*\.png$/);
+});
+
 test("admin changes the password (current verified)", async ({ page }) => {
   await page.goto("/tr/login");
   await page.getByLabel("Şifre").fill("1234");
