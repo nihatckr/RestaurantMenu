@@ -141,7 +141,15 @@ rem-based, so every piece of text scales up/down together at the same ratio
 ### A11y as-built
 - Keyboard `:focus-visible` outline on links/buttons; bigger tap targets.
 - No horizontal overflow down to 320px (verified).
-- `lang` attributes drive correct TR/EN uppercasing.
+- `<html lang={locale}>` drives correct per-language uppercasing (dotted/dotless I).
+- `prefers-reduced-motion: reduce` disables transitions/animations (globals.css).
+
+### SEO as-built
+- `generateMetadata` per locale/venue/category (title, description); JSON-LD
+  Restaurant/Menu with the page `inLanguage`; `hreflang` + `canonical` alternates
+  for tr/en/ru (+ `x-default`) via `buildAlternates`.
+- Social share card: `[locale]/opengraph-image.tsx` (branded 1200×630 og:image) +
+  `twitter: summary_large_image`.
 
 ## Open questions
 - **U-design-1** Exact brand palette beyond the two greys (any accent colors from
