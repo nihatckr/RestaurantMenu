@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CategoryLink } from "@/lib/data/menu";
+import { getMessages } from "@/lib/messages";
 
 // Ordered category list for a venue landing (DESIGN.md flow: landing → category
 // page). Order comes from data (per-venue), not code (AGENTS.md 10). Names are
@@ -15,7 +16,7 @@ export function CategoryNav({
 }) {
   if (categories.length === 0) {
     return (
-      <p className="font-body text-sm text-muted">Bu mekân için menü bulunamadı.</p>
+      <p className="font-body text-sm text-muted">{getMessages(locale).emptyMenu}</p>
     );
   }
   return (

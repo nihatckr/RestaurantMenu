@@ -14,6 +14,7 @@ import {
 } from "@/lib/data/menu";
 import { buildMenuJsonLd } from "@/lib/jsonld";
 import { LOCALES, isLocale, type Locale } from "@/lib/i18n";
+import { getMessages } from "@/lib/messages";
 
 // Prerender each (locale, venue). Guarded so a DB-less build (CI) still succeeds.
 // cacheComponents requires ≥1 param.
@@ -35,13 +36,15 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; venueSlug: string }>;
 }): Promise<Metadata> {
-  const { venueSlug } = await params;
+  const { locale, venueSlug } = await params;
   const venue = await getVenueBySlug(venueSlug);
   if (!venue) return {};
+  const t = getMessages(locale);
+  const title = `${venue.name} — ${t.metaMenuSuffix}`;
   return {
-    title: `${venue.name} — Menü`,
-    description: `${venue.name} menüsü.`,
-    openGraph: { title: `${venue.name} — Menü` },
+    title,
+    description: t.venueMenuDescription(venue.name),
+    openGraph: { title },
   };
 }
 
