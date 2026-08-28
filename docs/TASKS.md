@@ -252,6 +252,14 @@ Granular, **dependency-ordered** build steps. Design lives in `ADMIN_PLAN.md`; t
 the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the gates
 (typecheck/lint/unit/e2e/build) after every step; commit per step.
 
+> **Compatibility (verified against current code):** the public read path is already
+> DB-backed via `src/lib/data/menu.ts` — the `prices.ts`/`translations.ts` files feed
+> **only** the seed, not the running app. So the admin is **additive** (writes +
+> revalidation); no rewrite of the public pages. Single-password auth needs **no
+> User/Session tables** (schema has none — good). Schema changes are **additive
+> migrations** only, called out per phase below (`deletedAt`, `Business.logo`,
+> `AuditLog`).
+
 **Phase A — Seedless foundation** *(must land first — else deploys wipe edits)*
 - [ ] Make `prisma/seed.ts` idempotent **bootstrap-only**: remove every
   `deleteMany(… notIn …)` reconcile; never overwrite existing rows. *Done when:*
@@ -269,8 +277,9 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
 
 **Phase C — Data safety** *(before any write feature goes live)*
 - [ ] Verify managed-Postgres **backups/PITR** enabled + test one restore (OPS).
-- [ ] **Soft-delete** (`deletedAt`) on Product & Category + filter in data-access
-  (or block deleting a non-empty category). *Done when:* a delete is recoverable.
+- [ ] **Migration:** add `deletedAt DateTime?` to Product & Category (soft-delete)
+  + filter it out in the data-access reads (or block deleting a non-empty category).
+  *Done when:* a delete is recoverable and hidden from the public menu.
 - [ ] **Excel export** (`exceljs`): workbook of categories/products/translations/
   prices/visibility. *Done when:* owner downloads the menu as `.xlsx`.
 - [ ] **Excel import**: slug-keyed, runs zod + integrity checks, **row-level errors,
@@ -306,14 +315,20 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
 - [ ] Blob storage (Vercel Blob) + `next.config` `remotePatterns`.
 - [ ] `ImageField` (tap-pick + preview + remove; optional desktop drag-drop) + server
   upload action + **sharp** optimize (WebP/resize/strip). Product photo wired.
-- [ ] **Settings page:** venue details, wordmark; **brand logo** (promote
-  `BRAND.mark` → data); **favicon + PWA icons** generated from the logo (sharp) via
-  dynamic routes/manifest. PNG/WebP for logos (SVG XSS).
+- [ ] **Migration:** add `Business.logo String?` (promote `BRAND.mark` → data, SVG
+  default fallback).
+- [ ] **Settings page:** venue details, wordmark; **brand logo**; **favicon + PWA
+  icons** generated from the logo (sharp) via dynamic routes/manifest. PNG/WebP for
+  logos (SVG XSS).
 - [ ] Blob **orphan cleanup** on replace/remove.
 
 **Security + tests (cross-cutting, before go-live)**
+- [ ] **Migration:** `AuditLog` model (who/action/entity/timestamp); every mutation
+  writes an entry. *Done when:* edits/deletes are traceable.
 - [ ] `ADMIN_PLAN.md` §4b hardening all present (authz on every action, zod
-  allow-list, server-mediated uploads, least-priv DB, admin `noindex`, audit log).
+  allow-list, server-mediated uploads, least-priv DB, admin `noindex`).
+- [ ] Admin UI copy in **Turkish** (owner's language; not part of the tr/en/ru
+  public switcher).
 - [ ] **e2e human flow:** login → add category → add product → set price → see it
   live → logout.
 
