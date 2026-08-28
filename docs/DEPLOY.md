@@ -18,6 +18,7 @@ these are the steps to run; an agent cannot perform account/DNS actions.
 | `NEXT_PUBLIC_SITE_URL` | Public origin, e.g. `https://menu.monohotelantalya.com` (metadata/OG/sitemap). |
 | `SESSION_SECRET` | Random ≥32-char secret for the encrypted admin session cookie (`iron-session`). |
 | `ADMIN_PASSWORD` | The owner's admin password — used **once** by `npm run seed:admin` to store its bcrypt hash in the DB (not read at runtime). Use a strong value (not the dev `1234`). |
+| `ADMIN_USERNAME` | *(optional)* Login username seeded by `seed:admin` (default `admin`). The owner logs in with this + `ADMIN_PASSWORD`; both editable later in Settings → Güvenlik. |
 | `BLOB_READ_WRITE_TOKEN` | **Required for image uploads.** Create a Vercel Blob store and copy its token. Without it, uploads are rejected on Vercel (ephemeral fs) — see `images.ts`. |
 | `BUSINESS_NAME` | *(optional)* Name for the Business row `seed:admin` bootstraps (default "İşletme"; rename later in Settings → İşletme). |
 
@@ -26,8 +27,11 @@ these are the steps to run; an agent cannot perform account/DNS actions.
    **pooled** URL → `DATABASE_URL` and the **direct/unpooled** URL → `DIRECT_URL`.
 2. **Import the repo** into Vercel (`github.com/nihatckr/RestaurantMenu`); set
    **Root Directory = `RestaurantMenu`**. Framework auto-detects as Next.js.
-3. **Set env vars** (`DATABASE_URL`, `DIRECT_URL`, `NEXT_PUBLIC_SITE_URL`) for
-   Production (and Preview).
+3. **Set env vars** — all required ones from the table above:
+   `DATABASE_URL`, `DIRECT_URL`, `SESSION_SECRET`, `ADMIN_PASSWORD`,
+   `BLOB_READ_WRITE_TOKEN`, `NEXT_PUBLIC_SITE_URL` (+ optional `ADMIN_USERNAME`,
+   `BUSINESS_NAME`) for Production (and Preview). Without `SESSION_SECRET` the admin
+   session won't work, and without `DIRECT_URL` the build's `migrate deploy` fails.
 4. **Deploy.** Vercel runs the `vercel-build` script automatically:
    `prisma generate && prisma migrate deploy && next build` — **migrate-only, no
    seed** (Path B, done 2026-08-28). The **DB is the content source**; deploys never
@@ -41,7 +45,8 @@ these are the steps to run; an agent cannot perform account/DNS actions.
 5. **Seed the admin (once).** With `ADMIN_PASSWORD` set to the owner's password, run
    `npm run seed:admin` against the prod DB (locally with the prod `DATABASE_URL`, or
    a one-off job) — it bcrypt-hashes the password into the `AdminUser` row so the
-   owner can log in at `/tr/login`. Re-run to change the password.
+   owner can log in at `/tr/login` with the **username** (`ADMIN_USERNAME`, default
+   `admin`) + password. Re-run to change the password.
 6. **Verify:** `/` (→ redirects to `/tr`), `/tr` (venue chooser), `/tr/terrace`,
    `/en/terrace`, `/ru/terrace`, a category page, `/api/health` → `{status:"ok"}`,
    `/robots.txt`, `/sitemap.xml`, and the security headers (CSP, HSTS, nosniff).
@@ -60,7 +65,9 @@ these are the steps to run; an agent cannot perform account/DNS actions.
   (currently local `/public` only).
 - Secrets are env-only; no secret in the client bundle.
 - CI green (typecheck / lint / test / build / `npm audit`).
-- No analytics/trackers unless a privacy/consent decision was made (KVKK/GDPR).
+- Analytics is the **first-party, PII-free** menu-open beacon only (`/api/track` →
+  `PageView`; no IP/cookies) — needs no consent banner. No third-party trackers
+  unless a separate privacy/consent decision is made (KVKK/GDPR; `SECURITY.md` §5).
 
 ## Known follow-ups (not blockers for a soft launch)
 - **Real prices** (U5) — seed currently uses flagged placeholders.
