@@ -15,11 +15,16 @@ import {
 import { buildMenuJsonLd } from "@/lib/jsonld";
 import { LOCALES, isLocale, type Locale } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
+import { BRAND } from "@/lib/brand";
+import { BUILD_FALLBACK } from "@/lib/site";
 
 // Prerender each (locale, venue). Guarded so a DB-less build (CI) still succeeds.
 // cacheComponents requires ≥1 param.
 export async function generateStaticParams() {
-  const fallback = LOCALES.map((locale) => ({ locale, venueSlug: "terrace" }));
+  const fallback = LOCALES.map((locale) => ({
+    locale,
+    venueSlug: BUILD_FALLBACK.venueSlug,
+  }));
   try {
     const slugs = await listVenueSlugs();
     const params = LOCALES.flatMap((locale) =>
@@ -76,7 +81,7 @@ async function VenueLanding({
     listVenueCategories(venueSlug, locale),
     getVenueMenu(venueSlug, locale),
   ]);
-  const jsonLd = menu ? buildMenuJsonLd(venue.name, menu) : null;
+  const jsonLd = menu ? buildMenuJsonLd(venue.name, menu, locale) : null;
   return (
     <>
       {/* SEO structured data (schema.org Restaurant/Menu) — invisible; a data
@@ -94,7 +99,7 @@ async function VenueLanding({
       <footer className="mt-4 flex justify-center pb-2">
         <div className="relative h-10 w-36">
           <Image
-            src={venue.wordmark || "/brand/mono.svg"}
+            src={venue.wordmark || BRAND.mark}
             alt={venue.name}
             fill
             className="object-contain"

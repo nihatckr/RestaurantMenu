@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { listVenues } from "@/lib/data/menu";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { LOCALES, isLocale } from "@/lib/i18n";
+import { BRAND } from "@/lib/brand";
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -21,7 +22,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
       <div className="flex w-full max-w-sm justify-end">
         <LanguageSwitcher current={locale} />
       </div>
-      <Image src="/brand/mono.svg" alt="Mono" width={72} height={88} priority />
+      <Image src={BRAND.mark} alt={BRAND.name} width={72} height={88} priority />
       <ul className="flex w-full max-w-sm flex-col gap-3">
         {venues.map((v) => (
           <li key={v.slug}>

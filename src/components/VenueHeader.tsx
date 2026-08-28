@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { BRAND } from "@/lib/brand";
 
 // Figma landing: the MONO (MO/NO) mark centered at the top; the venue wordmark
 // sits at the very bottom (see the landing page footer). The venue name is kept
@@ -8,8 +9,8 @@ export function VenueHeader({ name }: { name: string }) {
     <header className="flex flex-col items-center py-6">
       <div className="relative h-16 w-14">
         <Image
-          src="/brand/mono.svg"
-          alt="Mono"
+          src={BRAND.mark}
+          alt={BRAND.name}
           fill
           className="object-contain"
           priority

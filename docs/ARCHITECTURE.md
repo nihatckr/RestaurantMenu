@@ -63,6 +63,21 @@ Server Action (or Route Handler)
 - **Do not** call `prisma.*` directly inside React components/pages. Components
   call the data-access functions.
 
+## Single-source constants (no magic values, DRY)
+Shared values live in exactly one module and are imported everywhere — never
+duplicated as inline literals:
+- `src/lib/i18n.ts` — `LOCALES`, `DEFAULT_LOCALE`, `isLocale`, `localized`
+  (the app's supported languages; the DB `Business.locales` mirrors this).
+- `src/lib/brand.ts` — `BRAND` (mark asset path, name, chrome colours used outside
+  CSS; CSS uses the matching `--foreground`/`--background` tokens).
+- `src/lib/site.ts` — `SITE_URL` (metadataBase/sitemap/robots) and `BUILD_FALLBACK`
+  (DB-less CI prerender placeholders).
+- `src/lib/format.ts` — `CURRENCY`, `formatPriceTRY`.
+- `src/lib/messages.ts` — UI-chrome strings; `prisma/data/{prices,translations}.ts`
+  — content. Design tokens/typography roles live in `globals.css`.
+The seed is data-driven off `Business.locales` (no hard-coded language list); no
+`if (venue === …)` or hard-coded slugs in logic (AGENTS.md 10).
+
 ## Next.js App Router conventions (per nextjs.org/docs — target **Next.js 16.3**)
 - **Version:** build on **Next.js 16.3** (current stable, Aug 2026) with the
   React version it requires; **Turbopack** is the default bundler. Scaffold via

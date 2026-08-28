@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { DEFAULT_LOCALE } from "./src/lib/i18n";
 
 const nextConfig: NextConfig = {
   // Partial Prerendering / Cache Components: static shell served instantly,
@@ -8,7 +9,7 @@ const nextConfig: NextConfig = {
   // The menu lives under /[locale] (I18N.md); send the bare root to the default
   // language. Locale-prefixed URLs are the canonical, shareable ones.
   async redirects() {
-    return [{ source: "/", destination: "/tr", permanent: false }];
+    return [{ source: "/", destination: `/${DEFAULT_LOCALE}`, permanent: false }];
   },
 
   // Only optimize images from an explicit host allowlist (SECURITY.md §1).

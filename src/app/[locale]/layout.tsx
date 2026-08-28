@@ -4,6 +4,8 @@ import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { MenuFooter } from "@/components/MenuFooter";
 import { LOCALES, isLocale } from "@/lib/i18n";
+import { BRAND } from "@/lib/brand";
+import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 // Brand display font ported from the legacy apps (MonoTRegular).
@@ -26,9 +28,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://menu.monohotelantalya.com",
-  ),
+  metadataBase: new URL(SITE_URL),
   title: "Mono Terrace — Menu",
   description: "Mono Terrace hotel, rooftop bar & garden menu.",
   icons: { icon: "/icon-192.png", apple: "/icon-192.png" },
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 // PWA/browser chrome colour (installable menu — app/manifest.ts). Black matches
 // the brand; no visible change to the page itself.
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: BRAND.black,
 };
 
 // Prerender one HTML shell per supported locale (I18N.md).

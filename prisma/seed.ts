@@ -1,6 +1,6 @@
 import { PrismaClient, ProductKind } from "@prisma/client";
 import { PRICES } from "./data/prices";
-import { TRANSLATIONS } from "./data/translations";
+import { TRANSLATIONS, type LocalizedText } from "./data/translations";
 
 const prisma = new PrismaClient();
 
@@ -15,11 +15,9 @@ const prisma = new PrismaClient();
 
 const BUSINESS_ID = "mono";
 
-type Tr = { tr: string; en?: string; ru?: string };
-
 // `columns` overrides the photo-grid column count (legacy per-category layout:
 // desserts/breakfast rendered 2-up; other food 3-up). Omit = kind default.
-const CATEGORIES: { slug: string; name: Tr; columns?: number }[] = [
+const CATEGORIES: { slug: string; name: LocalizedText; columns?: number }[] = [
   { slug: "starters", name: { tr: "Başlangıçlar", en: "Starters", ru: "Закуски" } },
   { slug: "salads", name: { tr: "Salatalar", en: "Salads", ru: "Салаты" } },
   { slug: "pastas", name: { tr: "Makarnalar", en: "Pastas", ru: "Паста" } },
@@ -285,16 +283,20 @@ async function main() {
     productIdBySlug.set(p.slug, prod.id);
     const text = TRANSLATIONS[p.slug];
     if (!text) throw new Error(`Missing TRANSLATIONS entry for product "${p.slug}"`);
-    // TRANSLATIONS is authoritative per locale: a filled title upserts the row;
-    // a blank ("") title removes any stale row so the app falls back to Turkish.
-    for (const locale of ["tr", "en", "ru"] as const) {
-      const title = text.title[locale]?.trim();
+    // Data-driven: iterate the business's supported locales (schema default
+    // ["tr","en","ru"]) — no hard-coded language list. TRANSLATIONS is
+    // authoritative per locale: a filled title upserts the row; a blank ("") title
+    // removes any stale row so the app falls back to the default language.
+    const pick = (field?: LocalizedText, locale?: string) =>
+      field && locale ? field[locale as keyof LocalizedText]?.trim() : undefined;
+    for (const locale of business.locales) {
+      const title = pick(text.title, locale);
       if (!title) {
         await prisma.productTranslation.deleteMany({ where: { productId: prod.id, locale } });
         continue;
       }
-      const subtitle = text.subtitle?.[locale]?.trim() || null;
-      const description = text.description?.[locale]?.trim() || null;
+      const subtitle = pick(text.subtitle, locale) || null;
+      const description = pick(text.description, locale) || null;
       await prisma.productTranslation.upsert({
         where: { productId_locale: { productId: prod.id, locale } },
         update: { title, subtitle, description },

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { BRAND } from "@/lib/brand";
 
 // PWA manifest — makes the menu installable ("Add to Home Screen") for QR guests.
 // Invisible to the page itself; only affects install/standalone chrome. This is a
@@ -7,12 +8,12 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Mono Terrace",
-    short_name: "Mono",
+    short_name: BRAND.name,
     description: "Mono Terrace & Garden digital menu.",
     start_url: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#000000",
+    background_color: BRAND.white,
+    theme_color: BRAND.black,
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png" },

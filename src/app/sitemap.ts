@@ -1,9 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
 import { LOCALES } from "@/lib/i18n";
-
-const BASE =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://menu.monohotelantalya.com";
+import { SITE_URL as BASE } from "@/lib/site";
 
 // Sitemap of the public menu: per locale, each venue and each visible category
 // (URLs are locale-prefixed, `/[locale]/…`). Guarded so a DB-less build still

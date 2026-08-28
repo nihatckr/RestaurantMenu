@@ -1,4 +1,5 @@
 import type { MenuCategoryView } from "@/lib/data/menu";
+import { CURRENCY } from "@/lib/format";
 
 // schema.org Restaurant + Menu structured data for SEO rich results. Invisible to
 // users; only consumed by search engines. Prices are TRY (currently DEMO until the
@@ -6,14 +7,18 @@ import type { MenuCategoryView } from "@/lib/data/menu";
 // NOT executable JS, so it is exempt from script-src CSP and needs no nonce, and it
 // uses React children (never dangerouslySetInnerHTML) so script-breaking sequences
 // are auto-escaped (SECURITY.md §4).
-export function buildMenuJsonLd(venueName: string, menu: MenuCategoryView[]) {
+export function buildMenuJsonLd(
+  venueName: string,
+  menu: MenuCategoryView[],
+  locale: string,
+) {
   return {
     "@context": "https://schema.org",
     "@type": "Restaurant",
     name: venueName,
     hasMenu: {
       "@type": "Menu",
-      inLanguage: "tr",
+      inLanguage: locale,
       hasMenuSection: menu
         .filter((c) => c.items.length > 0)
         .map((c) => ({
@@ -26,13 +31,13 @@ export function buildMenuJsonLd(venueName: string, menu: MenuCategoryView[]) {
                     "@type": "Offer",
                     name: po.label,
                     price: String(po.amount),
-                    priceCurrency: "TRY",
+                    priceCurrency: CURRENCY,
                   }))
                 : item.price != null
                   ? {
                       "@type": "Offer",
                       price: String(item.price),
-                      priceCurrency: "TRY",
+                      priceCurrency: CURRENCY,
                     }
                   : undefined;
             return {

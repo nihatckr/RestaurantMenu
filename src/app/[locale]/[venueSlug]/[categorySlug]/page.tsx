@@ -8,14 +8,16 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
 import { LOCALES, isLocale, type Locale } from "@/lib/i18n";
+import { BRAND } from "@/lib/brand";
+import { BUILD_FALLBACK } from "@/lib/site";
 
 // Prerender every (locale, venue, visible category). Guarded so a DB-less build
 // (CI) still succeeds. cacheComponents requires ≥1 param.
 export async function generateStaticParams() {
   const fallback = LOCALES.map((locale) => ({
     locale,
-    venueSlug: "terrace",
-    categorySlug: "starters",
+    venueSlug: BUILD_FALLBACK.venueSlug,
+    categorySlug: BUILD_FALLBACK.categorySlug,
   }));
   try {
     const slugs = await listVenueSlugs();
@@ -102,8 +104,8 @@ async function CategoryView({
         </div>
         <div className="relative h-16 w-14">
           <Image
-            src="/brand/mono.svg"
-            alt="Mono"
+            src={BRAND.mark}
+            alt={BRAND.name}
             fill
             className="object-contain"
             priority
@@ -119,7 +121,7 @@ async function CategoryView({
       <footer className="flex justify-center py-8">
         <div className="relative h-10 w-36">
           <Image
-            src={venue.wordmark || "/brand/mono.svg"}
+            src={venue.wordmark || BRAND.mark}
             alt={venue.name}
             fill
             className="object-contain"

@@ -1,6 +1,9 @@
 // Currency/locale helpers. Business currency is TRY, default locale tr
 // (confirmed by the live-site check — see LEGACY_AUDIT.md / I18N.md).
 
+/** ISO 4217 currency code for the whole menu (single-currency business). */
+export const CURRENCY = "TRY";
+
 /**
  * Format a numeric amount as a menu price string. The Figma design shows plain
  * grouped numbers (no ₺ symbol) — the brand Mono font has no glyph for ₺ (it
