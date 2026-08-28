@@ -122,6 +122,30 @@ small modal. Mobile-friendly (owner edits from a phone); no jargon ("Name (Turki
 "Price", "Show on Terrace"); Save → server action (zod) → `revalidateTag` → live. No
 multi-step wizards, no separate dashboard to learn.
 
+## 5b. Admin UI stack (dependencies)
+
+Small, purpose-built additions (justified per ARCHITECTURE §dependencies); none is on
+the denied list:
+
+- **Icons — `lucide-react`.** Per-icon, tree-shakeable imports for the inline
+  Edit / Delete / ＋Add controls. No icon font or sprite.
+- **Validation — `zod`.** ONE schema per entity, **shared** by the client form and
+  the server action (which re-validates — the client is never trusted). Single source
+  of the shape + rules.
+- **Forms — `react-hook-form` + `@hookform/resolvers/zod`.** Chosen over **Formik**:
+  lighter, far fewer re-renders, first-class zod integration. Drives the modal
+  create/edit forms with inline field errors.
+- **Modal — native `<dialog>`** via a thin accessible wrapper: focus-trap + ESC come
+  for free, no UI-kit dependency. (Radix is the fallback only if we later need richer
+  primitives — not for v1.)
+
+**State management — deliberately NONE.** `Redux` and `Zustand` are on the project's
+**denied-dependency list** (`AGENTS.md` rule 8), and are unnecessary here: this admin
+has no cross-page global client state. Local UI state (modal open, form fields) uses
+React `useState`/`useReducer`; server state is Server Components + **server actions**
+(`useActionState` / `useFormStatus`) + `revalidateTag`. No client store or data-fetch
+library.
+
 ## 6. Images (T14)
 
 - Product photos move from **committed `public/products/*`** to **object storage**
