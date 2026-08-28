@@ -91,6 +91,36 @@ button:focus-visible {
 }
 
 /*
+ * Subtle scroll reveal — sections fade/slide in as they enter the viewport. This
+ * does NOT change the design (only how it appears) and adds ZERO JavaScript: it
+ * uses the native CSS scroll-driven `animation-timeline: view()`.
+ *
+ * Safety: the initial `opacity: 0` is applied ONLY when motion is allowed AND the
+ * browser supports scroll timelines — so a reduced-motion user or an unsupporting
+ * browser always sees fully-visible content (never a blank, un-revealed menu).
+ */
+@keyframes reveal-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      opacity: 0;
+      animation: reveal-fade-up linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 20%;
+    }
+  }
+}
+
+/*
  * Centralized typography — one place, used consistently across the menu so the
  * heading/label styles never drift. Size (text-*) stays at the call site.
  *   .type-heading    — section title (brand, wide-tracked caps)

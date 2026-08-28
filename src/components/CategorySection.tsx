@@ -163,7 +163,7 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
   // sets `lang` on <html>, so the uppercase title gets the right dotted/dotless I
   // (SPIRITS in en, VİSKİ in tr) from the CSS text-transform automatically.
   return (
-    <section className="w-full scroll-mt-4">
+    <section className="reveal w-full scroll-mt-4">
       <div className="py-4 text-center">
         <h2 className="type-heading text-lg tracking-[0.125em]">{category.name}</h2>
       </div>

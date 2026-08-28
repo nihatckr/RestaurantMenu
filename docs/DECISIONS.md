@@ -104,7 +104,9 @@ option · `"…"` = the user's own phrase. **U#/T#** = tracked unknowns/tasks.
 | 7.5 | Push | Ship the session's work | Pushed 9 commits to `origin/main` | `"push et"` | `7d539cd..7fa335a` |
 | 7.6 | Add home links to the logos | Logo = standard "go home" affordance | Brand mark + wordmark wrapped in `<Link>`: category pages → venue landing, landing → venue chooser; + a logo-click e2e | `"logolara anasayfa linkleri ekle"` | `1adfc68` |
 | 7.7 | Should the header (back + language) be sticky? | Long single-scroll menu — reach back/language at any depth | Slim sticky bar on the category page (back + switcher; brand mark scrolls); landing untouched | `AskUserQuestion`: "İnce sticky bar (geri + dil)" | `0323650` |
-| 7.8 | What else (navigation)? → back-to-top button | Quick return on a long scroll | `ScrollToTop` client button (appears after 600px; reduced-motion aware; localized label) on the category page | `AskUserQuestion`: "Yukarı çık butonu" | *(pending)* |
+| 7.8 | What else (navigation)? → back-to-top button | Quick return on a long scroll | `ScrollToTop` client button (appears after 600px; reduced-motion aware; localized label) on the category page | `AskUserQuestion`: "Yukarı çık butonu" | `6a15215` |
+| 7.9 | Add animations without changing the design (GSAP or Framer?) | Subtle motion, but keep the static/minimal-JS architecture | Recommended & used **native CSS** over a JS lib: scroll-driven `animation-timeline: view()` reveal on sections (0 JS, guarded by `@supports` + reduced-motion so content is never hidden). Rejected GSAP/Framer as over-heavy for this surface (would force client components + bundle). | verbal + my recommendation accepted | *(pending)* |
+| B.1 | Owner will self-update the menu → build an admin (Path B) | The DB + no-admin combo was the one architectural tension; owner needs self-service | (planning) content source of truth shifts DB←seed; admin auth+CRUD+cache revalidation — see `ADMIN_PLAN.md` | `"sahip menüyü kendi güncelleyecek — admin planla (B)"` | *(planning)* |
 
 ---
 
