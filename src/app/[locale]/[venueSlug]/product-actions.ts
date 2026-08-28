@@ -3,6 +3,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
 import { uploadImage, ImageError } from "@/lib/images";
+import { audit } from "@/lib/data/audit";
 import { productSchema } from "@/lib/schemas";
 import {
   createProduct,
@@ -84,6 +85,7 @@ export async function createProductAction(
     return { error: e instanceof ImageError ? e.message : "Görsel yüklenemedi" };
   }
   await createProduct(venueSlug, parsed.data, image ?? null);
+  await audit("create", "product", parsed.data.titleTr);
   revalidateMenu(venueSlug);
   return { ok: true };
 }
@@ -108,6 +110,7 @@ export async function updateProductAction(
     return { error: e instanceof ImageError ? e.message : "Görsel yüklenemedi" };
   }
   await updateProduct(id, venueSlug, parsed.data, image);
+  await audit("update", "product", parsed.data.titleTr);
   revalidateMenu(venueSlug);
   return { ok: true };
 }
@@ -120,6 +123,7 @@ export async function deleteProductAction(
 ): Promise<void> {
   await requireAdmin();
   await softDeleteProduct(id);
+  await audit("delete", "product");
   revalidateMenu(venueSlug);
 }
 
@@ -151,5 +155,6 @@ export async function moveProductAction(
 export async function restoreProductAction(id: string): Promise<void> {
   await requireAdmin();
   await restoreProduct(id);
+  await audit("restore", "product");
   revalidateMenu();
 }

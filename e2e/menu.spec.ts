@@ -299,6 +299,39 @@ test("admin downloads the Excel backup from settings", async ({ page }) => {
   expect(download.suggestedFilename()).toMatch(/^menu-yedek-.*\.xlsx$/);
 });
 
+test("the login page is marked noindex", async ({ page }) => {
+  await page.goto("/tr/login");
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    /noindex/,
+  );
+});
+
+test("admin actions show up in the settings activity log", async ({ page }) => {
+  const name = `E2ELog ${Date.now()}`;
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/terrace");
+
+  await page.getByRole("button", { name: "Kategori ekle" }).click();
+  await page.getByLabel("Ad (Türkçe)").fill(name);
+  await page.getByRole("button", { name: "Kaydet" }).click();
+  await expect(page.getByRole("link", { name })).toBeVisible();
+
+  // The create is recorded in the audit trail on Settings.
+  await page.goto("/tr/settings");
+  await expect(page.getByRole("heading", { name: "Son işlemler" })).toBeVisible();
+  await expect(page.getByText(name)).toBeVisible();
+
+  // Clean up.
+  await page.goto("/tr/terrace");
+  await page.getByRole("button", { name: `${name} sil` }).click();
+  await page.getByRole("button", { name: "Sil", exact: true }).click();
+});
+
 test("admin restores a trashed category from settings", async ({ page }) => {
   const name = `E2EÇöp ${Date.now()}`;
 

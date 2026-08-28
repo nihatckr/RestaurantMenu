@@ -1,10 +1,14 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
 import { isLocale } from "@/lib/i18n";
 import { Spinner } from "@/components/Spinner";
 import { LoginForm } from "@/components/LoginForm";
 import { login } from "./actions";
+
+// Admin surface — keep it out of search indexes.
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 // Discreet admin login — not linked from any public page (the owner bookmarks it).
 // The session read (cookies()) is isolated in a Suspense boundary so it stays out of

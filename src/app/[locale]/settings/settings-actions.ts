@@ -5,6 +5,7 @@ import { revalidateMenu } from "@/lib/cache";
 import { uploadImage, ImageError } from "@/lib/images";
 import { setBrandLogo, setVenueWordmark } from "@/lib/data/settings";
 import { importBackup } from "@/lib/data/backup-import";
+import { audit } from "@/lib/data/audit";
 
 export type SettingsFormState = { ok?: boolean; error?: string };
 
@@ -40,6 +41,7 @@ export async function updateBrandLogoAction(
   }
   if (image === undefined) return { ok: true }; // nothing submitted
   await setBrandLogo(image);
+  await audit("settings", "brand", image ? "logo güncellendi" : "logo kaldırıldı");
   revalidateMenu();
   return { ok: true };
 }
@@ -59,6 +61,7 @@ export async function updateVenueWordmarkAction(
   }
   if (image === undefined) return { ok: true };
   await setVenueWordmark(venueSlug, image);
+  await audit("settings", "wordmark", venueSlug);
   revalidateMenu(venueSlug);
   return { ok: true };
 }
@@ -76,6 +79,11 @@ export async function importBackupAction(
 
   const result = await importBackup(await file.arrayBuffer());
   if (!result.ok) return { errors: result.errors };
+  await audit(
+    "import",
+    "backup",
+    `${result.counts.categories} kategori, ${result.counts.products} ürün, ${result.counts.items} yerleşim`,
+  );
   revalidateMenu();
   return { ok: true, counts: result.counts };
 }

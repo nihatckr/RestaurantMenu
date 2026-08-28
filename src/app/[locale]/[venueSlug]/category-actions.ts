@@ -2,6 +2,7 @@
 
 import { requireAdmin } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
+import { audit } from "@/lib/data/audit";
 import { categorySchema } from "@/lib/schemas";
 import {
   createCategory,
@@ -51,6 +52,7 @@ export async function createCategoryAction(
     return { error: "Geçersiz giriş", fieldErrors: fieldErrors(parsed.error.issues) };
   }
   await createCategory(venueSlug, parsed.data);
+  await audit("create", "category", parsed.data.nameTr);
   revalidateMenu(venueSlug);
   return { ok: true };
 }
@@ -69,6 +71,7 @@ export async function updateCategoryAction(
     return { error: "Geçersiz giriş", fieldErrors: fieldErrors(parsed.error.issues) };
   }
   await updateCategory(id, parsed.data);
+  await audit("update", "category", parsed.data.nameTr);
   revalidateMenu(venueSlug);
   return { ok: true };
 }
@@ -81,6 +84,7 @@ export async function deleteCategoryAction(
 ): Promise<void> {
   await requireAdmin();
   await softDeleteCategory(id);
+  await audit("delete", "category");
   revalidateMenu(venueSlug);
 }
 
@@ -112,5 +116,6 @@ export async function moveCategoryAction(
 export async function restoreCategoryAction(id: string): Promise<void> {
   await requireAdmin();
   await restoreCategory(id);
+  await audit("restore", "category");
   revalidateMenu();
 }

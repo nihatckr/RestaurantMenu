@@ -183,3 +183,15 @@ model MenuItemPrice {
 
   @@unique([menuItemId, label])
 }
+
+// Admin audit trail (SECURITY.md §4b): one row per content mutation. Single-owner
+// admin, so "who" is implicit — the value is what changed and when.
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String // create | update | delete | restore | import | settings
+  entity    String // category | product | brand | wordmark | backup
+  detail    String? // human label (e.g. the item name / a short summary)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
