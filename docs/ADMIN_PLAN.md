@@ -1,13 +1,20 @@
-# Admin Plan — owner self-service (Path B)
+# Admin Plan — owner self-service (Path B) — ✅ SHIPPED (2026-08-28)
 
-**Decision (2026-08-28):** the owner will maintain the menu themselves, so we build
-an **admin** (auth + CRUD). This resolves the one architectural tension noted in
-`DECISIONS.md` (a relational DB with *no* admin). See also `SECURITY.md` §2 — the
-write path was always specified; this activates it. Supersedes the earlier
-**T11 = no-admin** decision.
+**Decision (2026-08-28):** the owner maintains the menu themselves, so we built an
+**admin** (auth + CRUD). Supersedes the earlier **T11 = no-admin** decision.
 
-This is a **plan**, not yet built. Nothing here ships until its `SECURITY.md`
-controls ship with it (AGENTS.md rule 13).
+> **Status: implemented and tested** (typecheck · lint · Vitest · 33 e2e green).
+> This doc is retained as the design record; where the plan and the shipped code
+> diverged, the **as-built** notes below and `DECISIONS.md` (B.1–B.35) are
+> authoritative. Key deltas from the original plan:
+> - **Auth:** ~~magic-link~~ → **`iron-session` + bcrypt, single owner, username +
+>   password** (`verifyCredentials`; username editable in Settings → Güvenlik).
+> - **Bootstrap:** `seed:admin` creates the admin **and** a Business row (so the
+>   panel works on an empty DB); no venue is pre-created — the owner adds the first
+>   venue in Settings → Mekanlar.
+> - **Extras shipped beyond the base plan:** per-venue visibility + reorder, measure
+>   prices, image/logo/favicon (Vercel Blob + sharp), QR codes, Excel backup
+>   export/import, trash + empty, audit log, default-password warning, `noindex`.
 
 ---
 

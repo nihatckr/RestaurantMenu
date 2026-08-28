@@ -1,10 +1,14 @@
 # Security Plan — RestaurantMenu
 
 > Scope-matched to `PRODUCT.md` + `ARCHITECTURE.md`: a **read-only public menu**
-> (Server Components → Prisma → PostgreSQL) with an **optional, later** admin.
-> No guest accounts, no payments, no ordering. Security effort is sized to that
-> reality — most risk lives in the admin/write path (now being built, Path B — see
-> `ADMIN_PLAN.md`), not the public read path. Controls are mapped to `TASKS.md`.
+> (Server Components → Prisma → PostgreSQL) with a **single-owner admin**
+> (**shipped 2026-08-28**, Path B — see `ADMIN_PLAN.md`). No guest accounts, no
+> payments, no ordering. Security effort is sized to that reality — most risk lives
+> in the admin/write path, which ships **with** the controls below. Controls are
+> mapped to `TASKS.md`.
+>
+> **As built:** auth is **`iron-session` (encrypted, httpOnly cookie) + bcrypt**,
+> single owner, **username + password** (not Auth.js — no multi-user/email needed).
 
 ---
 
@@ -22,8 +26,8 @@
 ## Trust boundaries
 - **Public (untrusted):** anonymous guests hitting `/[venueSlug]` reads. No
   writes reachable.
-- **Admin (trusted, being built — Path B):** authenticated staff performing
-  mutations via Server Actions / Route Handlers.
+- **Admin (trusted — shipped, Path B):** the authenticated single owner performing
+  mutations via Server Actions / admin Route Handlers.
 - **Server ↔ DB:** app server is the only DB client; DB is never public.
 
 ---
@@ -46,32 +50,35 @@
 - **Venue slug tampering** → resolve slug to a Venue record; unknown/inactive →
   `notFound()`. Never trust the slug beyond a lookup key (AGENTS rule 10).
 
-### 2. Admin / write path (NOW BEING BUILT — Path B, 2026-08-28)
-> No longer deferred: the owner will self-update the menu, so the admin is planned
-> and ships **with** these controls. The consolidated hardening checklist lives in
-> `ADMIN_PLAN.md` §4b; this section remains the governing spec.
-- **AuthN** → Auth.js; admin-only. No guest auth. Strong password or SSO;
-  secrets via env, never in repo. Secure, `HttpOnly`, `SameSite` session cookies.
-- **AuthZ** → every Server Action / Route Handler **re-checks the session +
-  role server-side** (never rely on hidden UI). Deny-by-default.
-- **CSRF** → Server Actions have built-in origin protection; for any custom
-  Route Handler mutation, verify origin / use anti-CSRF. `SameSite=Lax/Strict`
-  cookies.
-- **Input validation** → validate/parse **all** mutation input with a schema
-  (e.g. zod) at the boundary; reject unknown fields; coerce types. Applies to
-  prices, slugs, order, language fields.
-- **Mass assignment** → map validated DTO → explicit Prisma fields; never spread
-  raw request bodies into `prisma.update({ data })`.
-- **File/image upload** (if admin uploads images) → validate content-type &
-  size, re-encode/strip metadata, store with random names, serve from an asset
-  host; never execute uploads.
-- **Brute force** → rate-limit login; generic error messages; lockout/backoff.
-- **Audit** → record who changed what (createUser/modifiedUser already implied by
-  the legacy SaaS model) for catalog mutations.
+### 2. Admin / write path (SHIPPED — Path B, 2026-08-28) ✅
+> The owner self-updates the menu; the admin shipped **with** all controls below.
+> Consolidated hardening checklist: `ADMIN_PLAN.md` §4b.
+- **AuthN** → ✅ **`iron-session`** (encrypted, `HttpOnly`, `SameSite=Lax`,
+  `secure` in prod) + **bcrypt**; single owner, **username + password**
+  (`verifyCredentials`). `SESSION_SECRET` via env. (Not Auth.js — no multi-user.)
+- **AuthZ** → ✅ every Server Action / admin Route Handler calls **`requireAdmin()`
+  server-side** (never trusts hidden UI); `/admin/*` routes return 401 unauthenticated.
+  Verified by e2e.
+- **CSRF** → ✅ Server Actions carry built-in origin protection; the session cookie
+  is `SameSite=Lax`. (No custom mutating Route Handlers.)
+- **Input validation** → ✅ all mutation input parsed with **zod** at the boundary
+  (`schemas.ts`), server re-validates; unknown fields rejected, types coerced.
+- **Mass assignment** → ✅ validated DTO → explicit Prisma fields; no request-body
+  spreads into `prisma.update({ data })`.
+- **File/image upload** → ✅ content-type + size checked, **`sharp` re-encodes to a
+  bounded, metadata-stripped WebP**, random blob keys, served via **Vercel Blob**
+  (dev-local fallback); uploads never executed. Non-image / oversized rejected (e2e).
+- **Brute force** → ✅ in-process login throttle (5 fails → 5-min lock) + generic
+  "kullanıcı adı veya şifre hatalı". *(Per-instance only; distributed lock via
+  Upstash is a documented follow-up.)*
+- **Audit** → ✅ every content mutation writes an **`AuditLog`** row (action/entity/
+  detail/time); shown in Settings → "Son işlemler".
+- **Not-indexed** → ✅ `/login` + `/settings` carry `robots: noindex`.
 
 ### 3. Data, secrets, infrastructure
-- **Secrets** → only via environment (`DATABASE_URL`, `AUTH_SECRET`, etc.);
-  `.env*` git-ignored; no secrets in client bundles (no `NEXT_PUBLIC_` secrets).
+- **Secrets** → only via environment (`DATABASE_URL`, `SESSION_SECRET`,
+  `BLOB_READ_WRITE_TOKEN`, etc.); `.env*` git-ignored; no secrets in client bundles
+  (no `NEXT_PUBLIC_` secrets).
 - **DB least privilege** → app connects with a non-superuser role limited to the
   app schema; migrations run with a separate privileged role in deploy only.
 - **Transport** → HTTPS/HSTS everywhere (platform default on Vercel-style hosts).
@@ -114,11 +121,12 @@
   lookups.
 - **T7/T8 Public render** → no `dangerouslySetInnerHTML`; `next/image`
   `remotePatterns` allowlist.
-- **T12 Auth** → Auth.js hardening, session cookie flags, brute-force limits.
-- **T13/T14 Mutations** → zod validation, server-side authZ on every action,
-  anti-mass-assignment, CSRF checks, audit logging.
-- **T16 Production readiness** → header/CSP verification, dependency audit,
-  secret-scanning, penetration smoke-test of admin, privacy/consent decision.
+- **T12 Auth** → ✅ iron-session + bcrypt, cookie flags, brute-force throttle.
+- **T13/T14 Mutations** → ✅ zod validation, `requireAdmin` on every action,
+  anti-mass-assignment, sharp-re-encoded uploads, audit logging.
+- **T16 Production readiness** → ◐ headers/CSP verified, dependency audit in CI;
+  **owner/ops remaining:** least-privilege DB role, DB backup/PITR test, penetration
+  smoke-test, privacy/consent decision if analytics are ever added.
 
 ## Definition of Done (security)
 Every mutation is authenticated + authorized server-side and schema-validated;

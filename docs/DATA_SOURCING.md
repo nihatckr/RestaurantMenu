@@ -71,5 +71,5 @@
 - **U-data-1** Are product images owned by the business (reusable) or SaaS-hosted
   (must be re-hosted)? Re-host to our own asset store to avoid the CDN dependency.
 - **~~U-data-2~~ RESOLVED (2026-08-28):** yes — the owner needs ongoing
-  self-service editing, so the **admin is being built** (Path B, `ADMIN_PLAN.md`) and
-  the DB becomes the content source (not seed-then-static).
+  self-service editing, so the **admin was built** (Path B, `ADMIN_PLAN.md`) and the
+  **DB is the content source** (not seed-then-static). `seed:demo` is dev-only.

@@ -10,7 +10,7 @@ docs below. The agent contract (`../AGENTS.md`) points here for the binding spec
 | --- | --- |
 | [PRODUCT.md](PRODUCT.md) | **What** the system is and does — the product authority. |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Technical boundaries: stack, allowed/denied deps, read/write paths. |
-| [LEGACY_AUDIT.md](LEGACY_AUDIT.md) | Evidence of what the old Terrace/Garden apps did (reference only, never a code template). |
+| [LEGACY_AUDIT.md](LEGACY_AUDIT.md) | Evidence of what the old Terrace/Garden apps did (reference only — the apps were removed 2026-08-28; source kept on GitHub). |
 
 ## Supporting specs (binding within their domain)
 
@@ -29,12 +29,13 @@ docs below. The agent contract (`../AGENTS.md`) points here for the binding spec
 | --- | --- |
 | [JOURNEY.md](JOURNEY.md) | Narrative of decisions and how we reached the current state. |
 | [DECISIONS.md](DECISIONS.md) | Auditable decision log: each request → why → change → how approved → commit. |
-| [ADMIN_PLAN.md](ADMIN_PLAN.md) | Plan for the owner self-service admin (Path B): auth + CRUD, DB-as-source, cache revalidation, phased tasks. |
+| [ADMIN_PLAN.md](ADMIN_PLAN.md) | The owner self-service admin (Path B) — **✅ shipped**: auth, inline CRUD, DB-as-source, cache revalidation. |
 | [DIAGRAMS.md](DIAGRAMS.md) | Mermaid diagrams: data model (ERD), request/render flow, card-variant + typography systems. |
-| [TASKS.md](TASKS.md) | Task-by-task plan and status (T1–T16, U-decisions). |
+| [TASKS.md](TASKS.md) | Task-by-task plan and status (T1–T16, U-decisions; admin T12–T14 done). |
 | [PARITY.md](PARITY.md) | Intentional HTML/CSS-inherent differences from the legacy apps. |
 | [DEPLOY.md](DEPLOY.md) | Vercel + managed-Postgres deploy runbook. |
-| [DEMO_MENU.md](DEMO_MENU.md) | Generated DEMO price list (replace with real data — U5). |
+| [YAYIN_ONCESI.md](YAYIN_ONCESI.md) | Owner-facing pre-launch checklist (Turkish). |
+| [DEMO_MENU.md](DEMO_MENU.md) | Generated DEMO price list (optional `seed:demo` content). |
 
 ## Notes
 

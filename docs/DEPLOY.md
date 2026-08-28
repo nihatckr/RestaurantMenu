@@ -18,6 +18,8 @@ these are the steps to run; an agent cannot perform account/DNS actions.
 | `NEXT_PUBLIC_SITE_URL` | Public origin, e.g. `https://menu.monohotelantalya.com` (metadata/OG/sitemap). |
 | `SESSION_SECRET` | Random ≥32-char secret for the encrypted admin session cookie (`iron-session`). |
 | `ADMIN_PASSWORD` | The owner's admin password — used **once** by `npm run seed:admin` to store its bcrypt hash in the DB (not read at runtime). Use a strong value (not the dev `1234`). |
+| `BLOB_READ_WRITE_TOKEN` | **Required for image uploads.** Create a Vercel Blob store and copy its token. Without it, uploads are rejected on Vercel (ephemeral fs) — see `images.ts`. |
+| `BUSINESS_NAME` | *(optional)* Name for the Business row `seed:admin` bootstraps (default "İşletme"; rename later in Settings → İşletme). |
 
 ## First deploy (Vercel + managed Postgres)
 1. **Provision Postgres** (Neon / Vercel Postgres / Supabase-Postgres). Copy the
@@ -29,9 +31,10 @@ these are the steps to run; an agent cannot perform account/DNS actions.
 4. **Deploy.** Vercel runs the `vercel-build` script automatically:
    `prisma generate && prisma migrate deploy && next build` — **migrate-only, no
    seed** (Path B, done 2026-08-28). The **DB is the content source**; deploys never
-   touch content, so owner edits are safe. A fresh prod DB comes up **empty** — the
-   owner logs into the admin, first-run creates the Business/Venue, then they build
-   the menu (`ADMIN_PLAN.md` §1).
+   touch content, so owner edits are safe. A fresh prod DB comes up **empty** —
+   `seed:admin` (step 5) creates the admin **and** a Business row; the owner then
+   logs in and adds the first venue in **Settings → Mekanlar**, then builds the menu
+   (`ADMIN_PLAN.md` §1).
    > **Demo data (dev only):** `npm run seed:demo` populates an **empty** dev DB with
    > the sample menu; it **bails out if the DB already has content** (never
    > overwrites). To re-apply changed demo data locally, `npm run db:reset` first.

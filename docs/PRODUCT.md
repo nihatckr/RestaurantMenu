@@ -20,10 +20,11 @@ legacy product, and none is introduced here (see *Out of MVP*).
 - **Primary user (guest):** a restaurant guest viewing the menu on their phone.
   Anonymous, no login, read-only. This is the only user with evidence in the
   legacy apps.
-- **Secondary user (staff/admin):** whoever maintains the catalog. In the legacy
-  system this was done in an external WordPress admin. Whether the new app owns
-  this is an open decision (see *Admin* and `ARCHITECTURE.md`). **ASSUMPTION**
-  that a lightweight admin is eventually wanted; it is **not** in the first MVP.
+- **Secondary user (owner/admin):** the single owner who maintains the catalog.
+  Legacy did this in an external WordPress admin; the new app **owns this** — a
+  built-in single-owner admin (auth + inline CRUD + Settings) manages venues,
+  categories, products, prices, images, visibility and order. **Shipped 2026-08-28**
+  (Path B — `ADMIN_PLAN.md`); the DB is now the content source.
 
 ## Domain model
 The core relationship is:
@@ -136,10 +137,10 @@ venue, never as `if (venue === 'terrace')`.
   (Legacy used one shared backend; per-venue price is not proven.)
 - **ASSUMPTION A2** A single Business with venues Terrace and Garden is the MVP
   scope; the schema is built for N venues but only these two are seeded.
-- **~~ASSUMPTION A3~~ → DECIDED no-admin (2026-08-27) → REVERSED (2026-08-28):** the
-  owner will self-update the menu, so we **are building the admin** (auth + CRUD,
-  T12–T14, Path B) and the content source moves seed → DB. Until it ships the code is
-  still seed-based. See `ADMIN_PLAN.md` / `DECISIONS.md` B.1.
+- **~~ASSUMPTION A3~~ → RESOLVED ✅ (admin shipped 2026-08-28):** the owner
+  self-updates the menu via the built-in admin (auth + inline CRUD + Settings,
+  T12–T14, Path B); the content source is the **DB** (seed is bootstrap/DEMO only).
+  See `ADMIN_PLAN.md` / `DECISIONS.md` B.1–B.35.
 - **ASSUMPTION A4** Hard Drinks and Soft Drinks become ordinary Categories in
   the unified model (legacy stored them as separate taxonomies); their
   multi-measure pricing is preserved as structured fields, not free text.

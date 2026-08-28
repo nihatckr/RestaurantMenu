@@ -20,12 +20,13 @@
 ## Environments
 - `development` (local), `preview` (per-PR), `production`.
 - Each has its own `DATABASE_URL` and secrets; **no prod secrets outside prod**.
-- Seed data runs in dev/preview; production is seeded once at cutover from the
-  agreed source.
+- Production is bootstrapped once with `seed:admin` (admin + Business); content is
+  then built in the admin panel (no content seed in prod). `seed:demo` is dev-only.
 
 ## Configuration & secrets (see SECURITY.md §3)
-- All secrets via environment: `DATABASE_URL`, and later `AUTH_SECRET` +
-  provider keys if admin/Auth.js is built.
+- All secrets via environment: `DATABASE_URL` (+ `DIRECT_URL`), `SESSION_SECRET`
+  (admin session), `BLOB_READ_WRITE_TOKEN` (image uploads), `ADMIN_PASSWORD`
+  (seed-time only).
 - `.env*` git-ignored; no secret in the client bundle (no `NEXT_PUBLIC_` secret).
 - Document required env vars in a committed `.env.example` (names only).
 
@@ -49,7 +50,9 @@
   standard Prisma-on-serverless setup.
 - **Backups:** rely on managed-Postgres automated backups; verify PITR/retention
   is enabled. Menu data is small and low-churn, so RPO/RTO needs are modest but
-  should be confirmed, not assumed.
+  should be confirmed, not assumed. The owner can also download an **Excel backup**
+  any time (Settings → Yedek) and re-import it. Uploaded images live in **Vercel
+  Blob** (durable) — deleting a product/logo best-effort removes its blob.
 
 ## Observability (light; scale only if needed)
 - **Errors:** a non-leaky error boundary in-app (users see generic messages);

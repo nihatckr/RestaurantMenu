@@ -230,8 +230,9 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
   (`prisma/seed.ts`). Kept for the record.
 - **Acceptance:** go/no-go recorded → **GO**; T12–T14 proceed per `ADMIN_PLAN.md`.
 
-### T12 — Auth (T11 = GO)
-- **Objective:** Admin-only authentication via Auth.js (ARCHITECTURE).
+### T12 — Auth (T11 = GO) — ✅ DONE (2026-08-28)
+- **Objective:** Admin-only auth. **As built:** `iron-session` + bcrypt, single
+  owner, username + password (not Auth.js — one owner, no email/multi-user).
 - **Scope:** admin login; no guest auth; protect admin routes only.
 - **Dependencies:** T11 = go.
 - **Acceptance:** admin routes require auth; public menu unaffected; secrets via

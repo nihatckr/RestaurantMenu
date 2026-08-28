@@ -1,8 +1,10 @@
 # Legacy Audit
 
-> Scope: read-only analysis of `TerraceMenu/` and `GardenMenu/`.
-> Nothing in those two folders was modified. Every claim below is backed by a
-> file reference. Anything not provable from code is marked **UNKNOWN**.
+> Scope: read-only analysis of the legacy `TerraceMenu/` and `GardenMenu/` apps.
+> **Those apps were removed from this workspace on 2026-08-28** (their behavior is
+> captured here; source preserved at `github.com/nihatckr/{Terrace,Garden}Menu`).
+> This file remains the historical evidence record — every claim is backed by a
+> file reference; anything not provable from code is marked **UNKNOWN**.
 
 ---
 

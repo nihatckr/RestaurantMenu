@@ -255,3 +255,27 @@ a consolidated **security hardening** checklist (`ADMIN_PLAN.md` §4b).
 For the task-by-task record see `TASKS.md`; the full admin design is `ADMIN_PLAN.md`;
 every request→decision→approval is logged in `DECISIONS.md`; HTML/CSS-inherent
 differences from the legacy are in `PARITY.md`.
+
+## 10. Admin shipped + finalized (2026-08-28)
+
+The admin was **built and tested** (typecheck · lint · Vitest · 33 Playwright e2e).
+What landed:
+
+- **Auth:** `iron-session` + bcrypt, single owner, **username + password**
+  (chosen over the earlier magic-link idea); username/password editable in Settings;
+  a warning shows while the default `1234` is still active.
+- **Inline CMS:** category & product CRUD on the menu pages themselves (no separate
+  dashboard) — measure prices, per-venue visibility + reorder, product photos.
+- **Settings (tabbed):** brand logo · venues (full CRUD) · business/footer · QR codes ·
+  Excel backup export/import · trash (restore + empty) · security · activity/audit log.
+- **Images:** `sharp` re-encode → **Vercel Blob** (dev-local fallback), favicon from
+  the logo. **Bootstrap:** `seed:admin` also creates a Business so an empty deploy is
+  usable; the owner builds venues → categories → products from the panel.
+- **Then a code-quality pass:** de-duplication (`reorder`, `resolveUploadedImage`,
+  `zodFieldErrors`, `SavedHint`, `ConfirmModal`, `ReorderButtons`, `useRefreshingAction`),
+  a central `config.ts`, and type-safe audit label maps.
+
+The legacy `TerraceMenu/` and `GardenMenu/` reference apps were **removed** (kept on
+GitHub); the docs were aligned to the as-built state. **Remaining is owner/ops
+only** (deploy, `BLOB_READ_WRITE_TOKEN`, DB backup verification, real prices/
+translations) — see `YAYIN_ONCESI.md`.

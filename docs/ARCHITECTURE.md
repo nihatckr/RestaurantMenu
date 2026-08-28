@@ -13,8 +13,10 @@
   object; port the *tokens*/scale, not the library.)
 - **PostgreSQL** — the catalog store.
 - **Prisma** — typed DB access and schema/migrations.
-- **Auth.js** — **only if** admin authentication is actually built, and only for
-  admin. Not for guests. Not added preemptively.
+- **`iron-session` + `bcryptjs`** — admin auth (single owner, username + password;
+  shipped Path B). Admin-only, never for guests. (We chose iron-session over Auth.js:
+  one owner, no email/multi-user.) `sharp` + `@vercel/blob` for admin image uploads;
+  `qrcode` (QR), `exceljs` (backup). All admin-only.
 
 ## Explicitly NOT used
 Do not introduce any of these, even though some appear in the legacy apps.
@@ -89,8 +91,9 @@ The seed is data-driven off `Business.locales` (no hard-coded language list); no
   Prerendering / `cacheComponents`** — a static shell served instantly, with any
   genuinely per-request bit isolated in its **own `<Suspense>` leaf** so one
   dynamic fetch doesn't make the whole page dynamic. Cache catalog reads with
-  `use cache` + tag-based **`revalidateTag`/`revalidatePath`** so admin
-  edits (Path B) refresh public pages without a redeploy. (Plain `export const revalidate`
+  `use cache` + tags (`cacheTag(MENU_TAG, venueTag(slug))`); admin mutations call
+  **`updateTag`** (read-your-own-writes — edits show immediately) so admin edits
+  refresh public pages without a redeploy. (Plain `export const revalidate`
   ISR is an acceptable fallback.) No client data-cache library (no SWR/TanStack)
   — Server Components + caching/revalidation only.
 - **Images:** `next/image` with **`remotePatterns`** host allowlist (the older
@@ -173,8 +176,8 @@ Mirror `PRODUCT.md`: `Business`, `Venue`, `Menu`, `Category`, `Product`,
   Turkish (`I18N.md`). (Earlier MVP showed TR+EN together — since replaced.)
 
 ## Config & environment
-- No secrets in the repo. `DATABASE_URL` (and Auth.js secrets, if/when added) via
-  environment. The legacy `VITE_GRAPHQL_URL` and WordPress endpoint are **not**
+- No secrets in the repo. `DATABASE_URL`, `SESSION_SECRET`, `BLOB_READ_WRITE_TOKEN`
+  via environment. The legacy `VITE_GRAPHQL_URL` and WordPress endpoint are **not**
   used.
 - Static assets served by Next; the legacy `.htaccess` SPA rewrite is obsolete.
 
