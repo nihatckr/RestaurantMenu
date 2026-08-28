@@ -10,6 +10,7 @@ import {
   softDeleteProduct,
   setProductAvailability,
   moveProduct,
+  restoreProduct,
   type MoveDirection,
 } from "@/lib/data/admin";
 
@@ -144,4 +145,11 @@ export async function moveProductAction(
   await requireAdmin();
   await moveProduct(venueSlug, id, dir);
   revalidateMenu(venueSlug);
+}
+
+// Bound with (id) → used as a <form action> (restore from trash; business-wide).
+export async function restoreProductAction(id: string): Promise<void> {
+  await requireAdmin();
+  await restoreProduct(id);
+  revalidateMenu();
 }

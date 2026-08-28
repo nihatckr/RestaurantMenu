@@ -1,0 +1,63 @@
+import { RotateCcw } from "lucide-react";
+import { getTrash, type TrashItem } from "@/lib/data/admin";
+import { restoreCategoryAction } from "@/app/[locale]/[venueSlug]/category-actions";
+import { restoreProductAction } from "@/app/[locale]/[venueSlug]/product-actions";
+
+function TrashList({
+  title,
+  items,
+  action,
+}: {
+  title: string;
+  items: TrashItem[];
+  action: (id: string) => Promise<void>;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <h3 className="font-body text-sm text-muted">{title}</h3>
+      {items.length === 0 ? (
+        <p className="font-body text-xs text-muted">—</p>
+      ) : (
+        <ul className="flex flex-col">
+          {items.map((it) => (
+            <li key={it.id} className="flex items-center justify-between gap-2 py-1">
+              <span className="font-body text-sm">
+                {it.name}
+                <span className="ml-2 text-xs text-muted">
+                  {new Date(it.deletedAt).toLocaleDateString("tr-TR")}
+                </span>
+              </span>
+              {/* Restore is business-wide → bound by id only. */}
+              <form action={action.bind(null, it.id)}>
+                <button
+                  type="submit"
+                  className="flex items-center gap-1 rounded border border-muted/40 px-2 py-1 font-body text-xs text-foreground transition-colors hover:border-foreground"
+                >
+                  <RotateCcw size={12} aria-hidden /> Geri al
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// Trash bin: soft-deleted categories/products, restorable. Server-rendered — each
+// restore is a plain form action (no client state).
+export async function TrashSection() {
+  const { categories, products } = await getTrash();
+  return (
+    <section className="flex flex-col gap-4 border-t border-muted/20 pt-6">
+      <div className="flex flex-col gap-1">
+        <h2 className="type-tag text-base">Çöp kutusu</h2>
+        <p className="font-body text-xs text-muted">
+          Silinen kategori ve ürünler burada saklanır; geri alınabilir.
+        </p>
+      </div>
+      <TrashList title="Kategoriler" items={categories} action={restoreCategoryAction} />
+      <TrashList title="Ürünler" items={products} action={restoreProductAction} />
+    </section>
+  );
+}

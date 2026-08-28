@@ -299,6 +299,37 @@ test("admin downloads the Excel backup from settings", async ({ page }) => {
   expect(download.suggestedFilename()).toMatch(/^menu-yedek-.*\.xlsx$/);
 });
 
+test("admin restores a trashed category from settings", async ({ page }) => {
+  const name = `E2EÇöp ${Date.now()}`;
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/terrace");
+
+  // Create then trash a category.
+  await page.getByRole("button", { name: "Kategori ekle" }).click();
+  await page.getByLabel("Ad (Türkçe)").fill(name);
+  await page.getByRole("button", { name: "Kaydet" }).click();
+  await expect(page.getByRole("link", { name })).toBeVisible();
+  await page.getByRole("button", { name: `${name} sil` }).click();
+  await page.getByRole("button", { name: "Sil", exact: true }).click();
+  await expect(page.getByRole("link", { name })).toHaveCount(0);
+
+  // Restore it from the settings trash…
+  await page.goto("/tr/settings");
+  await page.locator("li", { hasText: name }).getByRole("button", { name: "Geri al" }).click();
+
+  // …and it's back in the public category nav.
+  await page.goto("/tr/terrace");
+  await expect(page.getByRole("link", { name })).toBeVisible();
+
+  // Clean up: trash it again so it leaves the live menu.
+  await page.getByRole("button", { name: `${name} sil` }).click();
+  await page.getByRole("button", { name: "Sil", exact: true }).click();
+});
+
 test("admin exports then re-imports the backup (round-trip)", async ({ page }) => {
   await page.goto("/tr/login");
   await page.getByLabel("Şifre").fill("1234");

@@ -8,6 +8,7 @@ import { getSettings } from "@/lib/data/settings";
 import { Spinner } from "@/components/Spinner";
 import { SettingsForms } from "./SettingsForms";
 import { BackupSection } from "./BackupSection";
+import { TrashSection } from "./TrashSection";
 
 // Admin-only; never indexed.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -50,6 +51,7 @@ async function SettingsView({
       </div>
       <SettingsForms logo={settings.logo} venues={settings.venues} />
       <BackupSection />
+      <TrashSection />
     </>
   );
 }

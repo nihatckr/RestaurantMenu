@@ -200,6 +200,70 @@ export async function softDeleteCategory(id: string) {
   await prisma.category.update({ where: { id }, data: { deletedAt: new Date() } });
 }
 
+// ── Trash (soft-deleted, recoverable) ────────────────────────────────────────
+
+export type TrashItem = { id: string; name: string; deletedAt: string };
+
+/** Trashed categories + products for the business (most-recent first). */
+export async function getTrash(): Promise<{
+  categories: TrashItem[];
+  products: TrashItem[];
+}> {
+  const business = await prisma.business.findFirst({ select: { id: true } });
+  if (!business) return { categories: [], products: [] };
+
+  const [categories, products] = await Promise.all([
+    prisma.category.findMany({
+      where: { businessId: business.id, deletedAt: { not: null } },
+      orderBy: { deletedAt: "desc" },
+      select: {
+        id: true,
+        deletedAt: true,
+        translations: { select: { locale: true, name: true } },
+      },
+    }),
+    prisma.product.findMany({
+      where: { businessId: business.id, deletedAt: { not: null } },
+      orderBy: { deletedAt: "desc" },
+      select: {
+        id: true,
+        slug: true,
+        deletedAt: true,
+        translations: { select: { locale: true, title: true } },
+      },
+    }),
+  ]);
+
+  return {
+    categories: categories.map((c) => ({
+      id: c.id,
+      name:
+        c.translations.find((t) => t.locale === "tr")?.name ??
+        c.translations[0]?.name ??
+        "—",
+      deletedAt: c.deletedAt!.toISOString(),
+    })),
+    products: products.map((p) => ({
+      id: p.id,
+      name:
+        p.translations.find((t) => t.locale === "tr")?.title ??
+        p.translations[0]?.title ??
+        p.slug,
+      deletedAt: p.deletedAt!.toISOString(),
+    })),
+  };
+}
+
+/** Restore (un-trash) a category — reappears in every venue that still links it. */
+export async function restoreCategory(id: string) {
+  await prisma.category.update({ where: { id }, data: { deletedAt: null } });
+}
+
+/** Restore (un-trash) a product. */
+export async function restoreProduct(id: string) {
+  await prisma.product.update({ where: { id }, data: { deletedAt: null } });
+}
+
 // ── Products ────────────────────────────────────────────────────────────────
 
 export type ProductAdminRow = {
