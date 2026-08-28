@@ -8,7 +8,13 @@ export type AuditAction =
   | "restore"
   | "import"
   | "settings";
-export type AuditEntity = "category" | "product" | "brand" | "wordmark" | "backup";
+export type AuditEntity =
+  | "category"
+  | "product"
+  | "brand"
+  | "wordmark"
+  | "backup"
+  | "trash";
 
 // Append one audit row. Best-effort: logging must never fail the mutation it
 // records (SECURITY.md §4b). Callers are already behind requireAdmin().

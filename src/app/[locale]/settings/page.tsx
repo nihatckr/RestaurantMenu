@@ -10,6 +10,7 @@ import { SettingsForms } from "./SettingsForms";
 import { BackupSection } from "./BackupSection";
 import { TrashSection } from "./TrashSection";
 import { ActivitySection } from "./ActivitySection";
+import { SettingsTabs } from "./SettingsTabs";
 
 // Admin-only; never indexed.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -39,45 +40,28 @@ async function SettingsView({
   if (!(await isAdmin())) redirect(`/${locale}/login`);
 
   const settings = await getSettings();
-  const nav = [
-    { href: "#marka", label: "Marka" },
-    { href: "#mekanlar", label: "Mekanlar" },
-    { href: "#yedek", label: "Yedek" },
-    { href: "#cop", label: "Çöp kutusu" },
-    { href: "#islemler", label: "İşlemler" },
-  ];
   return (
     <>
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h1 className="type-heading text-lg">Ayarlar</h1>
-          <Link
-            href={`/${locale}`}
-            className="font-body text-xs text-muted underline"
-          >
-            &lsaquo; Menüye dön
-          </Link>
-        </div>
-        {/* Quick jump between sections. */}
-        <nav className="flex flex-wrap gap-2">
-          {nav.map((n) => (
-            <a
-              key={n.href}
-              href={n.href}
-              className="rounded-full border border-muted/30 px-3 py-1 font-body text-xs text-muted transition-colors hover:border-foreground hover:text-foreground"
-            >
-              {n.label}
-            </a>
-          ))}
-        </nav>
+      <div className="flex items-center justify-between">
+        <h1 className="type-heading text-lg">Ayarlar</h1>
+        <Link href={`/${locale}`} className="font-body text-xs text-muted underline">
+          &lsaquo; Menüye dön
+        </Link>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <SettingsForms logo={settings.logo} venues={settings.venues} />
-        <BackupSection />
-        <TrashSection />
-        <ActivitySection />
-      </div>
+      {/* Server-rendered panels handed to a client tab switcher. */}
+      <SettingsTabs
+        tabs={[
+          {
+            id: "marka",
+            label: "Marka & Mekanlar",
+            panel: <SettingsForms logo={settings.logo} venues={settings.venues} />,
+          },
+          { id: "yedek", label: "Yedek", panel: <BackupSection /> },
+          { id: "cop", label: "Çöp kutusu", panel: <TrashSection /> },
+          { id: "islemler", label: "Son işlemler", panel: <ActivitySection /> },
+        ]}
+      />
     </>
   );
 }

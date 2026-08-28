@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
 import { uploadImage, ImageError } from "@/lib/images";
 import { setBrandLogo, setVenueWordmark } from "@/lib/data/settings";
+import { emptyTrash } from "@/lib/data/admin";
 import { importBackup } from "@/lib/data/backup-import";
 import { audit } from "@/lib/data/audit";
 
@@ -86,4 +87,16 @@ export async function importBackupAction(
   );
   revalidateMenu();
   return { ok: true, counts: result.counts };
+}
+
+// Permanently empty the trash (irreversible). Used as a plain <form action>.
+export async function emptyTrashAction(): Promise<void> {
+  await requireAdmin();
+  const { categories, products } = await emptyTrash();
+  await audit(
+    "delete",
+    "trash",
+    `çöp boşaltıldı — ${categories} kategori, ${products} ürün kalıcı silindi`,
+  );
+  revalidateMenu();
 }

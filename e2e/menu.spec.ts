@@ -291,6 +291,7 @@ test("admin downloads the Excel backup from settings", async ({ page }) => {
   await page.getByRole("button", { name: "Giriş" }).click();
   await expect(page).toHaveURL(/\/tr$/);
   await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "Yedek" }).click();
 
   const [download] = await Promise.all([
     page.waitForEvent("download"),
@@ -323,6 +324,7 @@ test("admin actions show up in the settings activity log", async ({ page }) => {
 
   // The create is recorded in the audit trail on Settings.
   await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "Son işlemler" }).click();
   await expect(page.getByRole("heading", { name: "Son işlemler" })).toBeVisible();
   await expect(page.getByText(name)).toBeVisible();
 
@@ -332,35 +334,72 @@ test("admin actions show up in the settings activity log", async ({ page }) => {
   await page.getByRole("button", { name: "Sil", exact: true }).click();
 });
 
-test("admin restores a trashed category from settings", async ({ page }) => {
-  const name = `E2EÇöp ${Date.now()}`;
+// Serial: the "empty trash" test purges the whole (business-wide) trash, so it
+// must not race the restore test which relies on its trashed item persisting.
+test.describe.serial("trash bin", () => {
+  test("admin restores a trashed category from settings", async ({ page }) => {
+    const name = `E2EÇöp ${Date.now()}`;
 
-  await page.goto("/tr/login");
-  await page.getByLabel("Şifre").fill("1234");
-  await page.getByRole("button", { name: "Giriş" }).click();
-  await expect(page).toHaveURL(/\/tr$/);
-  await page.goto("/tr/terrace");
+    await page.goto("/tr/login");
+    await page.getByLabel("Şifre").fill("1234");
+    await page.getByRole("button", { name: "Giriş" }).click();
+    await expect(page).toHaveURL(/\/tr$/);
+    await page.goto("/tr/terrace");
 
-  // Create then trash a category.
-  await page.getByRole("button", { name: "Kategori ekle" }).click();
-  await page.getByLabel("Ad (Türkçe)").fill(name);
-  await page.getByRole("button", { name: "Kaydet" }).click();
-  await expect(page.getByRole("link", { name })).toBeVisible();
-  await page.getByRole("button", { name: `${name} sil` }).click();
-  await page.getByRole("button", { name: "Sil", exact: true }).click();
-  await expect(page.getByRole("link", { name })).toHaveCount(0);
+    // Create then trash a category.
+    await page.getByRole("button", { name: "Kategori ekle" }).click();
+    await page.getByLabel("Ad (Türkçe)").fill(name);
+    await page.getByRole("button", { name: "Kaydet" }).click();
+    await expect(page.getByRole("link", { name })).toBeVisible();
+    await page.getByRole("button", { name: `${name} sil` }).click();
+    await page.getByRole("button", { name: "Sil", exact: true }).click();
+    await expect(page.getByRole("link", { name })).toHaveCount(0);
 
-  // Restore it from the settings trash…
-  await page.goto("/tr/settings");
-  await page.locator("li", { hasText: name }).getByRole("button", { name: "Geri al" }).click();
+    // Restore it from the settings trash tab…
+    await page.goto("/tr/settings");
+    await page.getByRole("tab", { name: "Çöp kutusu" }).click();
+    await page.locator("li", { hasText: name }).getByRole("button", { name: "Geri al" }).click();
 
-  // …and it's back in the public category nav.
-  await page.goto("/tr/terrace");
-  await expect(page.getByRole("link", { name })).toBeVisible();
+    // …and it's back in the public category nav.
+    await page.goto("/tr/terrace");
+    await expect(page.getByRole("link", { name })).toBeVisible();
 
-  // Clean up: trash it again so it leaves the live menu.
-  await page.getByRole("button", { name: `${name} sil` }).click();
-  await page.getByRole("button", { name: "Sil", exact: true }).click();
+    // Clean up: trash it again so it leaves the live menu.
+    await page.getByRole("button", { name: `${name} sil` }).click();
+    await page.getByRole("button", { name: "Sil", exact: true }).click();
+  });
+
+  test("admin permanently empties the trash", async ({ page }) => {
+    const name = `E2EBoşalt ${Date.now()}`;
+
+    await page.goto("/tr/login");
+    await page.getByLabel("Şifre").fill("1234");
+    await page.getByRole("button", { name: "Giriş" }).click();
+    await expect(page).toHaveURL(/\/tr$/);
+    await page.goto("/tr/terrace");
+
+    // Create then trash a category so there's something to purge.
+    await page.getByRole("button", { name: "Kategori ekle" }).click();
+    await page.getByLabel("Ad (Türkçe)").fill(name);
+    await page.getByRole("button", { name: "Kaydet" }).click();
+    await page.getByRole("button", { name: `${name} sil` }).click();
+    await page.getByRole("button", { name: "Sil", exact: true }).click();
+
+    await page.goto("/tr/settings");
+    await page.getByRole("tab", { name: "Çöp kutusu" }).click();
+
+    // Our trashed row (name + a "Geri al" button) is present, then gone after empty.
+    const row = page
+      .locator("li")
+      .filter({ hasText: name })
+      .filter({ has: page.getByRole("button", { name: "Geri al" }) });
+    await expect(row).toHaveCount(1);
+
+    await page.getByRole("button", { name: "Çöp kutusunu boşalt" }).click();
+    await page.getByRole("button", { name: "Kalıcı olarak sil" }).click();
+
+    await expect(row).toHaveCount(0);
+  });
 });
 
 test("admin exports then re-imports the backup (round-trip)", async ({ page }) => {
@@ -369,6 +408,7 @@ test("admin exports then re-imports the backup (round-trip)", async ({ page }) =
   await page.getByRole("button", { name: "Giriş" }).click();
   await expect(page).toHaveURL(/\/tr$/);
   await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "Yedek" }).click();
 
   // Download the current backup…
   const [download] = await Promise.all([
@@ -389,6 +429,7 @@ test("import rejects a file that isn't a valid workbook", async ({ page }) => {
   await page.getByRole("button", { name: "Giriş" }).click();
   await expect(page).toHaveURL(/\/tr$/);
   await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "Yedek" }).click();
 
   await page.locator('input[type="file"][name="file"]').setInputFiles({
     name: "notreal.xlsx",

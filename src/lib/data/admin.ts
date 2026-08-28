@@ -264,6 +264,41 @@ export async function restoreProduct(id: string) {
   await prisma.product.update({ where: { id }, data: { deletedAt: null } });
 }
 
+/** Permanently delete everything in the trash (irreversible). Deletes trashed
+ *  products (cascades their menu items/translations/prices) and trashed
+ *  categories (after clearing any remaining menu items that reference them), then
+ *  best-effort removes the products' images. Returns how many were purged. */
+export async function emptyTrash(): Promise<{ categories: number; products: number }> {
+  const business = await prisma.business.findFirst({ select: { id: true } });
+  if (!business) return { categories: 0, products: 0 };
+
+  const trashedCats = await prisma.category.findMany({
+    where: { businessId: business.id, deletedAt: { not: null } },
+    select: { id: true },
+  });
+  const trashedProds = await prisma.product.findMany({
+    where: { businessId: business.id, deletedAt: { not: null } },
+    select: { id: true, image: true },
+  });
+  const catIds = trashedCats.map((c) => c.id);
+
+  await prisma.$transaction([
+    // Free the category FK: drop any menu items still pointing at trashed categories.
+    prisma.menuItem.deleteMany({ where: { categoryId: { in: catIds } } }),
+    // Trashed products cascade their remaining menu items/translations/prices.
+    prisma.product.deleteMany({
+      where: { businessId: business.id, deletedAt: { not: null } },
+    }),
+    // Trashed categories cascade their menu links + translations.
+    prisma.category.deleteMany({
+      where: { businessId: business.id, deletedAt: { not: null } },
+    }),
+  ]);
+
+  for (const p of trashedProds) await deleteImage(p.image);
+  return { categories: trashedCats.length, products: trashedProds.length };
+}
+
 // ── Products ────────────────────────────────────────────────────────────────
 
 export type ProductAdminRow = {

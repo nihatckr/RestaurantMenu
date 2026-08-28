@@ -55,7 +55,7 @@ export function SettingsForms({
   venues: { slug: string; name: string; wordmark: string | null }[];
 }) {
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <Card id="marka">
         <CardHeader
           icon={ImageIcon}
@@ -88,6 +88,6 @@ export function SettingsForms({
           ))}
         </div>
       </Card>
-    </>
+    </div>
   );
 }

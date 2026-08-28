@@ -1,6 +1,7 @@
 import { RotateCcw, Trash2 } from "lucide-react";
 import { getTrash, type TrashItem } from "@/lib/data/admin";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { EmptyTrashButton } from "./EmptyTrashButton";
 import { restoreCategoryAction } from "@/app/[locale]/[venueSlug]/category-actions";
 import { restoreProductAction } from "@/app/[locale]/[venueSlug]/product-actions";
 
@@ -63,6 +64,9 @@ export async function TrashSection() {
         <div className="flex flex-col gap-4">
           <TrashList title="Kategoriler" items={categories} action={restoreCategoryAction} />
           <TrashList title="Ürünler" items={products} action={restoreProductAction} />
+          <div className="border-t border-muted/15 pt-3">
+            <EmptyTrashButton />
+          </div>
         </div>
       )}
     </Card>
