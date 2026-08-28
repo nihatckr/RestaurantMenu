@@ -28,6 +28,7 @@ docs below. The agent contract (`../AGENTS.md`) points here for the binding spec
 | Doc | Purpose |
 | --- | --- |
 | [JOURNEY.md](JOURNEY.md) | Narrative of decisions and how we reached the current state. |
+| [DIAGRAMS.md](DIAGRAMS.md) | Mermaid diagrams: data model (ERD), request/render flow, card-variant + typography systems. |
 | [TASKS.md](TASKS.md) | Task-by-task plan and status (T1–T16, U-decisions). |
 | [PARITY.md](PARITY.md) | Intentional HTML/CSS-inherent differences from the legacy apps. |
 | [DEPLOY.md](DEPLOY.md) | Vercel + managed-Postgres deploy runbook. |
