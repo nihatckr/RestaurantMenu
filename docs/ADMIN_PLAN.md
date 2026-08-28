@@ -11,21 +11,23 @@ controls ship with it (AGENTS.md rule 13).
 
 ---
 
-## 1. The pivotal change: source of truth moves seed → DB
+## 1. The pivotal change: the DB is the sole content source; start EMPTY
 
-Today the **seed files are authoritative**: `prisma/seed.ts` + `data/{prices,
-translations}.ts` are re-run on every deploy and **reconcile** (delete rows not in
-the files). With an admin, the **database becomes the source of truth** and admin
-edits must survive deploys.
+The admin must be a **menu builder**: on an **empty database**, the owner logs in
+and **creates everything from scratch** — categories, products, prices,
+translations, per-venue visibility/order. **No content seed is required.**
 
-**Required changes (must land first — otherwise a deploy wipes the owner's edits):**
-- **Seed becomes bootstrap-only, idempotent:** `create`-if-missing only; **remove
-  every `deleteMany(... notIn ...)` reconcile** and never overwrite existing rows
-  (or gate the whole seed behind `if (empty database)`).
-- **`vercel-build` pipeline:** stop running `db seed` on every deploy — run
-  migrations only; seed once (first deploy / manual). (`DEPLOY.md` update.)
-- `data/{prices,translations}.ts` stay as the **initial content** for a fresh DB,
-  not a live source. After go-live, content is edited through the admin.
+**Required changes:**
+- **No content seed on deploy.** The DB is the single source of truth; production
+  starts empty and is populated through the admin. `vercel-build` runs **migrations
+  only** (no `db seed`). (`DEPLOY.md` update.)
+- **Remove the authoritative reconcile** (`deleteMany(... notIn ...)`) — admin-created
+  rows must never be deleted by a re-run.
+- The existing `prisma/seed.ts` + `data/{prices,translations}.ts` demote to an
+  **optional, dev-only demo importer** (`npm run seed:demo`) — handy for local work,
+  **never** run in production. Production content is 100% admin-created.
+- The only non-content bootstrap is the **first admin + the Business/Venue skeleton**
+  — see §3 (First run).
 
 ## 2. Caching — the public path stays static, invalidated on write
 
@@ -37,16 +39,23 @@ Public reads use `use cache` (PPR). For edits to appear without redeploying:
   `revalidatePath`) so the affected public pages rebuild on next request.
 - Public pages remain fully static/cacheable between edits — no SSR regression.
 
-## 3. Auth (T12)
+## 3. Auth (T12) + First run (empty database)
 
 - **Library:** **Auth.js v5 (NextAuth)** with the **Prisma adapter** — App-Router
   native, not on the denied-deps list, purpose-built (justified per ARCHITECTURE
   §"dependencies"). Avoids hand-rolling sessions/CSRF.
-- **Method:** email + password for a *small* set of staff, hashed with a strong KDF
-  (bcrypt/argon2), **or** passwordless email magic-link (fewer secrets to manage).
-  Decide with the owner (**U-admin-1**). No public sign-up.
-- **Model additions:** `User` (+ `role`), `Session`, `Account`, `VerificationToken`
-  (Auth.js adapter tables). Seed the first admin from env, not committed.
+- **Method (recommended): passwordless email magic-link.** Simplest UX (owner types
+  their email, clicks the link — no password to set/store/reset) and it works on an
+  **empty DB**. Alternative: single hashed password in env. Decide (**U-admin-1**).
+  No public sign-up.
+- **First run on an empty DB (seedless):** the allowed admin email is set in env
+  (`ADMIN_EMAIL`). On first magic-link login it creates the `User` row (role
+  `admin`). If no `Business`/`Venue` exists yet, a tiny **first-run setup** step in
+  the admin creates the Business + the first Venue (name + wordmark). From there the
+  owner adds categories and products. **No content seed needed at any point.**
+- **Model additions:** `User` (+ `role`), `Session`, `VerificationToken` (Auth.js
+  adapter tables). No committed credentials — only `ADMIN_EMAIL` + mail-sender creds
+  in env.
 - **Session:** httpOnly, secure, SameSite cookies; short-lived + rotation.
 
 ## 4. Authorization & the write path (SECURITY.md §2)
@@ -62,20 +71,31 @@ Public reads use `use cache` (PPR). For edits to appear without redeploying:
 - Admin lives under a dynamic, **non-cached** segment (e.g. `src/app/admin/…`),
   separate from the static public tree.
 
-## 5. Admin CRUD surface (T13)
+## 5. Admin CRUD surface (T13) — build a menu from nothing
 
-The admin edits exactly the data that is content today:
-- **Products:** identity (kind, tag, category), image; **translations** (tr required,
-  en/ru optional) for title/subtitle/description — the `translations.ts` fields.
-- **Prices:** single price or labelled measures (CL / glass-bottle) — the
-  `prices.ts` shape; per-venue if price ever varies (currently equal).
-- **Categories:** name translations, `columns`, order.
-- **Per-venue menu:** which categories/items are **visible**, and their **order**
-  (the `MenuCategory` / `MenuItem` rows) — data-driven, still no venue-name logic.
-- **Venues:** name, wordmark, sort order.
+Full **create / edit / delete**, so the owner can stand up the whole menu on an
+empty DB. Kept simple with sensible defaults (auto-slug, "visible everywhere",
+appended order) so the common path is a few taps.
 
-UX: list + edit forms per entity; optimistic-free (server actions + revalidate);
-inline validation from the same zod schemas. Keep it small and functional.
+- **Categories — add / edit / delete.** Form: TR/EN/RU name, optional `columns`.
+  **Slug auto-generated** from the English (or TR) name, editable, uniqueness-checked
+  — the owner never types a slug by hand. Reorder by drag or up/down.
+- **Products — add / edit / delete.** Form: TR/EN/RU title (+ optional subtitle/
+  description), **category** (picker), kind (food/drink), optional tag, **price**
+  (single amount *or* labelled measures like 4 CL / 35 CL / glass-bottle), photo,
+  and **which venues show it** (defaults: all venues, available, appended to the
+  category). Slug auto-generated + editable.
+- **Prices:** edited inline on the product; per-venue only if the owner turns that on
+  (model already allows it; default = same everywhere).
+- **Per-venue menu:** toggle a category/product **visible** per venue and set
+  **order** — still data-driven, never a venue-name branch.
+- **Venues:** add / edit (name, wordmark, order) — rarely used; created once at first
+  run.
+
+**UX principles (the "easy" bar):** one list per entity with a prominent **"+ Add"**;
+one form to edit; mobile-friendly (owner edits from a phone); no jargon (labels like
+"Name (Turkish)", "Price", "Show on Terrace"); Save → server action (zod) →
+`revalidateTag` → live. Delete asks to confirm. No multi-step wizards.
 
 ## 6. Images (T14)
 
@@ -89,12 +109,12 @@ inline validation from the same zod schemas. Keep it small and functional.
 
 | Task | Scope | Done when |
 |------|-------|-----------|
-| **A. Bootstrap-safe seed** | Remove reconcile/overwrite; deploy runs migrate only | Re-running seed/deploy never deletes or overwrites existing rows |
-| **B. Cache tags** | `cacheTag` in data-access; helper to revalidate | An edit (manual DB change) reflects after `revalidateTag` |
-| **T12 Auth** | Auth.js + Prisma adapter; admin-only; first user from env | Only an authenticated admin reaches `/admin`; sessions secure |
-| **T13 CRUD** | Server actions + zod for products/translations/prices/categories/menu/venues; revalidate on write | Owner edits a price/translation in the UI → public page updates; validation blocks bad input |
+| **A. Seedless deploy** | Deploy runs migrate only; remove reconcile; demote content seed to `seed:demo` (dev-only) | A fresh prod DB comes up **empty**; re-runs never delete/overwrite |
+| **B. Cache tags** | `cacheTag` in data-access; a `revalidateMenu()` helper | An edit reflects on the public page after `revalidateTag` |
+| **T12 Auth + first run** | Auth.js magic-link; `ADMIN_EMAIL`; first-run creates admin + Business/Venue on empty DB | On an empty DB, the owner logs in and reaches `/admin`; no seed used |
+| **T13 CRUD (create-first)** | Server actions + zod: **add/edit/delete categories & products**, prices, translations, per-venue visibility/order; auto-slug; revalidate on write | On an empty DB the owner **builds a full menu** (add category → add product → set price → appears live); validation blocks bad input |
 | **T14 Images** | Upload to blob storage; `remotePatterns`; `Product.image` = URL | Owner uploads a photo → it renders on the menu |
-| **Sec + tests** | Rate-limit, audit log, noindex; e2e of the human admin flow (login → edit → see change) | SECURITY.md §2 controls all present; e2e green |
+| **Sec + tests** | Rate-limit, audit log, noindex; e2e of the human flow (login → add category → add product → see it live) | SECURITY.md §2 controls present; e2e green |
 
 ## 8. Open questions (confirm with owner)
 
