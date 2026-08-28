@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { formatPriceTRY } from "@/lib/format";
 import type { MenuCategoryView, MenuItemView } from "@/lib/data/menu";
@@ -15,14 +16,15 @@ function ItemGrid({
 }) {
   const nonEmpty = items.length > 0;
   // Grids are mobile-first responsive (1/2/3 up) so nothing is cramped on a phone.
-  // Compact imageless drinks (beers/softs/wines): 1 → 2 → 3.
+  // Compact imageless drinks (beers/softs/wines): 2 → 3 (with smaller text on
+  // phones — 1-up was too sparse, user request).
   const allCompact = nonEmpty && items.every((i) => i.kind === "DRINK" && !i.image);
   // Cocktails (DRINK + photo): 3 → 4 → 5 (Figma 5-up on desktop, readable on phone).
   const allCocktail = nonEmpty && items.every((i) => i.kind === "DRINK" && !!i.image);
   // Food photo grid: category `columns` override (desserts/breakfast = 2), else 3.
   const foodCols = columns === 2 ? "grid-cols-2" : "grid-cols-3 lg:grid-cols-4";
   const cls = allCompact
-    ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+    ? "grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3"
     : allCocktail
       ? "grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-4 sm:gap-x-3 lg:grid-cols-5"
       : `grid gap-x-3 gap-y-6 sm:gap-x-6 ${foodCols}`;
@@ -76,38 +78,38 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
     ...(hasBottle ? ["0.75rem", ...bottleLabels.map(() => "auto")] : []),
   ].join(" ");
 
-  const priceCell = "type-price text-right text-[11px] sm:text-sm";
+  const label = "type-label whitespace-nowrap pb-1 text-right";
+  const priceCell = "type-price py-1 text-right text-[11px] sm:text-sm";
+  const gap = <span aria-hidden />;
 
+  // ONE grid holds the header AND every row's cells (via Fragments), so the auto
+  // columns size to the widest content across ALL rows and stay aligned — a
+  // missing measure just leaves an empty cell that holds its column.
   return (
-    <div className="w-full">
-      {/* Header: CL labels, one per column, aligned above the prices. */}
-      <div
-        className="grid items-baseline gap-x-2 pb-1 sm:gap-x-3"
-        style={{ gridTemplateColumns }}
-      >
-        <span aria-hidden />
-        {glassLabels.map((l) => (
-          <span key={l} className="type-label whitespace-nowrap text-right">
+    <div
+      className="grid w-full items-baseline gap-x-2 sm:gap-x-3"
+      style={{ gridTemplateColumns }}
+    >
+      {/* header */}
+      <span aria-hidden className="pb-1" />
+      {glassLabels.map((l) => (
+        <span key={`h-${l}`} className={label}>
+          {l}
+        </span>
+      ))}
+      {hasBottle && <span aria-hidden className="pb-1" />}
+      {hasBottle &&
+        bottleLabels.map((l) => (
+          <span key={`hb-${l}`} className={label}>
             {l}
           </span>
         ))}
-        {hasBottle && <span aria-hidden />}
-        {hasBottle &&
-          bottleLabels.map((l) => (
-            <span key={l} className="type-label whitespace-nowrap text-right">
-              {l}
-            </span>
-          ))}
-      </div>
 
+      {/* one Fragment per product → its cells flow into the shared grid columns */}
       {items.map((item) => (
-        <div
-          key={item.id}
-          className="grid items-baseline gap-x-2 py-1.5 sm:gap-x-3"
-          style={{ gridTemplateColumns }}
-        >
+        <Fragment key={item.id}>
           {/* TR name stacked over the EN name (alt alta). */}
-          <div className="min-w-0 leading-tight">
+          <div className="min-w-0 py-1 leading-tight">
             <span className="type-item text-sm">
               {item.title}
               {item.dlc && (
@@ -121,18 +123,18 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
             )}
           </div>
           {glassLabels.map((l) => (
-            <span key={l} className={priceCell}>
+            <span key={`g-${item.id}-${l}`} className={priceCell}>
               {priceOf(item, l)}
             </span>
           ))}
-          {hasBottle && <span aria-hidden />}
+          {hasBottle && gap}
           {hasBottle &&
             bottleLabels.map((l) => (
-              <span key={l} className={priceCell}>
+              <span key={`b-${item.id}-${l}`} className={priceCell}>
                 {priceOf(item, l)}
               </span>
             ))}
-        </div>
+        </Fragment>
       ))}
     </div>
   );
