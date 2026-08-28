@@ -45,19 +45,17 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
         />
       )}
       {/* Smaller text on phones so the card fits a 2-up grid (user request). */}
-      <div className="relative flex flex-col gap-0.5 p-1.5 sm:gap-1 sm:p-2">
-        <p className="type-item text-xs leading-tight sm:text-sm">
+      <div className="relative flex flex-col gap-1 p-2">
+        <p className="type-item text-sm leading-tight">
           {item.title}
           {item.dlc && (
-            <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[9px] text-muted">
+            <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[0.5625rem] text-muted">
               DLC
             </span>
           )}
         </p>
         {item.titleAlt && (
-          <p className="type-desc text-[11px] leading-tight sm:text-xs">
-            {item.titleAlt}
-          </p>
+          <p className="type-desc text-xs leading-tight">{item.titleAlt}</p>
         )}
         <div className="flex flex-wrap items-end gap-x-3 gap-y-1 pt-0.5">
           {item.prices.length > 0 ? (
@@ -67,7 +65,7 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
                 className="flex flex-col border-l border-foreground/25 pl-1.5 leading-tight"
               >
                 <span className="type-label">{po.label}</span>
-                <span className="type-price text-xs sm:text-sm">
+                <span className="type-price text-sm">
                   {formatPriceTRY(po.amount)}
                 </span>
               </div>
@@ -76,7 +74,7 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
             // Softs have no measure label but keep the same bordered-price
             // discipline as the beer cards (user request).
             <div className="flex flex-col border-l border-foreground/25 pl-1.5 leading-tight">
-              <span className="type-price text-xs sm:text-sm">{price}</span>
+              <span className="type-price text-sm">{price}</span>
             </div>
           ) : null}
         </div>

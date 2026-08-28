@@ -28,7 +28,7 @@ export function CategoryNav({
                 <span className="text-sm">{c.name}</span>
                 {/* lang=en so the EN line uppercases with dotless I. */}
                 {c.nameAlt && (
-                  <span lang="en" className="text-[10px] text-muted">
+                  <span lang="en" className="text-[0.625rem] text-muted">
                     {c.nameAlt}
                   </span>
                 )}

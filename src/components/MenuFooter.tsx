@@ -8,7 +8,7 @@ export function MenuFooter() {
       <p className="font-body text-xs text-muted">
         Tüm fiyatlarımıza KDV dâhildir · Servis ücreti alınmaz
       </p>
-      <p className="font-body text-[10px] text-muted">
+      <p className="font-body text-[0.625rem] text-muted">
         All prices include VAT · No service charge
       </p>
     </footer>

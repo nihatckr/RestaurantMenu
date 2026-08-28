@@ -79,7 +79,7 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
   ].join(" ");
 
   const label = "type-label whitespace-nowrap pb-1 text-right";
-  const priceCell = "type-price py-1 text-right text-[11px] sm:text-sm";
+  const priceCell = "type-price py-1 text-right text-sm";
   const gap = <span aria-hidden />;
 
   // ONE grid holds the header AND every row's cells (via Fragments), so the auto
@@ -113,7 +113,7 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
             <span className="type-item text-sm">
               {item.title}
               {item.dlc && (
-                <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[9px] text-muted">
+                <span className="ml-1.5 rounded border border-muted/40 px-1 align-middle text-[0.5625rem] text-muted">
                   DLC
                 </span>
               )}
@@ -173,7 +173,7 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
         {/* lang=en so the uppercase EN title uses dotless I (SPIRITS, not SPİRİTS). */}
         <h2
           lang={category.nameAlt ? "en" : undefined}
-          className="type-heading text-base tracking-[0.125em] sm:text-lg"
+          className="type-heading text-lg tracking-[0.125em]"
         >
           {heading}
         </h2>
@@ -201,7 +201,7 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
                   {heading}
                 </h3>
                 {subheading && (
-                  <p className="type-subheading mb-1 text-[10px] tracking-[0.2em]">
+                  <p className="type-subheading mb-1 text-[0.625rem] tracking-[0.2em]">
                     {subheading}
                   </p>
                 )}

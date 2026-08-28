@@ -52,6 +52,17 @@
   --font-body: var(--font-body);
 }
 
+/*
+ * Fluid root type scale — the ONE responsive standard. The root font-size grows
+ * with the viewport (≈13.5px on a small phone → 16px on desktop), and every text
+ * size is rem-based, so ALL type scales up/down together at the same ratio. Set
+ * sizes with the rem utilities (text-xs/sm/base…) or the .type-* roles; avoid
+ * fixed px so nothing breaks the scale.
+ */
+html {
+  font-size: clamp(13.5px, 11.9px + 0.45vw, 16px);
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -85,7 +96,7 @@ body {
      title = Inter 700; subtitle/desc = Inter. Headings above are Mono. */
   .type-label {
     /* legacy `cl` — Mono, ls 0 */
-    @apply font-brand text-[10px] uppercase text-muted;
+    @apply font-brand text-[0.625rem] uppercase text-muted;
   }
   .type-item {
     /* legacy `title` — Inter bold */
