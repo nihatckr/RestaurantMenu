@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { CategorySection } from "@/components/CategorySection";
+import { GuestSections, MenuSectionsIsland } from "./MenuSectionsIsland";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { AdminSessionControls } from "@/components/AdminSessionControls";
 import { ScrollToTop } from "@/components/ScrollToTop";
@@ -134,9 +134,12 @@ async function CategoryView({
         </Link>
       </div>
 
-      {ordered.map((category) => (
-        <CategorySection key={category.slug} category={category} />
-      ))}
+      {/* Sections: guests get the static prerendered list (the Suspense
+          fallback); an admin gets the same list with inline product edit/delete
+          + add (session-gated island, so no admin controls leak to guests). */}
+      <Suspense fallback={<GuestSections ordered={ordered} />}>
+        <MenuSectionsIsland locale={locale} venueSlug={venueSlug} ordered={ordered} />
+      </Suspense>
 
       {/* Brand footer (Figma: MONO TERRACE wordmark centered at the bottom).
           Links back to the venue landing (the menu "home"). */}

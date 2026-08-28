@@ -2,6 +2,22 @@ import { Fragment } from "react";
 import { MenuItemCard } from "@/components/MenuItemCard";
 import { formatPriceTRY } from "@/lib/format";
 import type { MenuCategoryView, MenuItemView } from "@/lib/data/menu";
+import type { ProductAdminRow } from "@/lib/data/admin";
+import {
+  AddProductButton,
+  ProductRowControls,
+  type CategoryOption,
+} from "@/app/[locale]/[venueSlug]/ProductControls";
+
+// Passed down only when an admin is viewing: lets each item render inline
+// edit/delete and each section an "add product" control. Guests never get this.
+export type SectionAdmin = {
+  locale: string;
+  venueSlug: string;
+  categorySlug: string;
+  rowsById: Record<string, ProductAdminRow>; // keyed by Product id
+  categoryOptions: CategoryOption[];
+};
 
 // A responsive grid of items: imageless single-price/single-measure drinks
 // (beers, softs) as compact cards, food/cocktails in a photo grid. Column
@@ -10,9 +26,11 @@ import type { MenuCategoryView, MenuItemView } from "@/lib/data/menu";
 function ItemGrid({
   items,
   columns,
+  admin,
 }: {
   items: MenuItemView[];
   columns?: number | null;
+  admin?: SectionAdmin;
 }) {
   const nonEmpty = items.length > 0;
   // Grids are mobile-first responsive (1/2/3 up) so nothing is cramped on a phone.
@@ -32,11 +50,26 @@ function ItemGrid({
       : `grid gap-x-3 gap-y-6 sm:gap-x-6 ${foodCols}`;
   return (
     <div className={cls}>
-      {items.map((item) => (
-        <div key={item.id} className={item.featured ? "col-span-full" : ""}>
-          <MenuItemCard item={item} />
-        </div>
-      ))}
+      {items.map((item) => {
+        const row = admin?.rowsById[item.productId];
+        return (
+          <div
+            key={item.id}
+            className={`relative ${item.featured ? "col-span-full" : ""}`}
+          >
+            {row && admin && (
+              <ProductRowControls
+                locale={admin.locale}
+                venueSlug={admin.venueSlug}
+                row={row}
+                categoryOptions={admin.categoryOptions}
+                overlay
+              />
+            )}
+            <MenuItemCard item={item} />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -56,7 +89,13 @@ function isBottleMeasure(label: string): boolean {
 // (e.g. "4 CL / 8 CL", "35 CL / 50 CL / 70 CL"). Groups are data-driven — the
 // BOTTLE column only appears once bottle-size prices exist in the data. Figma
 // uses Inter Bold for name + price (also avoids the Mono slashed-zero).
-function DrinkTable({ items }: { items: MenuItemView[] }) {
+function DrinkTable({
+  items,
+  admin,
+}: {
+  items: MenuItemView[];
+  admin?: SectionAdmin;
+}) {
   const glassLabels: string[] = [];
   const bottleLabels: string[] = [];
   for (const item of items)
@@ -119,6 +158,14 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
                 </span>
               )}
             </span>
+            {admin?.rowsById[item.productId] && (
+              <ProductRowControls
+                locale={admin.locale}
+                venueSlug={admin.venueSlug}
+                row={admin.rowsById[item.productId]}
+                categoryOptions={admin.categoryOptions}
+              />
+            )}
           </div>
           {glassLabels.map((l) => (
             <span key={`g-${item.id}-${l}`} className={priceCell}>
@@ -141,18 +188,31 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
 // A tag sub-group of hard drinks (Champaign/Gin/Vodka): imageless drinks with
 // measures render as an aligned price table (Figma). Wines are NOT tag-grouped,
 // so they never reach this path — they stay as cards (ItemGrid) below.
-function TagGroup({ items }: { items: MenuItemView[] }) {
+function TagGroup({
+  items,
+  admin,
+}: {
+  items: MenuItemView[];
+  admin?: SectionAdmin;
+}) {
   const allCompact =
     items.length > 0 && items.every((i) => i.kind === "DRINK" && !i.image);
   const maxMeasures = items.reduce((m, i) => Math.max(m, i.prices.length), 0);
-  if (allCompact && maxMeasures >= 2) return <DrinkTable items={items} />;
-  return <ItemGrid items={items} />;
+  if (allCompact && maxMeasures >= 2)
+    return <DrinkTable items={items} admin={admin} />;
+  return <ItemGrid items={items} admin={admin} />;
 }
 
 // A category heading + its items. When the category has several `tag`
 // sub-categories (legacy hard drinks: Viski/Rakı/…), items are grouped under
 // tag sub-headers; otherwise they render as a single group (DESIGN.md).
-export function CategorySection({ category }: { category: MenuCategoryView }) {
+export function CategorySection({
+  category,
+  admin,
+}: {
+  category: MenuCategoryView;
+  admin?: SectionAdmin;
+}) {
   const items = category.items;
   const tags = [
     ...new Set(items.map((i) => i.tag).filter((t): t is string => !!t)),
@@ -179,13 +239,26 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
             return (
               <div key={tag}>
                 <h3 className="type-tag text-base tracking-[0.125em]">{heading}</h3>
-                <TagGroup items={items.filter((i) => i.tag === tag)} />
+                <TagGroup items={items.filter((i) => i.tag === tag)} admin={admin} />
               </div>
             );
           })}
         </div>
       ) : (
-        <ItemGrid items={items} columns={category.columns} />
+        <ItemGrid items={items} columns={category.columns} admin={admin} />
+      )}
+
+      {/* Admin-only: add a product straight into this category (inline, no
+          separate panel). Guests never receive this. */}
+      {admin && (
+        <div className="flex justify-center">
+          <AddProductButton
+            locale={admin.locale}
+            venueSlug={admin.venueSlug}
+            categorySlug={admin.categorySlug}
+            categoryOptions={admin.categoryOptions}
+          />
+        </div>
       )}
     </section>
   );

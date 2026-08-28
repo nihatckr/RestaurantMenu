@@ -113,6 +113,7 @@ function tagLabel(tag: string, locale: string): string {
 
 export type MenuItemView = {
   id: string;
+  productId: string; // the underlying Product id — used by admin inline edit/delete
   title: string; // localized to the requested locale (tr fallback)
   subtitle: string | null;
   description: string | null;
@@ -181,6 +182,7 @@ export async function getVenueMenu(
               },
               product: {
                 select: {
+                  id: true,
                   image: true,
                   kind: true,
                   tag: true,
@@ -205,6 +207,7 @@ export async function getVenueMenu(
     const t = pickLocalized(item.product.translations, locale);
     const view: MenuItemView = {
       id: item.id,
+      productId: item.product.id,
       title: localized(item.product.translations, (r) => r.title, locale) || "",
       subtitle: t?.subtitle ?? null,
       description: t?.description ?? null,

@@ -184,3 +184,32 @@ test("admin creates and deletes a category inline", async ({ page }) => {
   await page.getByRole("button", { name: "Sil", exact: true }).click();
   await expect(page.getByRole("link", { name })).toHaveCount(0);
 });
+
+test("admin creates and deletes a product inline on a category page", async ({
+  page,
+}) => {
+  const title = `E2EÜrün ${Date.now()}`; // unique so runs never collide
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/terrace/starters");
+
+  // "Ürün ekle" lives in each category section — scope to the Başlangıçlar one so
+  // the new product lands in that category (the form preselects it).
+  const section = page.locator("section", {
+    has: page.getByRole("heading", { name: "Başlangıçlar" }),
+  });
+  await section.getByRole("button", { name: "Ürün ekle" }).click();
+  await page.getByLabel("Ad (Türkçe)").fill(title);
+  await page.getByRole("button", { name: "Kaydet" }).click();
+
+  // It shows up in the section immediately (updateTag read-your-own-writes).
+  await expect(page.getByText(title)).toBeVisible();
+
+  // Delete it via the inline card control → confirm → gone.
+  await page.getByRole("button", { name: `${title} sil` }).click();
+  await page.getByRole("button", { name: "Sil", exact: true }).click();
+  await expect(page.getByText(title)).toHaveCount(0);
+});
