@@ -140,3 +140,17 @@ test("prices render as plain numbers (no ₺ tofu)", async ({ page }) => {
   await page.goto("/tr/terrace/starters");
   await expect(page.getByText("₺")).toHaveCount(0);
 });
+
+test("admin logs in with the password and logs out", async ({ page }) => {
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/); // redirected to the menu after login
+
+  // The session persists — the login route now shows the logged-in panel.
+  await page.goto("/tr/login");
+  await expect(page.getByText("Giriş yapıldı")).toBeVisible();
+
+  await page.getByRole("button", { name: "Çıkış yap" }).click();
+  await expect(page.getByRole("button", { name: "Giriş" })).toBeVisible(); // back to form
+});

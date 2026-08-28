@@ -75,24 +75,29 @@ Public reads use `use cache` (PPR). For edits to appear without redeploying:
 **single password**. No multi-user, no email service, no OAuth — the simplest secure
 fit for one person editing (often from a phone).
 
-- **Approach — lightweight session, not full Auth.js.** Auth.js's provider/adapter
-  machinery is overkill for one env-based password. Use **`iron-session`**
-  (maintained, encrypted+signed httpOnly cookie — still not hand-rolled) + verify the
-  password with **`argon2`** (or bcrypt) against a hash in env
-  (`ADMIN_PASSWORD_HASH`). No `User`/`Session`/`Account` tables needed. (Auth.js is
-  the documented upgrade path **if** multiple users / OAuth are ever added.)
-- **Login flow:** discreet unlinked route `/login` → password field → verify against
-  `ADMIN_PASSWORD_HASH` → set the encrypted session cookie. **Rate-limit** the login
-  (it's a password now: throttle attempts, generic error).
-- **First run on an empty DB (seedless):** password comes from env, so login works on
-  a fresh DB with no user row. On first login, if no `Business`/`Venue` exists, a tiny
-  **first-run setup** creates the Business + first Venue (name + wordmark). Then the
-  owner adds categories/products. **No content seed at any point.**
-- **Break-glass = env:** the password lives in `ADMIN_PASSWORD_HASH`; if forgotten/
-  leaked, the dev sets a new hash + redeploys (documented in OPS). No lockout.
-- **Session:** encrypted, httpOnly, secure, SameSite cookie; sensible expiry + idle
-  timeout. Logout clears it. Secrets (`ADMIN_PASSWORD_HASH`, session secret) only in
-  env, never committed.
+**As built (T12):**
+- **Lightweight session, not full Auth.js** — overkill for one credential. Use
+  **`iron-session`** (encrypted+signed httpOnly cookie — not hand-rolled) + **bcrypt**
+  (`bcryptjs`, pure-JS — chosen over argon2 to avoid a native build on serverless) for
+  hashing *and* verify. Auth.js stays the upgrade path if multiple users / OAuth are
+  ever added.
+- **Credential in the DB, seeded by code** (`prisma/auth.seed.ts` → `npm run
+  seed:admin`): a single `AdminUser { username, passwordHash }` row; the plaintext
+  (`ADMIN_PASSWORD`, dev default `1234`) is **bcrypt-hashed in the seed** and stored
+  hashed — never in plaintext, and no `$`-in-env dotenv pitfalls. Verify reads the row
+  and `bcrypt.compare`s. (`src/lib/auth.ts`.)
+- **Login flow:** discreet unlinked route `/[locale]/login` → password field
+  (`LoginForm`, `useActionState`) → server action verifies → sets the session cookie →
+  redirects to the menu. Logout action destroys it. **Login rate-limit** (in-process
+  best-effort: 5 fails → 5-min lock, generic error). Admin chrome is Turkish.
+- **Cookie:** encrypted, httpOnly, SameSite=lax, 8h; **`secure` in production**
+  (HTTPS). `AUTH_ALLOW_HTTP=1` disables `secure` for local `next start` over
+  http://localhost (dev/e2e only — never in prod).
+- **Break-glass:** change `ADMIN_PASSWORD` + re-run `npm run seed:admin` (re-hashes).
+  No lockout. Secrets (`SESSION_SECRET`, `ADMIN_PASSWORD`) only in env.
+- **First run** (empty-DB venue/Business creation) is built **with T13** (venue CRUD),
+  since it reuses the venue-create action. Auth itself works on an empty DB (the admin
+  row is seeded independently of content).
 
 ## 4. Authorization & the write path (SECURITY.md §2)
 
@@ -119,10 +124,11 @@ fit for one person editing (often from a phone).
 The consolidated "so nobody hacks us" list. All must be present before the admin
 goes live.
 
-- **Auth:** single owner password, **argon2-hashed** in env (`ADMIN_PASSWORD_HASH`);
-  encrypted httpOnly + secure + SameSite session cookie (`iron-session`) with idle
-  timeout; **rate-limit + throttle login attempts** (brute-force defence, generic
-  error). Secrets only in env; env break-glass for reset.
+- **Auth:** single owner password, **bcrypt-hashed in the DB** (`AdminUser`, seeded by
+  `auth.seed.ts`); encrypted httpOnly + secure + SameSite session cookie
+  (`iron-session`, 8h); **rate-limit login attempts** (brute-force defence, generic
+  error). Secrets (`SESSION_SECRET`, `ADMIN_PASSWORD`) only in env; break-glass =
+  re-seed the admin.
 - **Authorization:** every mutation re-checks the session + `role === "admin"`
   **server-side**; queries scoped to this business's rows (no IDOR); security never
   relies on hiding the UI.

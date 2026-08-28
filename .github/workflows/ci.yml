@@ -34,6 +34,8 @@ jobs:
       - run: npm ci
       - run: npx prisma migrate deploy
       - run: npx prisma db seed
+      # Seed the admin (password "1234") so the admin-login e2e can sign in.
+      - run: npm run seed:admin
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run test

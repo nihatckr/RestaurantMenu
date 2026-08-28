@@ -17,6 +17,17 @@ enum ProductKind {
   DRINK
 }
 
+// Single admin (the owner) — ADMIN_PLAN.md §3. The password is bcrypt-hashed and
+// seeded via `prisma/auth.seed.ts` (`npm run seed:admin`); login verifies with
+// bcrypt. Not committed anywhere in plaintext.
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique @default("admin")
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model Business {
   id            String     @id @default(cuid())
   name          String

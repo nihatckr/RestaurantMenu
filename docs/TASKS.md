@@ -287,15 +287,16 @@ the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the
   full-replace) — **moved to build WITH T12 (auth)**: admin endpoints must be
   authenticated, so they can't safely ship before login exists.
 
-**T12 — Auth + first run**
-- [ ] Add deps `iron-session` + `argon2`; env `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`.
-- [ ] `/login` (password verify → encrypted session cookie) + logout action +
-  **login rate-limit/throttle**. *Done when:* right password logs in, wrong is
-  rejected + throttled.
-- [ ] `getAdminSession()` server helper gating admin islands **and** every server
-  action. *Done when:* guests see none of it; actions reject unauthenticated calls.
-- [ ] First-run: if no `Business`/`Venue`, a setup modal creates them. *Done when:*
-  empty DB → login → create the first venue.
+**T12 — Auth** — ✅ DONE (first-run setup moved to T13 with venue CRUD)
+- [x] Deps `iron-session` + `bcryptjs` (bcrypt over argon2 — no native build).
+- [x] **`AdminUser` migration** + `prisma/auth.seed.ts` (`npm run seed:admin`) —
+  bcrypt-hashes `ADMIN_PASSWORD` (dev `1234`) into the DB.
+- [x] `src/lib/auth.ts`: `getSession`/`isAdmin` (iron-session), `verifyPassword`
+  (bcrypt vs DB hash), in-process login throttle. `secure` cookie in prod;
+  `AUTH_ALLOW_HTTP=1` for local http.
+- [x] `/[locale]/login` (form + server action) + logout + rate-limit. *Verified:*
+  right password → logs in + session persists; wrong → "Şifre hatalı"; logout clears.
+- [x] **e2e** login/logout (10 e2e); CI seeds the admin (`npm run seed:admin`).
 
 **T13 — Inline CRUD (create-first)**
 - [ ] UI primitives: `cn()` (clsx+tailwind-merge), `Button`/`Input`/`Textarea`/

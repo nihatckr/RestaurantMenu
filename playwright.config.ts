@@ -20,5 +20,12 @@ export default defineConfig({
     url: "http://127.0.0.1:3100/tr/terrace",
     reuseExistingServer: true,
     timeout: 120_000,
+    // Test-only auth env for the admin login e2e (the admin is seeded with password
+    // "1234" via `npm run seed:admin`). AUTH_ALLOW_HTTP lets the session cookie work
+    // over http on 127.0.0.1; these are not production secrets.
+    env: {
+      AUTH_ALLOW_HTTP: "1",
+      SESSION_SECRET: "e2e_test_session_secret_at_least_32_characters",
+    },
   },
 });

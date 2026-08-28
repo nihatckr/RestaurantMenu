@@ -16,6 +16,8 @@ these are the steps to run; an agent cannot perform account/DNS actions.
 | `DATABASE_URL` | **Pooled** connection for the app runtime (serverless pooler — `OPS.md`). |
 | `DIRECT_URL` | **Unpooled** connection for `prisma migrate deploy` (wired in `schema.prisma` `datasource.directUrl`). |
 | `NEXT_PUBLIC_SITE_URL` | Public origin, e.g. `https://menu.monohotelantalya.com` (metadata/OG/sitemap). |
+| `SESSION_SECRET` | Random ≥32-char secret for the encrypted admin session cookie (`iron-session`). |
+| `ADMIN_PASSWORD` | The owner's admin password — used **once** by `npm run seed:admin` to store its bcrypt hash in the DB (not read at runtime). Use a strong value (not the dev `1234`). |
 
 ## First deploy (Vercel + managed Postgres)
 1. **Provision Postgres** (Neon / Vercel Postgres / Supabase-Postgres). Copy the
@@ -33,7 +35,11 @@ these are the steps to run; an agent cannot perform account/DNS actions.
    > **Demo data (dev only):** `npm run seed:demo` populates an **empty** dev DB with
    > the sample menu; it **bails out if the DB already has content** (never
    > overwrites). To re-apply changed demo data locally, `npm run db:reset` first.
-5. **Verify:** `/` (→ redirects to `/tr`), `/tr` (venue chooser), `/tr/terrace`,
+5. **Seed the admin (once).** With `ADMIN_PASSWORD` set to the owner's password, run
+   `npm run seed:admin` against the prod DB (locally with the prod `DATABASE_URL`, or
+   a one-off job) — it bcrypt-hashes the password into the `AdminUser` row so the
+   owner can log in at `/tr/login`. Re-run to change the password.
+6. **Verify:** `/` (→ redirects to `/tr`), `/tr` (venue chooser), `/tr/terrace`,
    `/en/terrace`, `/ru/terrace`, a category page, `/api/health` → `{status:"ok"}`,
    `/robots.txt`, `/sitemap.xml`, and the security headers (CSP, HSTS, nosniff).
 
