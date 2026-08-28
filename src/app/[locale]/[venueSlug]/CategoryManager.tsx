@@ -192,16 +192,36 @@ function CategoryFormModal({
   return (
     <Modal open onClose={onClose} title={title}>
       <form action={formAction} className="flex flex-col gap-3">
-        <Field label="Ad (Türkçe)" error={state.fieldErrors?.nameTr}>
+        <p className="font-body text-xs text-muted">
+          Kategori, menüdeki bir bölümdür (örn. Başlangıçlar). Adı üç dilde
+          girebilirsin; İngilizce/Rusça boşsa Türkçesi gösterilir.
+        </p>
+        <Field
+          label="Ad (Türkçe)"
+          hint="Menüde ve kategori listesinde görünen ad."
+          error={state.fieldErrors?.nameTr}
+        >
           <Input name="nameTr" defaultValue={initial?.nameTr} required autoFocus />
         </Field>
-        <Field label="Ad (İngilizce)" error={state.fieldErrors?.nameEn}>
+        <Field
+          label="Ad (İngilizce)"
+          hint="Boş bırakılırsa Türkçesi gösterilir."
+          error={state.fieldErrors?.nameEn}
+        >
           <Input name="nameEn" defaultValue={initial?.nameEn} />
         </Field>
-        <Field label="Ad (Rusça)" error={state.fieldErrors?.nameRu}>
+        <Field
+          label="Ad (Rusça)"
+          hint="Boş bırakılırsa Türkçesi gösterilir."
+          error={state.fieldErrors?.nameRu}
+        >
           <Input name="nameRu" defaultValue={initial?.nameRu} />
         </Field>
-        <Field label="Sütun sayısı (opsiyonel)" error={state.fieldErrors?.columns}>
+        <Field
+          label="Sütun sayısı (opsiyonel)"
+          hint="Fotoğrafların satır başına sayısı. 2 = büyük 2’li düzen (tatlı/kahvaltı); boş = otomatik."
+          error={state.fieldErrors?.columns}
+        >
           <Input
             name="columns"
             type="number"

@@ -11,10 +11,12 @@ export function ImageField({
   name,
   initial,
   label = "Görsel",
+  hint,
 }: {
   name: string;
   initial?: string | null;
   label?: string;
+  hint?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(initial ?? null);
@@ -38,6 +40,9 @@ export function ImageField({
   return (
     <div className="flex flex-col gap-1">
       <span className="font-body text-xs text-muted">{label}</span>
+      {hint && (
+        <span className="font-body text-[0.6875rem] text-muted/80">{hint}</span>
+      )}
       <div className="flex items-center gap-3">
         {preview ? (
           <div className="relative h-20 w-20 overflow-hidden rounded border border-muted/30">

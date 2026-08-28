@@ -258,16 +258,36 @@ function ProductFormModal({
   return (
     <Modal open onClose={onClose} title={title}>
       <form action={formAction} className="flex flex-col gap-3">
-        <Field label="Ad (Türkçe)" error={state.fieldErrors?.titleTr}>
+        <p className="font-body text-xs text-muted">
+          Ürün, menüdeki tek bir kalemdir (yemek ya da içecek). Adı üç dilde
+          girilebilir; İngilizce/Rusça boşsa Türkçesi gösterilir.
+        </p>
+        <Field
+          label="Ad (Türkçe)"
+          hint="Menüde görünen ürün adı."
+          error={state.fieldErrors?.titleTr}
+        >
           <Input name="titleTr" defaultValue={initial.titleTr} required autoFocus />
         </Field>
-        <Field label="Ad (İngilizce)" error={state.fieldErrors?.titleEn}>
+        <Field
+          label="Ad (İngilizce)"
+          hint="Boş bırakılırsa Türkçesi gösterilir."
+          error={state.fieldErrors?.titleEn}
+        >
           <Input name="titleEn" defaultValue={initial.titleEn} />
         </Field>
-        <Field label="Ad (Rusça)" error={state.fieldErrors?.titleRu}>
+        <Field
+          label="Ad (Rusça)"
+          hint="Boş bırakılırsa Türkçesi gösterilir."
+          error={state.fieldErrors?.titleRu}
+        >
           <Input name="titleRu" defaultValue={initial.titleRu} />
         </Field>
-        <Field label="Kategori" error={state.fieldErrors?.categorySlug}>
+        <Field
+          label="Kategori"
+          hint="Ürünün hangi bölümde görüneceği. Değiştirirsen ürün o kategoriye taşınır."
+          error={state.fieldErrors?.categorySlug}
+        >
           <Select name="categorySlug" defaultValue={initial.categorySlug} required>
             {categoryOptions.map((c) => (
               <option key={c.slug} value={c.slug}>
@@ -286,7 +306,12 @@ function ProductFormModal({
             <option value="DRINK">İçecek</option>
           </Select>
         </Field>
-        <ImageField name="image" initial={initial.image} label="Ürün görseli" />
+        <ImageField
+          name="image"
+          initial={initial.image}
+          label="Ürün görseli"
+          hint="Opsiyonel. Yüklenen görsel otomatik küçültülür ve WebP’e dönüştürülür."
+        />
         <Field
           label="Tek fiyat (opsiyonel)"
           hint="Aşağıya ölçülü fiyat eklersen bu yok sayılır."
