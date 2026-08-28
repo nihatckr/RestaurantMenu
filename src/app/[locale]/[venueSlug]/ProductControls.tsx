@@ -44,7 +44,7 @@ export function AddProductButton({
     <>
       <Button
         variant="ghost"
-        className="mx-auto mt-3 flex items-center justify-center gap-1 py-1.5 text-xs"
+        className="flex items-center gap-1 whitespace-nowrap px-2 py-1 text-xs"
         onClick={() => setOpen(true)}
       >
         <Plus size={14} aria-hidden /> Ürün ekle

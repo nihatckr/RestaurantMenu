@@ -224,8 +224,20 @@ export function CategorySection({
   // (SPIRITS in en, VİSKİ in tr) from the CSS text-transform automatically.
   return (
     <section className="reveal w-full scroll-mt-4">
-      <div className="py-4 text-center">
+      {/* Heading stays centred (Figma); the admin "add product" control sits at
+          the far right of the same row (absolute, so it never shifts the title). */}
+      <div className="relative py-4 text-center">
         <h2 className="type-heading text-lg tracking-[0.125em]">{category.name}</h2>
+        {admin && (
+          <div className="absolute right-0 top-1/2 -translate-y-1/2">
+            <AddProductButton
+              locale={admin.locale}
+              venueSlug={admin.venueSlug}
+              categorySlug={admin.categorySlug}
+              categoryOptions={admin.categoryOptions}
+            />
+          </div>
+        )}
       </div>
 
       {items.length === 0 ? (
@@ -246,19 +258,6 @@ export function CategorySection({
         </div>
       ) : (
         <ItemGrid items={items} columns={category.columns} admin={admin} />
-      )}
-
-      {/* Admin-only: add a product straight into this category (inline, no
-          separate panel). Guests never receive this. */}
-      {admin && (
-        <div className="flex justify-center">
-          <AddProductButton
-            locale={admin.locale}
-            venueSlug={admin.venueSlug}
-            categorySlug={admin.categorySlug}
-            categoryOptions={admin.categoryOptions}
-          />
-        </div>
       )}
     </section>
   );
