@@ -14,7 +14,8 @@ export type AuditEntity =
   | "brand"
   | "wordmark"
   | "backup"
-  | "trash";
+  | "trash"
+  | "password";
 
 // Append one audit row. Best-effort: logging must never fail the mutation it
 // records (SECURITY.md §4b). Callers are already behind requireAdmin().

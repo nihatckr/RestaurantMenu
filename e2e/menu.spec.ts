@@ -440,6 +440,30 @@ test("import rejects a file that isn't a valid workbook", async ({ page }) => {
   await expect(page.getByText(/Dosya okunamadı/)).toBeVisible();
 });
 
+test("admin changes the password (current verified)", async ({ page }) => {
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+  await page.goto("/tr/settings");
+  await page.getByRole("tab", { name: "Güvenlik" }).click();
+
+  // Wrong current password → rejected.
+  await page.locator('input[name="current"]').fill("yanlis");
+  await page.locator('input[name="next"]').fill("1234");
+  await page.locator('input[name="confirm"]').fill("1234");
+  await page.getByRole("button", { name: "Şifreyi değiştir" }).click();
+  await expect(page.getByText("Mevcut şifre hatalı.")).toBeVisible();
+
+  // Correct current → saved. Keep the value "1234" so parallel logins still work.
+  await page.locator('input[name="current"]').fill("1234");
+  await page.locator('input[name="next"]').fill("1234");
+  await page.locator('input[name="confirm"]').fill("1234");
+  await page.getByRole("button", { name: "Şifreyi değiştir" }).click();
+  // exact: the audit log ("— şifre değiştirildi") would substring-match otherwise.
+  await expect(page.getByText("Şifre değiştirildi", { exact: true })).toBeVisible();
+});
+
 test("admin uploads a product photo", async ({ page }) => {
   const title = `E2EFoto ${Date.now()}`;
   // A tiny valid 8×8 PNG so sharp can decode + re-encode it.

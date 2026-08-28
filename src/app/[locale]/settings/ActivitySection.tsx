@@ -17,6 +17,7 @@ const ENTITIES: Record<string, string> = {
   wordmark: "Wordmark",
   backup: "Yedek",
   trash: "Çöp kutusu",
+  password: "Şifre",
 };
 
 // Recent admin activity (audit trail). Server-rendered, read-only.

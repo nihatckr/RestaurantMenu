@@ -62,6 +62,18 @@ export async function verifyPassword(input: string): Promise<boolean> {
   return bcrypt.compare(input, admin.passwordHash);
 }
 
+/** Set (bcrypt-hash) the admin password. Single admin: updates the one row, or
+ *  creates it if missing. Callers must be authenticated + have verified current. */
+export async function setPassword(newPassword: string): Promise<void> {
+  const passwordHash = bcrypt.hashSync(newPassword, 10);
+  const admin = await prisma.adminUser.findFirst({ select: { id: true } });
+  if (admin) {
+    await prisma.adminUser.update({ where: { id: admin.id }, data: { passwordHash } });
+  } else {
+    await prisma.adminUser.create({ data: { passwordHash } });
+  }
+}
+
 // Best-effort in-process login throttle (single admin). Distributed rate-limiting
 // across serverless instances is deferred to Upstash if ever needed (ADMIN_PLAN §4/§4b).
 const FAILS = new Map<string, { count: number; until: number }>();

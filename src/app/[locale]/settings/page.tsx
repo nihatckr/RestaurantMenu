@@ -10,6 +10,7 @@ import { SettingsForms } from "./SettingsForms";
 import { BackupSection } from "./BackupSection";
 import { TrashSection } from "./TrashSection";
 import { ActivitySection } from "./ActivitySection";
+import { PasswordForm } from "./PasswordForm";
 import { SettingsTabs } from "./SettingsTabs";
 
 // Admin-only; never indexed.
@@ -59,6 +60,7 @@ async function SettingsView({
           },
           { id: "yedek", label: "Yedek", panel: <BackupSection /> },
           { id: "cop", label: "Çöp kutusu", panel: <TrashSection /> },
+          { id: "guvenlik", label: "Güvenlik", panel: <PasswordForm /> },
           { id: "islemler", label: "Son işlemler", panel: <ActivitySection /> },
         ]}
       />

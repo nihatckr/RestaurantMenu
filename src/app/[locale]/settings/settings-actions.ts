@@ -1,6 +1,6 @@
 "use server";
 
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, verifyPassword, setPassword } from "@/lib/auth";
 import { revalidateMenu } from "@/lib/cache";
 import { uploadImage, ImageError } from "@/lib/images";
 import { setBrandLogo, setVenueWordmark } from "@/lib/data/settings";
@@ -87,6 +87,28 @@ export async function importBackupAction(
   );
   revalidateMenu();
   return { ok: true, counts: result.counts };
+}
+
+export type PasswordState = { ok?: boolean; error?: string };
+
+// Change the admin password (requires the current one).
+export async function changePasswordAction(
+  _prev: PasswordState,
+  formData: FormData,
+): Promise<PasswordState> {
+  await requireAdmin();
+  const current = String(formData.get("current") ?? "");
+  const next = String(formData.get("next") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  if (!(await verifyPassword(current))) return { error: "Mevcut şifre hatalı." };
+  if (next.length < 4) return { error: "Yeni şifre en az 4 karakter olmalı." };
+  if (next.length > 100) return { error: "Yeni şifre çok uzun." };
+  if (next !== confirm) return { error: "Yeni şifreler eşleşmiyor." };
+
+  await setPassword(next);
+  await audit("settings", "password", "şifre değiştirildi");
+  return { ok: true };
 }
 
 // Permanently empty the trash (irreversible). Used as a plain <form action>.
