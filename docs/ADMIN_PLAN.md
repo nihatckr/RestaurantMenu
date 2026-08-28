@@ -135,9 +135,16 @@ the denied list:
 - **Forms — `react-hook-form` + `@hookform/resolvers/zod`.** Chosen over **Formik**:
   lighter, far fewer re-renders, first-class zod integration. Drives the modal
   create/edit forms with inline field errors.
-- **Modal — native `<dialog>`** via a thin accessible wrapper: focus-trap + ESC come
-  for free, no UI-kit dependency. (Radix is the fallback only if we later need richer
-  primitives — not for v1.)
+- **Modal — native `<dialog>`** (decided) via ONE thin reusable `<Modal>` wrapper —
+  no UI-kit dependency. `showModal()` gives focus-trap (background `inert`), **ESC**,
+  and `::backdrop` for free. The wrapper adds the three things native `<dialog>`
+  doesn't: (1) sync React `open` ↔ `showModal()`/`close()` and **return focus** to
+  the trigger on close, (2) **backdrop-click to close**, (3) **body scroll-lock**
+  while open. Enter/exit animation is native CSS (`@starting-style` + `transition` +
+  `transition-behavior: allow-discrete`) — consistent with the "no JS motion lib"
+  decision and auto-disabled under `prefers-reduced-motion`. Every create/edit/delete
+  form renders inside this one component. (Radix Dialog stays the fallback only if
+  dialogs later get numerous/complex — not for v1.)
 
 **State management — deliberately NONE.** `Redux` and `Zustand` are on the project's
 **denied-dependency list** (`AGENTS.md` rule 8), and are unnecessary here: this admin
