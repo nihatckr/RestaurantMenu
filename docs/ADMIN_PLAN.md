@@ -146,6 +146,16 @@ the denied list:
   form renders inside this one component. (Radix Dialog stays the fallback only if
   dialogs later get numerous/complex — not for v1.)
 
+- **Styling & components — Tailwind + our own primitives, no UI kit.** No shadcn/ui
+  (it reintroduces Radix — we chose native `<dialog>`) and no DaisyUI (opinionated
+  look clashes with the bespoke minimalist brand). Instead: one small **`cn()`**
+  helper (**`clsx` + `tailwind-merge`**) for conditional/override-safe classes, plus
+  a handful of hand-rolled, brand-consistent primitives — `Button`, `Input`,
+  `Textarea`, `Field` (label + error), and the `Modal` wrapper — reused across every
+  form (same "central over scattered" principle as the public `.type-*` roles).
+  `class-variance-authority` (cva) only **if** button/badge variants multiply — not
+  needed for v1. Optional dev-only: `prettier-plugin-tailwindcss` (class sorting).
+
 **State management — deliberately NONE.** `Redux` and `Zustand` are on the project's
 **denied-dependency list** (`AGENTS.md` rule 8), and are unnecessary here: this admin
 has no cross-page global client state. Local UI state (modal open, form fields) uses
