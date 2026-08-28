@@ -9,6 +9,7 @@ import { Input, Field } from "@/components/ui/form";
 import { ImageField } from "@/components/ui/ImageField";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { SavedHint } from "@/components/ui/SavedHint";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import {
   createVenueAction,
   updateVenueNameAction,
@@ -83,7 +84,6 @@ function VenueRow({
   count: number;
 }) {
   const [confirming, setConfirming] = useState(false);
-  const router = useRouter();
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-muted/20 p-4">
@@ -129,27 +129,15 @@ function VenueRow({
       </div>
 
       {confirming && (
-        <Modal open onClose={() => setConfirming(false)} title="Mekan silinsin mi?">
-          <p className="mb-4 font-body text-sm">
-            “{venue.name}” ve menüsü (kategori/ürün yerleşimleri) <strong>kalıcı</strong>{" "}
-            silinecek. Ürün ve kategori kataloğu etkilenmez. Bu işlem geri alınamaz.
-          </p>
-          <form
-            action={async () => {
-              await deleteVenueAction(venue.slug);
-              setConfirming(false);
-              router.refresh();
-            }}
-            className="flex justify-end gap-2"
-          >
-            <Button type="button" variant="ghost" onClick={() => setConfirming(false)}>
-              İptal
-            </Button>
-            <Button type="submit" variant="danger">
-              Kalıcı olarak sil
-            </Button>
-          </form>
-        </Modal>
+        <ConfirmModal
+          title="Mekan silinsin mi?"
+          confirmLabel="Kalıcı olarak sil"
+          onConfirm={() => deleteVenueAction(venue.slug)}
+          onClose={() => setConfirming(false)}
+        >
+          “{venue.name}” ve menüsü (kategori/ürün yerleşimleri) <strong>kalıcı</strong>{" "}
+          silinecek. Ürün ve kategori kataloğu etkilenmez. Bu işlem geri alınamaz.
+        </ConfirmModal>
       )}
     </div>
   );

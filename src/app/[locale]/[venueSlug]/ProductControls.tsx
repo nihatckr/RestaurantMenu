@@ -12,6 +12,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Button } from "@/components/ui/Button";
 import { Input, Field, Select } from "@/components/ui/form";
 import { ImageField } from "@/components/ui/ImageField";
@@ -202,12 +203,13 @@ export function ProductRowControls({
         />
       )}
       {editing === "delete" && (
-        <DeleteModal
-          name={row.titleTr}
-          action={deleteProductAction.bind(null, locale, venueSlug, row.id)}
+        <ConfirmModal
+          title="Silinsin mi?"
+          onConfirm={deleteProductAction.bind(null, locale, venueSlug, row.id)}
           onClose={() => setEditing(null)}
-          onDone={done}
-        />
+        >
+          “{row.titleTr}” ürünü menüden kaldırılacak (geri alınabilir).
+        </ConfirmModal>
       )}
     </>
   );
@@ -412,36 +414,3 @@ function ProductFormModal({
   );
 }
 
-function DeleteModal({
-  name,
-  action,
-  onClose,
-  onDone,
-}: {
-  name: string;
-  action: (formData: FormData) => Promise<void>;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  return (
-    <Modal open onClose={onClose} title="Silinsin mi?">
-      <p className="mb-4 font-body text-sm">
-        “{name}” ürünü menüden kaldırılacak (geri alınabilir).
-      </p>
-      <form
-        action={async (formData) => {
-          await action(formData);
-          onDone();
-        }}
-        className="flex justify-end gap-2"
-      >
-        <Button type="button" variant="ghost" onClick={onClose}>
-          İptal
-        </Button>
-        <Button type="submit" variant="danger">
-          Sil
-        </Button>
-      </form>
-    </Modal>
-  );
-}

@@ -13,6 +13,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/form";
 import type { CategoryAdminRow } from "@/lib/data/admin";
@@ -160,12 +161,13 @@ export function CategoryManager({
         />
       )}
       {editing?.mode === "delete" && (
-        <DeleteModal
-          name={editing.row.nameTr}
-          action={deleteCategoryAction.bind(null, locale, venueSlug, editing.row.id)}
+        <ConfirmModal
+          title="Silinsin mi?"
+          onConfirm={deleteCategoryAction.bind(null, locale, venueSlug, editing.row.id)}
           onClose={close}
-          onDone={done}
-        />
+        >
+          “{editing.row.nameTr}” kategorisi menüden kaldırılacak (geri alınabilir).
+        </ConfirmModal>
       )}
     </nav>
   );
@@ -246,36 +248,3 @@ function CategoryFormModal({
   );
 }
 
-function DeleteModal({
-  name,
-  action,
-  onClose,
-  onDone,
-}: {
-  name: string;
-  action: (formData: FormData) => Promise<void>;
-  onClose: () => void;
-  onDone: () => void;
-}) {
-  return (
-    <Modal open onClose={onClose} title="Silinsin mi?">
-      <p className="mb-4 font-body text-sm">
-        “{name}” kategorisi menüden kaldırılacak (geri alınabilir).
-      </p>
-      <form
-        action={async (formData) => {
-          await action(formData);
-          onDone();
-        }}
-        className="flex justify-end gap-2"
-      >
-        <Button type="button" variant="ghost" onClick={onClose}>
-          İptal
-        </Button>
-        <Button type="submit" variant="danger">
-          Sil
-        </Button>
-      </form>
-    </Modal>
-  );
-}
