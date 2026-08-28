@@ -27,11 +27,13 @@ export function AddProductButton({
   venueSlug,
   categorySlug,
   categoryOptions,
+  iconOnly = false,
 }: {
   locale: string;
   venueSlug: string;
   categorySlug: string;
   categoryOptions: CategoryOption[];
+  iconOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -44,10 +46,16 @@ export function AddProductButton({
     <>
       <Button
         variant="ghost"
-        className="flex items-center gap-1 whitespace-nowrap px-2 py-1 text-xs"
+        aria-label={iconOnly ? "Ürün ekle" : undefined}
+        className={
+          iconOnly
+            ? "flex items-center justify-center p-1 text-xs"
+            : "mx-auto mt-3 flex items-center justify-center gap-1 py-1.5 text-xs"
+        }
         onClick={() => setOpen(true)}
       >
-        <Plus size={14} aria-hidden /> Ürün ekle
+        <Plus size={iconOnly ? 16 : 14} aria-hidden />
+        {!iconOnly && " Ürün ekle"}
       </Button>
       {open && (
         <ProductFormModal

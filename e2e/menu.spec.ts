@@ -201,7 +201,9 @@ test("admin creates and deletes a product inline on a category page", async ({
   const section = page.locator("section", {
     has: page.getByRole("heading", { name: "Başlangıçlar" }),
   });
-  await section.getByRole("button", { name: "Ürün ekle" }).click();
+  // Two "add product" controls per section (icon in the heading + full button
+  // below); the first is the heading-row icon.
+  await section.getByRole("button", { name: "Ürün ekle" }).first().click();
   await page.getByLabel("Ad (Türkçe)").fill(title);
   await page.getByRole("button", { name: "Kaydet" }).click();
 

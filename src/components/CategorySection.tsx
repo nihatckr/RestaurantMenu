@@ -235,6 +235,7 @@ export function CategorySection({
               venueSlug={admin.venueSlug}
               categorySlug={admin.categorySlug}
               categoryOptions={admin.categoryOptions}
+              iconOnly
             />
           </div>
         )}
@@ -258,6 +259,19 @@ export function CategorySection({
         </div>
       ) : (
         <ItemGrid items={items} columns={category.columns} admin={admin} />
+      )}
+
+      {/* Admin-only: the full "add product" control below the items (mirrors the
+          icon in the heading row). Guests never receive this. */}
+      {admin && (
+        <div className="flex justify-center">
+          <AddProductButton
+            locale={admin.locale}
+            venueSlug={admin.venueSlug}
+            categorySlug={admin.categorySlug}
+            categoryOptions={admin.categoryOptions}
+          />
+        </div>
       )}
     </section>
   );
