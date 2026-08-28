@@ -84,7 +84,7 @@ async function CategoryView({
       <div className="flex flex-col items-center gap-4">
         <Link
           href={`/${venueSlug}`}
-          className="self-start font-body text-xs text-muted underline"
+          className="-my-1 self-start py-2 font-body text-xs text-muted underline"
         >
           &lsaquo; {venue.name}
         </Link>

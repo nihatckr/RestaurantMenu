@@ -24,7 +24,7 @@ export function ImageWithPlaceholder({
   // image loads (no blank flash) — invisible once the photo paints over it.
   const sizes = portrait
     ? "20vw"
-    : "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 33vw";
+    : "(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw";
   return (
     <Image
       src={src}

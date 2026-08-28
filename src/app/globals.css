@@ -68,6 +68,14 @@ body {
   color: var(--foreground);
 }
 
+/* Keyboard-only focus ring (a11y) — invisible for mouse/touch users. */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /*
  * Centralized typography — one place, used consistently across the menu so the
  * heading/label styles never drift. Size (text-*) stays at the call site.

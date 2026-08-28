@@ -21,8 +21,10 @@ function ItemGrid({
   const allCompact = nonEmpty && items.every((i) => i.kind === "DRINK" && !i.image);
   // Cocktails (DRINK + photo): 3 → 4 → 5 (Figma 5-up on desktop, readable on phone).
   const allCocktail = nonEmpty && items.every((i) => i.kind === "DRINK" && !!i.image);
-  // Food photo grid: category `columns` override (desserts/breakfast = 2), else 3.
-  const foodCols = columns === 2 ? "grid-cols-2" : "grid-cols-3 lg:grid-cols-4";
+  // Food photo grid: category `columns` override (desserts/breakfast = 2 up),
+  // else responsive 2 → 3 → 4 so phone photos aren't tiny.
+  const foodCols =
+    columns === 2 ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
   const cls = allCompact
     ? "grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3"
     : allCocktail
