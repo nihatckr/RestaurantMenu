@@ -1,0 +1,123 @@
+# Decision Log — RestaurantMenu
+
+An auditable record of **what was requested, why, what changed, how it was
+approved, and the resulting commit** — from the first Figma analysis to today.
+
+**Fidelity note:** this log is reconstructed from the git history, the project
+docs (`JOURNEY.md` has the fuller narrative) and the working session record.
+Entries are faithful in **decision, rationale and approval**; pre-session request
+wording is paraphrased (not always a verbatim quote). Approvals shown as quotes
+(`"evet"`, `"push et"`, `"kodlarımıza bak"`) are the user's own words where known;
+`AskUserQuestion` marks a choice made through the in-chat option picker.
+
+Legend — **Approval:** `verbal` = asked in chat · `AskUserQuestion` = picked an
+option · `"…"` = the user's own phrase. **U#/T#** = tracked unknowns/tasks.
+
+---
+
+## Phase 0 — Discovery & Figma
+
+| # | Request | Why | What changed | Approval | Commit / artifact |
+|---|---------|-----|--------------|----------|-------------------|
+| 0.1 | Analyse the Mono Figma files | Ground the design in real brand assets/tokens | Extracted palette, wordmark/logo system, menu layouts; saved findings | `"evet"` (save to memory) | memory + `JOURNEY.md` §0 |
+| 0.2 | Build the new app, retire the legacy forks | Legacy Terrace/Garden were Vite/Apollo reading a dead WP backend | Decided one Next.js app, legacy = READ-ONLY evidence | verbal | `AGENTS.md`, `LEGACY_AUDIT.md` |
+
+## Phase 1 — Foundation, data model, public menu
+
+| # | Request | Why | What changed | Approval | Commit |
+|---|---------|-----|--------------|----------|--------|
+| 1.1 | Scaffold the app | Start clean on the agreed stack | Next.js 16.3, TS, Tailwind v4, fonts, security headers, CI | verbal | `c2c67d5` |
+| 1.2 | Database model | Shared catalog + per-venue facts | Prisma schema, Product/MenuItem split, 2-venue seed | verbal (`U11`=two venues) | `5a558e1` |
+| 1.3 | Public menu pages | The core guest flow | Venue landing + single-scroll category page (`use cache`/PPR) | verbal | `cfa5c97`, `833145d` |
+| 1.4 | Responsive layout | Menu is a phone/QR surface | Mobile-first grids (no fixed 390px) | verbal | `404966a` |
+| 1.5 | Tests | Lock in per-venue behaviour | Vitest unit + DB integration + CI Postgres | verbal | `41d44cc` |
+| 1.6 | No admin UI | Content is managed via seed | T11 = no-admin; seed is the content source | verbal | `4f6e506` |
+| 1.7 | Real photos, prod-readiness, SEO, deploy prep | Ship-ready public menu | Legacy photos, CSP/health/robots, per-page metadata + sitemap, Vercel pipeline | `"commit et"`, `"push et"` | `f2f861a`, `2e00720`, `161b3e5`, `b24aba1` |
+| 1.8 | Multi-measure drink pricing | Legacy had 4/8 CL, bottle/glass | `MenuItemPrice` child table | `"hepsini yap"` | `0a82fa1` |
+| 1.9 | Legal price-label compliance | TR Law 6502 | VAT-included / no-service-charge footer + `COMPLIANCE.md` | verbal (`U12`) | `9601f8a` |
+
+## Phase 2 — Legacy & Figma fidelity (corrections-heavy)
+
+| # | Request | Why | What changed | Approval | Commit |
+|---|---------|-----|--------------|----------|--------|
+| 2.1 | Show TR + EN together | Match legacy bilingual display | `bilingual()` helper + alt lines | verbal | `05fbc28` *(later superseded — see 6.1)* |
+| 2.2 | Wines must be **cards** | I had wrongly rendered them as a table | Table restricted to tag-grouped hard drinks; wines stay cards | `"şaraplarda card gösterimli olması lazım"` | part of parity pass |
+| 2.3 | Hard drinks like the legacy (35/50/75) | My version missed bottle sizes | GLASS/BOTTLE grouped columns from legacy `MenuItemHardDrinks` | `"35 50 75 seçenekleri vardı"`, `"eski kodlarına bak"` | `68cb1fb`, `5038f98` |
+| 2.4 | Alcohol section must match exactly | Parity | Tag sub-grouping (Viski/Rakı/…), EN tag labels | `"alkollü içeceklerde birebir olmalı"` | `2820e3d` |
+| 2.5 | Softs share the beer-card discipline | Consistency | Soft drinks use the same bordered-price block | `"aynı disiplin"` | `3d5952a` |
+| 2.6 | Add spirits with various CL | Populate the structure | Added spirit products + measures (flagged DEMO) | `"çeşitli cl varyasyonlarına sahip"` | `5038f98` |
+| 2.7 | Cocktails with photos, colour chips, beer CL, featured | Restore ~18 legacy card variants | Image-driven card variant; `Product.color` chips; featured full-width | verbal | `e947b12`, `7b7d50c`, `3d5952a` |
+| 2.8 | **Remove invented drinks** | I had invented beer/wine/spirit names — not evidence-backed | Deleted them; seed made authoritative (reconcile) | correction (`AGENTS.md` 5–6) | `0267d23` |
+| 2.9 | Fonts must follow the legacy `theme.js` | I had "unified" fonts on my own instinct | Restored price/cl = Mono, title/desc = Inter | `"fontlar … nasıl kullanıldıysa öyle kullanılmalı"` | `64aa191` *(reverts `d468a8b`)* |
+| 2.10 | Centralised styling; no dividers; no thousands dot; dotless English I | Consistency + correctness | Central `.type-*` roles; removed dividers; `useGrouping:false`; `lang` + CSS caps | verbal | `28df6d4` |
+| 2.11 | TR & EN names stacked (alt alta) | Legacy layout | Hard-drink name stacks TR over EN | `"alt alta olmalı"` | `0025e6d` |
+| 2.12 | Legacy letter-spacing per context | Fidelity to `theme.js` | Per-call-site tracking | verbal | `1cfb967` |
+
+## Phase 3 — Category set & per-venue behaviour (flip-flops, settled by code)
+
+| # | Request | Why | What changed | Approval | Commit |
+|---|---------|-----|--------------|----------|--------|
+| 3.1 | Breakfast only on Terrace | Verbal: "Garden has no breakfast" | Made breakfast Terrace-only | `"gardenda kahvaltı hizmeti yok"` | `fc83280` |
+| 3.2 | **Correction:** follow the code | Legacy Navigation hides breakfast on **Terrace**, shows on Garden | Reverted to Terrace-hides / Garden-shows | `"kodlarımıza bak"` → "Legacy'ye uy" | `2415650` |
+| 3.3 | Add Çerezler + Nargile | Misread as Terrace-only categories | Added them | verbal | `0e206be` |
+| 3.4 | **Correction:** they don't exist | Not in the Mono menu at all | Removed; added category reconcile to seed | `"NARGİLE VE ÇEREZLER YOK"` | `b43366b` |
+| 3.5 | Drop DEMO per-item venue hiding | Real per-item list is unknown | `HIDDEN_BY_VENUE = {}`; shared catalog shows in both | verbal | `1541e29` |
+
+## Phase 4 — Mobile-first & the responsive standard
+
+| # | Request | Why | What changed | Approval | Commit |
+|---|---------|-----|--------------|----------|--------|
+| 4.1 | Fix phone hard-drink price wrap + overlapping beer cards | Unreadable on a phone | Responsive 1/2/3-up grids | `"satır kaymaları … iç içe geçiyor"` | `49db7ab` |
+| 4.2 | Prices misalign when a measure is missing | "if one has no 35 CL, all shift" | ONE shared CSS grid (header + rows via `Fragment`) | `"birinde 35 cl yoksa hepsi kayıyor"` | `8ca8b8c` |
+| 4.3 | Beer cards 2-up with smaller text | 1-up too sparse | 2-up compact grid, smaller type | verbal | `8ca8b8c` |
+| 4.4 | One fluid typography standard | "everything scales at the same ratio" | `clamp()` root font-size; all rem | `"bir standart olmalı"` | `b8ac077` |
+| 4.5 | A thing's TR & EN share one font | General rule | `.type-subheading` → Mono like its heading | `"Türkçesi hangi fontta ise İngilizcesi de o olmalı"` | `031ac16` |
+| 4.6 | Mobile polish | Small-screen readability + a11y | Responsive food grid, focus rings, tap targets | verbal | `1ee1fb4` |
+
+## Phase 5 — Documentation & consolidation
+
+| # | Request | Why | What changed | Approval | Commit |
+|---|---------|-----|--------------|----------|--------|
+| 5.1 | Document from the start; organise docs into a folder | Capture how we got here | Moved specs to `docs/`; added `JOURNEY.md`, index, diagrams | `"en baştan … mantıklı klasöre al"` | `c6e27b7`, `8ae219f` |
+| 5.2 | Is Prisma aligned 1:1 with the frontend? | Verify no drift | Confirmed every consumed field maps through typed data-access | `"prisma frontende birebir hizalı mı"` | verified (typecheck) |
+| 5.3 | Docs accuracy pass | Some docs claimed features not built | Marked switcher deferred, TASKS status, DEMO note | verbal | `7d539cd` |
+
+## Phase 6 — Internationalization rework (this session)
+
+| # | Request | Why | What changed | Approval | Commit |
+|---|---------|-----|--------------|----------|--------|
+| 6.0 | "I don't see a language option" | RU existed in data but was unreachable | (options offered) | `"dil seçeneği göremedim"` | — |
+| 6.1 | **Real single-language switcher** | An RU toggle wasn't a proper switcher | `/[locale]` routes, one language at a time, tr fallback; removed bilingual + toggle | `AskUserQuestion`: "tek dil gösteren gerçek switcher" (after "sanırım switcher'ı yanlış kurmadık") | `84cba24` |
+| 6.2 | Russian text looks oversized | Mono font has no Cyrillic glyphs | RU brand-text roles → Inter (cyrillic subset) | `"rusça … yazıların boyutları büyüyor"` | `59d5a7d` |
+| 6.3 | Why do only categories translate, not products? | Data gap: products mostly tr/en only | Extracted all product text → `translations.ts` fill-in file | `"evet"` (create the fill-in file) | `dd69096` |
+| 6.4 | Footer still Turkish — adapt the whole project | Static UI chrome wasn't localized | `messages.ts` catalog; footer/404/error/empty/metadata localized | `"footer da hala türkçe … tüm projeye adapte et"` | `9e9bfce` |
+| 6.5 | Align all docs, no inconsistency | i18n rework made docs stale | Swept & fixed 13 docs; removed dead `.type-subheading` | `"tüm dökümanları hizala"` | `d6e0934` |
+
+## Phase 7 — Code quality (this session)
+
+| # | Request | Why | What changed | Approval | Commit |
+|---|---------|-----|--------------|----------|--------|
+| 7.1 | No hardcoded values; centralize | Code quality | Data-driven seed locales; `brand.ts`, `site.ts`, `CURRENCY`; JSON-LD `inLanguage` fix | `"hardcoded olmamalı … merkeziyetçi"` | `584fcb1` |
+| 7.2 | What else can be done? | Further quality | (options offered) → all four chosen | `AskUserQuestion` (multi-select) | — |
+| 7.3 | SEO hreflang, seed integrity, RU e2e, DRY helper | Robustness + SEO + coverage | `buildAlternates`, seed self-checks, RU-switch e2e, `localeFromPathname` | `AskUserQuestion` | `bb6a89b` |
+| 7.4 | Continue | More quality | OG share image, reduced-motion a11y, committed `.env.example` | `"devam et"` | `a6ab515`, `7fa335a` |
+| 7.5 | Push | Ship the session's work | Pushed 9 commits to `origin/main` | `"push et"` | `7d539cd..7fa335a` |
+
+---
+
+## Cross-cutting principles that emerged (the "why" behind the corrections)
+
+1. **Legacy code is the authority** for fonts, layout and category behaviour — over
+   verbal instructions, over Figma, and over my own instincts (2.9, 3.2).
+2. **Never invent menu data** — unknowns stay UNKNOWN/DEMO; real values come from
+   the owner (`U5`) (2.8).
+3. **Data-driven, not name-driven** — no `if (venue === …)`, no hard-coded slugs or
+   locale lists in logic (7.1).
+4. **Centralise** — one source per concern: design tokens (`globals.css`), typography
+   roles, prices (`prices.ts`), text (`translations.ts`), UI strings (`messages.ts`),
+   brand (`brand.ts`), site (`site.ts`), locales (`i18n.ts`) (2.10, 4.4, 7.1).
+5. **Verify, then commit** — typecheck + lint + unit + e2e (+ a real render check)
+   before every clean, single-purpose commit.
+
+For the fuller narrative see `JOURNEY.md`; for intentional divergences from the
+legacy see `PARITY.md`; for the task-by-task plan see `TASKS.md`.
