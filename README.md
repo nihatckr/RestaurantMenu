@@ -7,7 +7,8 @@ about a venue (its categories, ordering, visibility) is **data-driven** — a 3r
 venue can be added from the admin panel with **no code changes**.
 
 The **single-owner admin** is built: the owner manages the whole menu (venues,
-categories, products, prices, images, visibility, order) plus Settings (brand/logo,
+categories, products, prices, images, visibility — incl. an optional daily time
+window per category — and order) plus Settings (brand/logo,
 QR codes, privacy-preserving analytics, Excel backup, trash, security) from the app
 itself; the database is the content source.
 
@@ -64,7 +65,7 @@ files (`prisma/data/prices.ts`, `translations.ts`) are only used by that demo se
 ## Status
 
 Public menu **and** the single-owner admin are feature-complete and tested
-(typecheck · lint · Vitest · **37 Playwright e2e** green). Pending the owner
+(typecheck · lint · Vitest · **38 Playwright e2e** green). Pending the owner
 (non-code): deploy (`docs/DEPLOY.md` / `docs/YAYIN_ONCESI.md`), set
 `BLOB_READ_WRITE_TOKEN`, and enter real prices/translations. See
 [docs/JOURNEY.md](docs/JOURNEY.md).

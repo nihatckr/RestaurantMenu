@@ -17,9 +17,11 @@
 > hours/phone/Instagram/map), full **venue CRUD** (add/rename/wordmark/reorder/delete),
 > default-password warning. **Menu enrichments (group A):** per-language description +
 > calories + diet/allergen badges on the card. **Analytics (group B):** PII-free
-> menu-open counts (`PageView` + `/api/track` beacon) in Settings → Analitik.
-> The owner self-updates the menu; source of truth is DB←seed. 37 Playwright e2e
-> cover the human flows. See **`ADMIN_PLAN.md`** / **`DECISIONS.md`** (B.1–B.37) and
+> menu-open counts (`PageView` + `/api/track` beacon) in Settings → Analitik, and
+> **scheduled category visibility** (optional daily time window per category, e.g.
+> Breakfast 06:00–11:00, `MenuCategory.visibleFrom/visibleTo`).
+> The owner self-updates the menu; source of truth is DB←seed. 38 Playwright e2e
+> cover the human flows. See **`ADMIN_PLAN.md`** / **`DECISIONS.md`** (B.1–B.38) and
 > **`YAYIN_ONCESI.md`** (owner pre-launch checklist).
 > **Pending owner:** real prices (`prices.ts`) + EN/RU translations & descriptions
 > (`translations.ts`) — `U5` / `DEMO_MENU.md`, and executing the deploy

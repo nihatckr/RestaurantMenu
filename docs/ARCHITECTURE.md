@@ -169,6 +169,11 @@ Mirror `PRODUCT.md`: `Business`, `Venue`, `Menu`, `Category`, `Product`,
   off free-text display names (legacy's core mistake).
 - Sort order is explicit and can differ per venue.
 - Preserve drink measure/pricing as **structured fields**, not free text.
+- **Per-venue visibility (including scheduling) lives on the join, not the catalog.**
+  `MenuCategory` carries `visible` and an optional daily time window
+  (`visibleFrom`/`visibleTo`, "HH:MM", Europe/Istanbul); the guest **menu
+  navigation** filters by the current time at request time (in the already-dynamic
+  `CategoryNavIsland`), so the cached menu readers stay time-agnostic and static.
 - **Operational (not part of the shared catalog):** `AdminUser` (single owner),
   `AuditLog` (admin action trail), and `PageView` (PII-free menu-open counts for
   analytics — `venueSlug`, `locale`, `createdAt` only). These sit beside the

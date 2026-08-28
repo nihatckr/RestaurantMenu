@@ -3,9 +3,9 @@
 **Decision (2026-08-28):** the owner maintains the menu themselves, so we built an
 **admin** (auth + CRUD). Supersedes the earlier **T11 = no-admin** decision.
 
-> **Status: implemented and tested** (typecheck · lint · Vitest · 37 e2e green).
+> **Status: implemented and tested** (typecheck · lint · Vitest · 38 e2e green).
 > This doc is retained as the design record; where the plan and the shipped code
-> diverged, the **as-built** notes below and `DECISIONS.md` (B.1–B.37) are
+> diverged, the **as-built** notes below and `DECISIONS.md` (B.1–B.38) are
 > authoritative. Key deltas from the original plan:
 > - **Auth:** ~~magic-link~~ → **`iron-session` + bcrypt, single owner, username +
 >   password** (`verifyCredentials`; username editable in Settings → Güvenlik).

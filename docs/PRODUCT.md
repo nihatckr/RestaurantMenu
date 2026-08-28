@@ -23,7 +23,8 @@ legacy product, and none is introduced here (see *Out of MVP*).
 - **Secondary user (owner/admin):** the single owner who maintains the catalog.
   Legacy did this in an external WordPress admin; the new app **owns this** — a
   built-in single-owner admin (auth + inline CRUD + Settings) manages venues,
-  categories, products, prices, images, visibility and order. **Shipped 2026-08-28**
+  categories, products, prices, images, visibility (including an optional daily
+  time window per category, e.g. Breakfast 06:00–11:00) and order. **Shipped 2026-08-28**
   (Path B — `ADMIN_PLAN.md`); the DB is now the content source. The owner also sees
   **privacy-preserving analytics** (how often each venue's menu is opened via QR) in
   Settings → Analitik — aggregate counts only, no personal data.
@@ -142,7 +143,7 @@ venue, never as `if (venue === 'terrace')`.
 - **~~ASSUMPTION A3~~ → RESOLVED ✅ (admin shipped 2026-08-28):** the owner
   self-updates the menu via the built-in admin (auth + inline CRUD + Settings,
   T12–T14, Path B); the content source is the **DB** (seed is bootstrap/DEMO only).
-  See `ADMIN_PLAN.md` / `DECISIONS.md` B.1–B.37.
+  See `ADMIN_PLAN.md` / `DECISIONS.md` B.1–B.38.
 - **ASSUMPTION A4** Hard Drinks and Soft Drinks become ordinary Categories in
   the unified model (legacy stored them as separate taxonomies); their
   multi-measure pricing is preserved as structured fields, not free text.
