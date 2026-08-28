@@ -95,7 +95,9 @@ button:focus-visible {
     @apply font-brand uppercase;
   }
   .type-subheading {
-    @apply font-body uppercase text-muted;
+    /* Mono — the TR sub-line must match its EN heading's font (legacy
+       menuSubtitleCenter = Mono). Rule: a thing's TR and EN share one font. */
+    @apply font-brand uppercase text-muted;
   }
   .type-tag {
     @apply font-brand uppercase;
