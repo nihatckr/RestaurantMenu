@@ -519,6 +519,56 @@ test("admin exports then re-imports the backup (round-trip)", async ({ page }) =
   await expect(page.getByText(/İçe aktarıldı:/)).toBeVisible();
 });
 
+test("backup round-trips product details (dietary + calories)", async ({ page }) => {
+  const title = `E2EYedek ${Date.now()}`;
+
+  await page.goto("/tr/login");
+  await page.getByLabel("Şifre").fill("1234");
+  await page.getByRole("button", { name: "Giriş" }).click();
+  await expect(page).toHaveURL(/\/tr$/);
+
+  // Create a product with a diet tag + calories.
+  await page.goto("/tr/terrace/starters");
+  const section = page.locator("section", {
+    has: page.getByRole("heading", { name: "Başlangıçlar" }),
+  });
+  await section.getByRole("button", { name: "Ürün ekle" }).first().click();
+  await page.getByLabel("Ad (Türkçe)").fill(title);
+  await page.locator('input[name="dietary"][value="vegan"]').check();
+  await page.locator('input[name="calories"]').fill("250");
+  await page.getByRole("button", { name: "Kaydet" }).click();
+  await expect(page.getByText(title)).toBeVisible();
+
+  try {
+    // Export the backup, then re-import it (upsert). If export/import dropped the
+    // new columns, re-import would CLEAR dietary/calories — surviving = round-trip.
+    await page.goto("/tr/settings");
+    await page.getByRole("tab", { name: "Yedek" }).click();
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.getByRole("link", { name: "Yedek indir (Excel)" }).click(),
+    ]);
+    await page.locator('input[type="file"][name="file"]').setInputFiles(await download.path());
+    await page.getByRole("button", { name: "Yedeği içe aktar" }).click();
+    await expect(page.getByText(/İçe aktarıldı:/)).toBeVisible();
+
+    // The badge + calories survived the round-trip. Scope to this product's card
+    // via its exact heading (avoids matching other products' badges).
+    await page.goto("/tr/terrace/starters");
+    const card = page
+      .locator("article")
+      .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
+    await expect(card.getByText("Vegan", { exact: true })).toBeVisible();
+    await expect(card.getByText("250 kcal")).toBeVisible();
+  } finally {
+    // Always delete (even if an assertion flakes) so no product is left behind.
+    await page.goto("/tr/terrace/starters");
+    await page.getByRole("button", { name: `${title} sil` }).click();
+    await page.getByRole("button", { name: "Sil", exact: true }).click();
+    await expect(page.getByText(title)).toHaveCount(0);
+  }
+});
+
 test("import rejects a file that isn't a valid workbook", async ({ page }) => {
   await page.goto("/tr/login");
   await page.getByLabel("Şifre").fill("1234");

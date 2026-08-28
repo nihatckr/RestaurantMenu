@@ -21,6 +21,11 @@ export type ProductRow = {
   titleTr: string;
   titleEn: string;
   titleRu: string;
+  descTr: string;
+  descEn: string;
+  descRu: string;
+  calories: number | "";
+  dietary: string; // pipe-joined tags, e.g. "vegan|halal"
 };
 
 export type ItemRow = {
@@ -45,7 +50,20 @@ export type BackupData = {
 // two never drift.
 export const SHEETS = {
   Categories: ["slug", "nameTr", "nameEn", "nameRu", "columns"],
-  Products: ["slug", "kind", "tag", "image", "titleTr", "titleEn", "titleRu"],
+  Products: [
+    "slug",
+    "kind",
+    "tag",
+    "image",
+    "titleTr",
+    "titleEn",
+    "titleRu",
+    "descTr",
+    "descEn",
+    "descRu",
+    "calories",
+    "dietary",
+  ],
   MenuItems: [
     "venueSlug",
     "categorySlug",
@@ -89,7 +107,9 @@ export async function getBackupData(): Promise<BackupData> {
         kind: true,
         tag: true,
         image: true,
-        translations: { select: { locale: true, title: true } },
+        calories: true,
+        dietary: true,
+        translations: { select: { locale: true, title: true, description: true } },
       },
     }),
     prisma.venue.findMany({
@@ -127,6 +147,7 @@ export async function getBackupData(): Promise<BackupData> {
 
   const productRows: ProductRow[] = products.map((p) => {
     const t = byLocale(p.translations, "title");
+    const d = byLocale(p.translations, "description");
     return {
       slug: p.slug,
       kind: p.kind,
@@ -135,6 +156,11 @@ export async function getBackupData(): Promise<BackupData> {
       titleTr: t.tr,
       titleEn: t.en,
       titleRu: t.ru,
+      descTr: d.tr,
+      descEn: d.en,
+      descRu: d.ru,
+      calories: p.calories ?? "",
+      dietary: p.dietary.join("|"),
     };
   });
 

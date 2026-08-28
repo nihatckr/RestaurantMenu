@@ -3,6 +3,7 @@ import ExcelJS from "exceljs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { config } from "@/lib/config";
+import { isDietaryTag } from "@/lib/dietary";
 import { SHEETS } from "@/lib/data/backup";
 
 // Import the owner's Excel backup (DECISIONS B.16). Fully validated first: if ANY
@@ -46,6 +47,13 @@ const productSchema = z.object({
   titleTr: z.string().trim().min(1),
   titleEn: optionalText,
   titleRu: optionalText,
+  descTr: optionalText,
+  descEn: optionalText,
+  descRu: optionalText,
+  calories: z
+    .union([z.coerce.number().int().min(0).max(100000), z.literal("")])
+    .optional(),
+  dietary: optionalText, // pipe-joined tags, e.g. "vegan|halal"
 });
 
 const itemSchema = z.object({
@@ -216,27 +224,39 @@ export async function importBackup(buffer: ArrayBuffer): Promise<ImportResult> {
       }
     }
 
-    // 2) Products (create/update identity + translations).
+    // 2) Products (create/update identity + translations + details).
     for (const p of products) {
       const existing = await tx.product.findFirst({
         where: { businessId, slug: p.slug },
         select: { id: true },
       });
-      const data = { kind: p.kind, tag: p.tag || null, image: p.image || null };
+      const dietary = p.dietary
+        .split("|")
+        .map((s) => s.trim())
+        .filter(isDietaryTag);
+      const data = {
+        kind: p.kind,
+        tag: p.tag || null,
+        image: p.image || null,
+        calories: p.calories === "" || p.calories === undefined ? null : p.calories,
+        dietary,
+      };
       const prodId = existing
         ? (await tx.product.update({ where: { id: existing.id }, data })).id
         : (await tx.product.create({ data: { businessId, slug: p.slug, ...data } })).id;
-      const titles: [string, string][] = [
-        ["tr", p.titleTr],
-        ["en", p.titleEn],
-        ["ru", p.titleRu],
+      // title + description per locale (a translation row needs a title).
+      const rows: [string, string, string][] = [
+        ["tr", p.titleTr, p.descTr],
+        ["en", p.titleEn, p.descEn],
+        ["ru", p.titleRu, p.descRu],
       ];
-      for (const [locale, title] of titles) {
+      for (const [locale, title, desc] of rows) {
         if (title.trim()) {
+          const description = desc.trim() || null;
           await tx.productTranslation.upsert({
             where: { productId_locale: { productId: prodId, locale } },
-            update: { title: title.trim() },
-            create: { productId: prodId, locale, title: title.trim() },
+            update: { title: title.trim(), description },
+            create: { productId: prodId, locale, title: title.trim(), description },
           });
         } else if (locale !== "tr") {
           await tx.productTranslation.deleteMany({ where: { productId: prodId, locale } });
