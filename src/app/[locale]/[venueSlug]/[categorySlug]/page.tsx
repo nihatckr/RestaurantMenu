@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CategorySection } from "@/components/CategorySection";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { AdminSessionControls } from "@/components/AdminSessionControls";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
@@ -107,7 +108,13 @@ async function CategoryView({
         >
           &lsaquo; {venue.name}
         </Link>
-        <LanguageSwitcher current={locale as Locale} />
+        <div className="flex items-center gap-3">
+          {/* Admin mode + logout live in the sticky header (session-gated island). */}
+          <Suspense fallback={null}>
+            <AdminSessionControls locale={locale} />
+          </Suspense>
+          <LanguageSwitcher current={locale as Locale} />
+        </div>
       </div>
 
       {/* Brand mark (Figma: MONO mark near the top). Scrolls normally. */}

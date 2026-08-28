@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listVenues } from "@/lib/data/menu";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { AdminSessionControls } from "@/components/AdminSessionControls";
 import { LOCALES, isLocale } from "@/lib/i18n";
 import { BRAND } from "@/lib/brand";
 
@@ -19,7 +21,10 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   const venues = await listVenues();
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-8 p-8">
-      <div className="flex w-full max-w-sm justify-end">
+      <div className="flex w-full max-w-sm items-center justify-end gap-3">
+        <Suspense fallback={null}>
+          <AdminSessionControls locale={locale} />
+        </Suspense>
         <LanguageSwitcher current={locale} />
       </div>
       <Image src={BRAND.mark} alt={BRAND.name} width={72} height={88} priority />

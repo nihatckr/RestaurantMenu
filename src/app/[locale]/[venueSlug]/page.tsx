@@ -6,6 +6,7 @@ import Link from "next/link";
 import { VenueHeader } from "@/components/VenueHeader";
 import { CategoryNavIsland } from "./CategoryNavIsland";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { AdminSessionControls } from "@/components/AdminSessionControls";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
 import { buildMenuJsonLd } from "@/lib/jsonld";
@@ -85,7 +86,10 @@ async function VenueLanding({
       {jsonLd && (
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       )}
-      <div className="flex w-full max-w-sm justify-end">
+      <div className="flex w-full max-w-sm items-center justify-end gap-3">
+        <Suspense fallback={null}>
+          <AdminSessionControls locale={locale} />
+        </Suspense>
         <LanguageSwitcher current={locale as Locale} />
       </div>
       <VenueHeader name={venue.name} homeHref={`/${locale}`} />
