@@ -29,6 +29,7 @@ docs below. The agent contract (`../AGENTS.md`) points here for the binding spec
 | --- | --- |
 | [JOURNEY.md](JOURNEY.md) | Narrative of decisions and how we reached the current state. |
 | [DECISIONS.md](DECISIONS.md) | Auditable decision log: each request → why → change → how approved → commit. |
+| [ADMIN_PLAN.md](ADMIN_PLAN.md) | Plan for the owner self-service admin (Path B): auth + CRUD, DB-as-source, cache revalidation, phased tasks. |
 | [DIAGRAMS.md](DIAGRAMS.md) | Mermaid diagrams: data model (ERD), request/render flow, card-variant + typography systems. |
 | [TASKS.md](TASKS.md) | Task-by-task plan and status (T1–T16, U-decisions). |
 | [PARITY.md](PARITY.md) | Intentional HTML/CSS-inherent differences from the legacy apps. |

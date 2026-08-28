@@ -9,7 +9,9 @@
 > `theme.js`, letter-spacing, card/table layouts), mobile-first responsive grids +
 > **fluid typography**, PWA (installable), a11y polish, Vitest unit+integration +
 > Playwright e2e + CI, and this docs set (see `JOURNEY.md`).
-> **Deferred / not built:** admin+auth (T11 = no-admin decided).
+> **Now planned (2026-08-28):** the **admin (T12–T14)** — the owner will self-update
+> the menu, so T11's "no-admin" is superseded and the source of truth shifts DB←seed.
+> See **`ADMIN_PLAN.md`** (auth + CRUD + cache revalidation, phased).
 > **Pending owner:** real prices (`prices.ts`) + EN/RU translations & descriptions
 > (`translations.ts`) — `U5` / `DEMO_MENU.md`, and executing the deploy
 > (`DEPLOY.md`).
