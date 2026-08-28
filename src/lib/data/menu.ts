@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db";
-import { bilingual, DEFAULT_LOCALE, pickLocalized } from "@/lib/i18n";
+import { DEFAULT_LOCALE, localized, pickLocalized } from "@/lib/i18n";
 
 // Thin, typed data-access layer (ARCHITECTURE.md). Components/pages call these
 // functions; they never touch `prisma.*` directly. Reads are venue-scoped by
@@ -12,9 +12,12 @@ import { bilingual, DEFAULT_LOCALE, pickLocalized } from "@/lib/i18n";
 // the cache boundary and decoupled from Prisma types.
 
 export type VenueSummary = { slug: string; name: string; wordmark: string | null };
-// `nameAlt` is the alternate-language name shown alongside the primary one
-// (legacy showed both). Null when absent or identical.
-export type CategoryLink = { slug: string; name: string; nameAlt: string | null };
+// A category link, localized to the requested locale (single language — the
+// locale comes from the route, `/[locale]/…`).
+export type CategoryLink = {
+  slug: string;
+  name: string;
+};
 
 /** All venue slugs, ordered — for generateStaticParams. */
 export async function listVenueSlugs(): Promise<string[]> {
@@ -74,22 +77,18 @@ export async function listVenueCategories(
   });
 
   const cats = venue?.menu?.categories ?? [];
-  return cats.map((mc) => {
-    const { primary, secondary } = bilingual(mc.category.translations, (r) => r.name, locale);
-    return {
-      slug: mc.category.slug,
-      name: primary || mc.category.slug,
-      nameAlt: secondary,
-    };
-  });
+  return cats.map((mc) => ({
+    slug: mc.category.slug,
+    name: localized(mc.category.translations, (r) => r.name, locale) || mc.category.slug,
+  }));
 }
 
 export type PriceOption = { label: string; amount: number };
 
 // Lightweight EN translation of the controlled hard-drink `tag` vocabulary so the
-// sub-category header can read English-big + Turkish-small like the legacy
-// HeaderSubCenter (and the EN-primary category headers). This is label i18n for a
-// closed set, not menu content. Tags without an entry fall back to Turkish-only.
+// sub-category header localizes with the rest of the page. This is label i18n for
+// a closed set, not menu content. Tags/locales without an entry fall back to the
+// Turkish tag (there is no RU tag vocabulary yet — see I18N.md coverage note).
 const TAG_EN: Record<string, string> = {
   Viski: "Whisky",
   Rakı: "Rakı",
@@ -101,10 +100,13 @@ const TAG_EN: Record<string, string> = {
   Likör: "Liqueur",
 };
 
+function tagLabel(tag: string, locale: string): string {
+  return locale === "en" ? (TAG_EN[tag] ?? tag) : tag;
+}
+
 export type MenuItemView = {
   id: string;
-  title: string;
-  titleAlt: string | null; // alternate-language title (legacy showed both)
+  title: string; // localized to the requested locale (tr fallback)
   subtitle: string | null;
   description: string | null;
   price: number | null;
@@ -112,16 +114,15 @@ export type MenuItemView = {
   image: string | null;
   color: string | null; // drink colour chip (legacy) — used by imageless drink rows
   kind: "FOOD" | "DRINK";
-  tag: string | null;
-  tagAlt: string | null; // EN name of the tag (hard-drink sub-header EN+TR)
+  tag: string | null; // raw TR tag — the stable grouping key for sub-categories
+  tagLabel: string | null; // localized tag name shown as the sub-header
   dlc: boolean; // wine has a valid label (legacy "DLC" badge)
   featured: boolean; // spans full width in its category (legacy featured breakfast)
 };
 
 export type MenuCategoryView = {
   slug: string;
-  name: string;
-  nameAlt: string | null;
+  name: string; // localized to the requested locale (tr fallback)
   columns: number | null; // grid column override for photo cards (null = default)
   items: MenuItemView[];
 };
@@ -192,11 +193,9 @@ export async function getVenueMenu(
   const itemsByCategory = new Map<string, MenuItemView[]>();
   for (const item of venue.menu.items) {
     const t = pickLocalized(item.product.translations, locale);
-    const title = bilingual(item.product.translations, (r) => r.title, locale);
     const view: MenuItemView = {
       id: item.id,
-      title: title.primary,
-      titleAlt: title.secondary,
+      title: localized(item.product.translations, (r) => r.title, locale) || "",
       subtitle: t?.subtitle ?? null,
       description: t?.description ?? null,
       price: item.price === null ? null : Number(item.price),
@@ -205,7 +204,7 @@ export async function getVenueMenu(
       color: item.product.color,
       kind: item.product.kind,
       tag: item.product.tag,
-      tagAlt: item.product.tag ? (TAG_EN[item.product.tag] ?? null) : null,
+      tagLabel: item.product.tag ? tagLabel(item.product.tag, locale) : null,
       dlc: item.product.dlc,
       featured: item.featured,
     };
@@ -214,14 +213,10 @@ export async function getVenueMenu(
     itemsByCategory.set(item.categoryId, bucket);
   }
 
-  return venue.menu.categories.map((mc) => {
-    const name = bilingual(mc.category.translations, (r) => r.name, locale);
-    return {
-      slug: mc.category.slug,
-      name: name.primary || mc.category.slug,
-      nameAlt: name.secondary,
-      columns: mc.category.columns,
-      items: itemsByCategory.get(mc.categoryId) ?? [],
-    };
-  });
+  return venue.menu.categories.map((mc) => ({
+    slug: mc.category.slug,
+    name: localized(mc.category.translations, (r) => r.name, locale) || mc.category.slug,
+    columns: mc.category.columns,
+    items: itemsByCategory.get(mc.categoryId) ?? [],
+  }));
 }

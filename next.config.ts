@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
   // per-request bits isolated in <Suspense> leaves (ARCHITECTURE.md).
   cacheComponents: true,
 
+  // The menu lives under /[locale] (I18N.md); send the bare root to the default
+  // language. Locale-prefixed URLs are the canonical, shareable ones.
+  async redirects() {
+    return [{ source: "/", destination: "/tr", permanent: false }];
+  },
+
   // Only optimize images from an explicit host allowlist (SECURITY.md §1).
   // Add real product-image hosts here once the catalog source is decided
   // (DATA_SOURCING.md). Empty = no remote images allowed yet.

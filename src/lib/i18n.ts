@@ -1,11 +1,25 @@
 // Localization helpers (I18N.md). Default locale is Turkish; missing
-// translations fall back to tr, never blank. Supported locales come from the
-// business (currently tr/en/ru) — kept here as a constant for now; a later i18n
-// task moves locale into the route and reads the supported set from data.
+// translations fall back to tr, never blank. Locale lives in the route
+// (`/[locale]/…`) so each language renders a single-language page that stays
+// static / cache-friendly (the cache key includes the locale). The supported
+// set is a constant for now; a later task can read it from the business data.
 
 export const DEFAULT_LOCALE = "tr";
 export const LOCALES = ["tr", "en", "ru"] as const;
 export type Locale = (typeof LOCALES)[number];
+
+// Human-readable names for the language switcher (shown in each language's own
+// script so a guest recognises their language).
+export const LOCALE_LABELS: Record<Locale, string> = {
+  tr: "TR",
+  en: "EN",
+  ru: "РУ",
+};
+
+/** Narrow an arbitrary route segment to a supported locale. */
+export function isLocale(value: string): value is Locale {
+  return (LOCALES as readonly string[]).includes(value);
+}
 
 /** Pick the row for `locale`, falling back to tr, then to the first available. */
 export function pickLocalized<T extends { locale: string }>(
@@ -20,21 +34,14 @@ export function pickLocalized<T extends { locale: string }>(
 }
 
 /**
- * Bilingual value: the primary text (in `locale`) plus an alternate-language
- * line — legacy showed both languages together. The alternate is English (or
- * Turkish when the primary is English). `secondary` is null when the alternate
- * is missing or identical (avoids a redundant line).
+ * The value for `locale` from a set of translation rows, falling back to tr then
+ * the first available (never blank). Used to render a single-language page.
  */
-export function bilingual<T extends { locale: string }>(
+export function localized<T extends { locale: string }>(
   rows: T[],
   getValue: (row: T) => string | null | undefined,
   locale: string = DEFAULT_LOCALE,
-): { primary: string; secondary: string | null } {
-  const primaryRow = pickLocalized(rows, locale);
-  const primary = (primaryRow && getValue(primaryRow)) || "";
-  const altLocale = locale === "en" ? "tr" : "en";
-  const altRow = rows.find((r) => r.locale === altLocale);
-  const altValue = altRow ? getValue(altRow) : null;
-  const secondary = altValue && altValue !== primary ? altValue : null;
-  return { primary, secondary };
+): string | null {
+  const row = pickLocalized(rows, locale);
+  return (row && getValue(row)) || null;
 }

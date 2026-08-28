@@ -2,11 +2,14 @@ import Link from "next/link";
 import type { CategoryLink } from "@/lib/data/menu";
 
 // Ordered category list for a venue landing (DESIGN.md flow: landing → category
-// page). Order comes from data (per-venue), not code (AGENTS.md 10).
+// page). Order comes from data (per-venue), not code (AGENTS.md 10). Names are
+// already localized to `locale`; links keep the locale segment.
 export function CategoryNav({
+  locale,
   venueSlug,
   categories,
 }: {
+  locale: string;
   venueSlug: string;
   categories: CategoryLink[];
 }) {
@@ -21,18 +24,10 @@ export function CategoryNav({
         {categories.map((c) => (
           <li key={c.slug}>
             <Link
-              href={`/${venueSlug}/${c.slug}`}
+              href={`/${locale}/${venueSlug}/${c.slug}`}
               className="type-heading flex items-center justify-between py-3 tracking-[0.6em] text-foreground transition-colors hover:text-muted"
             >
-              <span className="flex flex-col">
-                <span className="text-sm">{c.name}</span>
-                {/* lang=en so the EN line uppercases with dotless I. */}
-                {c.nameAlt && (
-                  <span lang="en" className="text-[0.625rem] text-muted">
-                    {c.nameAlt}
-                  </span>
-                )}
-              </span>
+              <span className="text-sm">{c.name}</span>
               <span aria-hidden className="text-muted">
                 &rsaquo;
               </span>

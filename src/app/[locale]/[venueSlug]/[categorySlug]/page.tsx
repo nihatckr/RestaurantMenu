@@ -4,19 +4,29 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { CategorySection } from "@/components/CategorySection";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Spinner } from "@/components/Spinner";
 import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
+import { LOCALES, isLocale, type Locale } from "@/lib/i18n";
 
-// Prerender every visible (venue, category) pair. Guarded so a DB-less build
+// Prerender every (locale, venue, visible category). Guarded so a DB-less build
 // (CI) still succeeds. cacheComponents requires ≥1 param.
 export async function generateStaticParams() {
-  const fallback = [{ venueSlug: "terrace", categorySlug: "starters" }];
+  const fallback = LOCALES.map((locale) => ({
+    locale,
+    venueSlug: "terrace",
+    categorySlug: "starters",
+  }));
   try {
     const slugs = await listVenueSlugs();
-    const params: { venueSlug: string; categorySlug: string }[] = [];
-    for (const venueSlug of slugs) {
-      const menu = await getVenueMenu(venueSlug);
-      for (const c of menu ?? []) params.push({ venueSlug, categorySlug: c.slug });
+    const params: { locale: string; venueSlug: string; categorySlug: string }[] = [];
+    for (const locale of LOCALES) {
+      for (const venueSlug of slugs) {
+        const menu = await getVenueMenu(venueSlug, locale);
+        for (const c of menu ?? []) {
+          params.push({ locale, venueSlug, categorySlug: c.slug });
+        }
+      }
     }
     return params.length ? params : fallback;
   } catch {
@@ -27,12 +37,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ venueSlug: string; categorySlug: string }>;
+  params: Promise<{ locale: string; venueSlug: string; categorySlug: string }>;
 }): Promise<Metadata> {
-  const { venueSlug, categorySlug } = await params;
+  const { locale, venueSlug, categorySlug } = await params;
   const [venue, menu] = await Promise.all([
     getVenueBySlug(venueSlug),
-    getVenueMenu(venueSlug),
+    getVenueMenu(venueSlug, locale),
   ]);
   const category = menu?.find((c) => c.slug === categorySlug);
   if (!venue || !category) return {};
@@ -48,9 +58,7 @@ export async function generateMetadata({
 // Breakfast on Terrace) 404 here and never appear below.
 export default async function CategoryPage({
   params,
-}: {
-  params: Promise<{ venueSlug: string; categorySlug: string }>;
-}) {
+}: PageProps<"/[locale]/[venueSlug]/[categorySlug]">) {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-6 sm:px-6">
       <Suspense fallback={<Spinner />}>
@@ -63,14 +71,15 @@ export default async function CategoryPage({
 async function CategoryView({
   params,
 }: {
-  params: Promise<{ venueSlug: string; categorySlug: string }>;
+  params: Promise<{ locale: string; venueSlug: string; categorySlug: string }>;
 }) {
-  const { venueSlug, categorySlug } = await params;
+  const { locale, venueSlug, categorySlug } = await params;
+  if (!isLocale(locale)) notFound();
 
   const venue = await getVenueBySlug(venueSlug);
   if (!venue) notFound();
 
-  const menu = await getVenueMenu(venueSlug);
+  const menu = await getVenueMenu(venueSlug, locale);
   if (!menu) notFound();
 
   const chosen = menu.find((c) => c.slug === categorySlug);
@@ -82,12 +91,15 @@ async function CategoryView({
     <div className="flex w-full max-w-md flex-col gap-6 sm:max-w-2xl lg:max-w-4xl">
       {/* Brand header (Figma: MONO mark centered at top of every menu screen). */}
       <div className="flex flex-col items-center gap-4">
-        <Link
-          href={`/${venueSlug}`}
-          className="-my-1 self-start py-2 font-body text-xs text-muted underline"
-        >
-          &lsaquo; {venue.name}
-        </Link>
+        <div className="flex w-full items-center justify-between">
+          <Link
+            href={`/${locale}/${venueSlug}`}
+            className="-my-1 py-2 font-body text-xs text-muted underline"
+          >
+            &lsaquo; {venue.name}
+          </Link>
+          <LanguageSwitcher current={locale as Locale} />
+        </div>
         <div className="relative h-16 w-14">
           <Image
             src="/brand/mono.svg"

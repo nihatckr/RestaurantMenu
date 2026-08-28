@@ -110,7 +110,6 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
       {/* one Fragment per product → its cells flow into the shared grid columns */}
       {items.map((item) => (
         <Fragment key={item.id}>
-          {/* TR name stacked over the EN name (alt alta). */}
           <div className="min-w-0 py-1 leading-tight">
             <span className="type-item text-sm">
               {item.title}
@@ -120,9 +119,6 @@ function DrinkTable({ items }: { items: MenuItemView[] }) {
                 </span>
               )}
             </span>
-            {item.titleAlt && (
-              <span className="type-desc block text-xs">{item.titleAlt}</span>
-            )}
           </div>
           {glassLabels.map((l) => (
             <span key={`g-${item.id}-${l}`} className={priceCell}>
@@ -163,25 +159,13 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
   ];
   const grouped = tags.length >= 2;
 
-  // Figma category header leads with English (STARTERS big, BAŞLANGIÇLAR small)
-  // — the opposite emphasis of the TR-primary category LIST. nameAlt is the
-  // secondary-language name (EN under the tr default); fall back to name if absent.
-  const heading = category.nameAlt ?? category.name;
-  const subheading = category.nameAlt ? category.name : null;
-
+  // Single-language category header (the locale comes from the route). The page
+  // sets `lang` on <html>, so the uppercase title gets the right dotted/dotless I
+  // (SPIRITS in en, VİSKİ in tr) from the CSS text-transform automatically.
   return (
     <section className="w-full scroll-mt-4">
       <div className="py-4 text-center">
-        {/* lang=en so the uppercase EN title uses dotless I (SPIRITS, not SPİRİTS). */}
-        <h2
-          lang={category.nameAlt ? "en" : undefined}
-          className="type-heading text-lg tracking-[0.125em]"
-        >
-          {heading}
-        </h2>
-        {subheading && (
-          <p className="type-subheading text-xs tracking-[0.2em]">{subheading}</p>
-        )}
+        <h2 className="type-heading text-lg tracking-[0.125em]">{category.name}</h2>
       </div>
 
       {items.length === 0 ? (
@@ -189,24 +173,12 @@ export function CategorySection({ category }: { category: MenuCategoryView }) {
       ) : grouped ? (
         <div className="flex flex-col gap-6">
           {tags.map((tag) => {
-            // Sub-category header EN-big + TR-small (legacy HeaderSubCenter,
-            // left-aligned). tagAlt is the EN name; fall back to TR-only.
-            const alt = items.find((i) => i.tag === tag)?.tagAlt ?? null;
-            const heading = alt ?? tag;
-            const subheading = alt ? tag : null;
+            // Sub-category header, localized to the page locale (legacy
+            // HeaderSubCenter, left-aligned). tagLabel falls back to the TR tag.
+            const heading = items.find((i) => i.tag === tag)?.tagLabel ?? tag;
             return (
               <div key={tag}>
-                <h3
-                  lang={alt ? "en" : undefined}
-                  className="type-tag text-base tracking-[0.125em]"
-                >
-                  {heading}
-                </h3>
-                {subheading && (
-                  <p className="type-subheading mb-1 text-[0.625rem] tracking-[0.2em]">
-                    {subheading}
-                  </p>
-                )}
+                <h3 className="type-tag text-base tracking-[0.125em]">{heading}</h3>
                 <TagGroup items={items.filter((i) => i.tag === tag)} />
               </div>
             );

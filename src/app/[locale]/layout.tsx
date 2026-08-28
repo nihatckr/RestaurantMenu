@@ -1,14 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
+import { notFound } from "next/navigation";
 import { MenuFooter } from "@/components/MenuFooter";
-import "./globals.css";
+import { LOCALES, isLocale } from "@/lib/i18n";
+import "../globals.css";
 
 // Brand display font ported from the legacy apps (MonoTRegular).
 const mono = localFont({
   src: [
-    { path: "./fonts/MonoTRegular.woff", weight: "400", style: "normal" },
-    { path: "./fonts/MonoTRegular.ttf", weight: "400", style: "normal" },
+    { path: "../fonts/MonoTRegular.woff", weight: "400", style: "normal" },
+    { path: "../fonts/MonoTRegular.ttf", weight: "400", style: "normal" },
   ],
   variable: "--font-brand",
   display: "swap",
@@ -36,12 +38,24 @@ export const viewport: Viewport = {
   themeColor: "#000000",
 };
 
-// Root layout. Locale-aware `<html lang>` is set by the [locale] segment layout
-// (I18N.md); this root defaults to Turkish, the business default language.
-export default function RootLayout({ children }: LayoutProps<"/">) {
+// Prerender one HTML shell per supported locale (I18N.md).
+export function generateStaticParams() {
+  return LOCALES.map((locale) => ({ locale }));
+}
+
+// Root layout, nested under [locale] so `<html lang>` matches the page language
+// (Next.js internationalization guide). The whole page renders in one language;
+// the locale lives in the route so pages stay static/cache-friendly per locale.
+export default async function LocaleLayout({
+  children,
+  params,
+}: LayoutProps<"/[locale]">) {
+  const { locale } = await params;
+  if (!isLocale(locale)) notFound();
+
   return (
     <html
-      lang="tr"
+      lang={locale}
       className={`${mono.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-body">

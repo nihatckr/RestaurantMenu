@@ -17,7 +17,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: "PORT=3100 npm run start",
-    url: "http://127.0.0.1:3100/terrace",
+    url: "http://127.0.0.1:3100/tr/terrace",
     reuseExistingServer: true,
     timeout: 120_000,
   },

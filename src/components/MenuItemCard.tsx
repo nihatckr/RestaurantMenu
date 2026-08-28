@@ -25,7 +25,6 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
             <span className={`type-price whitespace-nowrap ${size}`}>{price}</span>
           )}
         </div>
-        {item.titleAlt && <p className="type-desc text-xs">{item.titleAlt}</p>}
         {item.subtitle && <p className="type-desc text-xs">{item.subtitle}</p>}
         {item.description && <p className="type-desc text-xs">{item.description}</p>}
       </article>
@@ -54,9 +53,6 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
             </span>
           )}
         </p>
-        {item.titleAlt && (
-          <p className="type-desc text-xs leading-tight">{item.titleAlt}</p>
-        )}
         <div className="flex flex-wrap items-end gap-x-3 gap-y-1 pt-0.5">
           {item.prices.length > 0 ? (
             item.prices.map((po) => (
