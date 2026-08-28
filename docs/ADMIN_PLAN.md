@@ -69,24 +69,30 @@ Public reads use `use cache` (PPR). For edits to appear without redeploying:
 - The guest render stays fully static/cacheable; only the admin's own view is
   dynamic.
 
-## 3. Auth (T12) + First run (empty database)
+## 3. Auth (T12) + First run (empty database) — DECIDED: single password, owner-only
 
-- **Library:** **Auth.js v5 (NextAuth)** with the **Prisma adapter** — App-Router
-  native, not on the denied-deps list, purpose-built (justified per ARCHITECTURE
-  §"dependencies"). Avoids hand-rolling sessions/CSRF.
-- **Method (recommended): passwordless email magic-link.** Simplest UX (owner types
-  their email, clicks the link — no password to set/store/reset) and it works on an
-  **empty DB**. Alternative: single hashed password in env. Decide (**U-admin-1**).
-  No public sign-up.
-- **First run on an empty DB (seedless):** the allowed admin email is set in env
-  (`ADMIN_EMAIL`). On first magic-link login it creates the `User` row (role
-  `admin`). If no `Business`/`Venue` exists yet, a tiny **first-run setup** step in
-  the admin creates the Business + the first Venue (name + wordmark). From there the
-  owner adds categories and products. **No content seed needed at any point.**
-- **Model additions:** `User` (+ `role`), `Session`, `VerificationToken` (Auth.js
-  adapter tables). No committed credentials — only `ADMIN_EMAIL` + mail-sender creds
-  in env.
-- **Session:** httpOnly, secure, SameSite cookies; short-lived + rotation.
+**Decision (2026-08-28, resolves U-admin-1):** exactly **one admin (the owner)**,
+**single password**. No multi-user, no email service, no OAuth — the simplest secure
+fit for one person editing (often from a phone).
+
+- **Approach — lightweight session, not full Auth.js.** Auth.js's provider/adapter
+  machinery is overkill for one env-based password. Use **`iron-session`**
+  (maintained, encrypted+signed httpOnly cookie — still not hand-rolled) + verify the
+  password with **`argon2`** (or bcrypt) against a hash in env
+  (`ADMIN_PASSWORD_HASH`). No `User`/`Session`/`Account` tables needed. (Auth.js is
+  the documented upgrade path **if** multiple users / OAuth are ever added.)
+- **Login flow:** discreet unlinked route `/login` → password field → verify against
+  `ADMIN_PASSWORD_HASH` → set the encrypted session cookie. **Rate-limit** the login
+  (it's a password now: throttle attempts, generic error).
+- **First run on an empty DB (seedless):** password comes from env, so login works on
+  a fresh DB with no user row. On first login, if no `Business`/`Venue` exists, a tiny
+  **first-run setup** creates the Business + first Venue (name + wordmark). Then the
+  owner adds categories/products. **No content seed at any point.**
+- **Break-glass = env:** the password lives in `ADMIN_PASSWORD_HASH`; if forgotten/
+  leaked, the dev sets a new hash + redeploys (documented in OPS). No lockout.
+- **Session:** encrypted, httpOnly, secure, SameSite cookie; sensible expiry + idle
+  timeout. Logout clears it. Secrets (`ADMIN_PASSWORD_HASH`, session secret) only in
+  env, never committed.
 
 ## 4. Authorization & the write path (SECURITY.md §2)
 
@@ -113,9 +119,10 @@ Public reads use `use cache` (PPR). For edits to appear without redeploying:
 The consolidated "so nobody hacks us" list. All must be present before the admin
 goes live.
 
-- **Auth:** magic-link tokens **short-lived + single-use**; `ADMIN_EMAIL` allow-list;
-  cookies httpOnly + secure + SameSite; **rate-limit the login/magic-link request**
-  (anti email-bomb / user-enumeration → generic responses either way).
+- **Auth:** single owner password, **argon2-hashed** in env (`ADMIN_PASSWORD_HASH`);
+  encrypted httpOnly + secure + SameSite session cookie (`iron-session`) with idle
+  timeout; **rate-limit + throttle login attempts** (brute-force defence, generic
+  error). Secrets only in env; env break-glass for reset.
 - **Authorization:** every mutation re-checks the session + `role === "admin"`
   **server-side**; queries scoped to this business's rows (no IDOR); security never
   relies on hiding the UI.
@@ -304,14 +311,15 @@ safety is non-negotiable and ships *with* the admin, not after:
 | **A. Seedless deploy** | Deploy runs migrate only; remove reconcile; demote content seed to `seed:demo` (dev-only) | A fresh prod DB comes up **empty**; re-runs never delete/overwrite |
 | **B. Cache tags** | `cacheTag` in data-access; a `revalidateMenu()` helper | An edit reflects on the public page after `revalidateTag` |
 | **C. Data safety (must-have)** | Verify managed-Postgres backups/PITR; soft-delete/trash for products & categories (or block non-empty delete); **Excel (.xlsx) export/import** (exceljs, slug-keyed, zod+integrity-validated, upsert default / confirmed full-replace, images as URLs); login break-glass; blob orphan cleanup | Backups verified + restore tested; a deleted item is recoverable; owner can **export to Excel, edit, and re-import to rebuild the DB** (bad files rejected with row errors); no lockout path |
-| **T12 Auth + first run** | Auth.js magic-link; `ADMIN_EMAIL`; first-run creates admin + Business/Venue on empty DB | On an empty DB, the owner logs in and reaches `/admin`; no seed used |
+| **T12 Auth + first run** | `iron-session` + argon2 single owner password (`ADMIN_PASSWORD_HASH`); `/login` + logout; rate-limit; first-run creates Business/Venue on empty DB | On an empty DB, the owner logs in with the password and reaches edit mode; no seed/email used |
 | **T13 CRUD (create-first, inline)** | Inline Edit/Delete + "＋ Add" controls on the live pages (admin-session islands) opening **modal forms**; server actions + zod for **add/edit/delete categories & products**, prices, translations, per-venue visibility/order; auto-slug; revalidate on write | On an empty DB the owner **builds a full menu in place** (＋ Add category → ＋ Add product in a modal → set price → appears live); guests see none of it; validation blocks bad input |
 | **T14 Images & logos** | `ImageField` (tap-pick + preview + remove, optional desktop drag-drop); upload to blob storage; `remotePatterns`; `Product.image` = URL; **logos too** (venue wordmark + brand mark → data); PNG/WebP for logos (SVG XSS) | Owner uploads a product photo **and a logo/wordmark** → both render on the menu |
 | **Sec + tests** | Rate-limit, audit log, noindex; e2e of the human flow (login → add category → add product → see it live) | SECURITY.md §2 controls present; e2e green |
 
 ## 8. Open questions (confirm with owner)
 
-- **U-admin-1** Auth method: email+password vs magic-link? How many staff accounts?
+- **~~U-admin-1~~ RESOLVED (2026-08-28):** one admin (the owner), **single password**
+  (`iron-session` + argon2, env hash) — no email/multi-user. See §3.
 - **U-admin-2** Image storage provider (Vercel Blob vs S3/R2)?
 - **U-admin-3** Do prices ever differ **per venue**, or always equal? (affects the
   price-edit UI — the model already allows per-venue.)

@@ -246,6 +246,77 @@ acceptance criteria (see the "Mapping to TASKS.md" table in `SECURITY.md`).
 - **Acceptance:** a Product can be shown in one venue and hidden in another,
   reordered, and (if A1 confirmed) priced per venue — all without code changes.
 
+### Admin — execution checklist (Path B, 2026-08-28)
+
+Granular, **dependency-ordered** build steps. Design lives in `ADMIN_PLAN.md`; this is
+the tracker. Auth = **single owner password** (`iron-session` + argon2). Run the gates
+(typecheck/lint/unit/e2e/build) after every step; commit per step.
+
+**Phase A — Seedless foundation** *(must land first — else deploys wipe edits)*
+- [ ] Make `prisma/seed.ts` idempotent **bootstrap-only**: remove every
+  `deleteMany(… notIn …)` reconcile; never overwrite existing rows. *Done when:*
+  re-running seed on a populated DB changes nothing.
+- [ ] Demote content seed to `npm run seed:demo` (dev-only); keep `prices.ts`/
+  `translations.ts` as the demo source. *Done when:* seeding is not in the prod path.
+- [ ] `vercel-build` → **migrate-only** (drop `db seed`). *Done when:* a fresh prod
+  DB comes up **empty**; DEPLOY.md updated.
+
+**Phase B — Cache tagging**
+- [ ] Add `cacheTag("menu","venue:<slug>")` to the data-access reads. *Done when:*
+  reads carry tags.
+- [ ] `revalidateMenu(venueSlug?)` helper over `revalidateTag`. *Done when:* calling
+  it refreshes the affected public pages.
+
+**Phase C — Data safety** *(before any write feature goes live)*
+- [ ] Verify managed-Postgres **backups/PITR** enabled + test one restore (OPS).
+- [ ] **Soft-delete** (`deletedAt`) on Product & Category + filter in data-access
+  (or block deleting a non-empty category). *Done when:* a delete is recoverable.
+- [ ] **Excel export** (`exceljs`): workbook of categories/products/translations/
+  prices/visibility. *Done when:* owner downloads the menu as `.xlsx`.
+- [ ] **Excel import**: slug-keyed, runs zod + integrity checks, **row-level errors,
+  reject before write**; upsert default, confirmed full-replace (+auto-backup).
+  *Done when:* a valid file rebuilds the DB; a bad file is rejected with errors.
+- [ ] Document env break-glass (password reset).
+
+**T12 — Auth + first run**
+- [ ] Add deps `iron-session` + `argon2`; env `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`.
+- [ ] `/login` (password verify → encrypted session cookie) + logout action +
+  **login rate-limit/throttle**. *Done when:* right password logs in, wrong is
+  rejected + throttled.
+- [ ] `getAdminSession()` server helper gating admin islands **and** every server
+  action. *Done when:* guests see none of it; actions reject unauthenticated calls.
+- [ ] First-run: if no `Business`/`Venue`, a setup modal creates them. *Done when:*
+  empty DB → login → create the first venue.
+
+**T13 — Inline CRUD (create-first)**
+- [ ] UI primitives: `cn()` (clsx+tailwind-merge), `Button`/`Input`/`Textarea`/
+  `Field`, and the `Modal` (native `<dialog>` wrapper: focus-trap, ESC, backdrop
+  close, scroll-lock). Lucide icons.
+- [ ] zod schema per entity (shared client form + server action).
+- [ ] Inline Edit/Delete + "＋ Add" controls, rendered only in an admin session.
+- [ ] **Category** add/edit/delete (server action + modal: tr/en/ru, columns,
+  auto-slug) + `revalidateMenu`. *Done when:* owner adds/edits/deletes a category live.
+- [ ] **Product** add/edit/delete (modal: tr/en/ru, category, kind, tag, price/
+  measures, venues, visibility; auto-slug) + revalidate. *Done when:* owner builds a
+  product from scratch and it appears live.
+- [ ] Per-venue **visibility/order** toggles + reorder.
+- [ ] Sticky-header account control (Settings + Logout) when logged in.
+
+**T14 — Images / logos / favicon + Settings**
+- [ ] Blob storage (Vercel Blob) + `next.config` `remotePatterns`.
+- [ ] `ImageField` (tap-pick + preview + remove; optional desktop drag-drop) + server
+  upload action + **sharp** optimize (WebP/resize/strip). Product photo wired.
+- [ ] **Settings page:** venue details, wordmark; **brand logo** (promote
+  `BRAND.mark` → data); **favicon + PWA icons** generated from the logo (sharp) via
+  dynamic routes/manifest. PNG/WebP for logos (SVG XSS).
+- [ ] Blob **orphan cleanup** on replace/remove.
+
+**Security + tests (cross-cutting, before go-live)**
+- [ ] `ADMIN_PLAN.md` §4b hardening all present (authz on every action, zod
+  allow-list, server-mediated uploads, least-priv DB, admin `noindex`, audit log).
+- [ ] **e2e human flow:** login → add category → add product → set price → see it
+  live → logout.
+
 ### T15 — Tests — ✅ DONE (2026-08-27)
 - **Result:** Vitest suite, **13 tests green**. Unit: `pickLocalized` fallback
   (i18n), `formatPriceTRY`. Integration (seeded Postgres): both venues listed &
