@@ -137,6 +137,16 @@ goes live.
 - **Ops:** **audit log** of mutations (who/what/when); non-leaky errors; dependency
   hygiene (`npm audit`, keep Auth.js/adapters current); backups per §6d.
 
+**Further hardening (phase-in / ops — nice-to-have, not launch-blocking):** extra
+cross-origin headers (COOP/CORP); enable Vercel's **firewall / edge rate-limit**
+(bot/DDoS); **session idle-timeout + "log out everywhere"** (shared restaurant
+devices); **monitoring/alerting** (e.g. Sentry — optional dep) + `npm audit`/
+Dependabot in CI + alert on repeated failed logins; a **pre-launch security review /
+basic pen-test** pass + secrets-rotation policy; **KVKK/privacy** note — minimal PII
+(admin email + audit log), and the public menu collects no guest data/analytics.
+These are captured so they aren't forgotten; fold them in during build/ops rather
+than pre-building them.
+
 ## 5. Admin CRUD surface (T13) — build a menu from nothing
 
 Full **create / edit / delete**, so the owner can stand up the whole menu on an
