@@ -12,3 +12,16 @@ export const categorySchema = z.object({
 });
 
 export type CategoryInput = z.infer<typeof categorySchema>;
+
+export const productSchema = z.object({
+  titleTr: z.string().trim().min(1, "Türkçe ad zorunlu").max(120),
+  titleEn: z.string().trim().max(120).optional().or(z.literal("")),
+  titleRu: z.string().trim().max(120).optional().or(z.literal("")),
+  categorySlug: z.string().trim().min(1, "Kategori seçin"),
+  kind: z.enum(["FOOD", "DRINK"]),
+  tag: z.string().trim().max(40).optional().or(z.literal("")),
+  // Single price (TRY). Optional — some items are priceless / measure-priced (later).
+  price: z.coerce.number().min(0).max(1_000_000).optional(),
+});
+
+export type ProductInput = z.infer<typeof productSchema>;

@@ -1,7 +1,8 @@
 import "server-only";
+import type { ProductKind } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { slugify, uniqueSlug } from "@/lib/slug";
-import type { CategoryInput } from "@/lib/schemas";
+import type { CategoryInput, ProductInput } from "@/lib/schemas";
 
 // Admin write path for categories (ADMIN_PLAN.md §5). Prisma stays behind this
 // data-access layer; the server actions call these after auth + zod. Admin reads are
@@ -131,4 +132,177 @@ export async function updateCategory(id: string, input: CategoryInput) {
 /** Soft-delete (trash) — hidden from the public menu, recoverable. */
 export async function softDeleteCategory(id: string) {
   await prisma.category.update({ where: { id }, data: { deletedAt: new Date() } });
+}
+
+// ── Products ────────────────────────────────────────────────────────────────
+
+export type ProductAdminRow = {
+  id: string;
+  titleTr: string;
+  titleEn: string;
+  titleRu: string;
+  categorySlug: string;
+  kind: ProductKind;
+  tag: string;
+  price: number | null;
+};
+
+/** Category options (slug + Turkish name) for the product form's picker. */
+export async function getCategoryOptions(
+  venueSlug: string,
+): Promise<{ slug: string; nameTr: string }[]> {
+  const rows = await getCategoriesAdmin(venueSlug);
+  return rows.map((c) => ({ slug: c.slug, nameTr: c.nameTr || c.slug }));
+}
+
+/** Products in this venue's menu (non-deleted), with edit fields + this venue's price. */
+export async function getProductsAdmin(
+  venueSlug: string,
+): Promise<ProductAdminRow[]> {
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: {
+      menu: {
+        select: {
+          items: {
+            where: { product: { deletedAt: null } },
+            orderBy: { sortOrder: "asc" },
+            select: {
+              price: true,
+              category: { select: { slug: true } },
+              product: {
+                select: {
+                  id: true,
+                  kind: true,
+                  tag: true,
+                  translations: { select: { locale: true, title: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+  return (venue?.menu?.items ?? []).map((it) => {
+    const t = Object.fromEntries(it.product.translations.map((x) => [x.locale, x.title]));
+    return {
+      id: it.product.id,
+      titleTr: t.tr ?? "",
+      titleEn: t.en ?? "",
+      titleRu: t.ru ?? "",
+      categorySlug: it.category.slug,
+      kind: it.product.kind,
+      tag: it.product.tag ?? "",
+      price: it.price === null ? null : Number(it.price),
+    };
+  });
+}
+
+function titleRows(input: ProductInput) {
+  const rows = [{ locale: "tr", title: input.titleTr.trim() }];
+  if (input.titleEn?.trim()) rows.push({ locale: "en", title: input.titleEn.trim() });
+  if (input.titleRu?.trim()) rows.push({ locale: "ru", title: input.titleRu.trim() });
+  return rows;
+}
+
+/** Create a product + its translations and add it to this venue's menu (in the
+ *  chosen category, appended, available) so it appears immediately. */
+export async function createProduct(venueSlug: string, input: ProductInput) {
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: { businessId: true, menu: { select: { id: true } } },
+  });
+  if (!venue?.menu) throw new Error("Venue menu not found");
+  const category = await prisma.category.findFirst({
+    where: { businessId: venue.businessId, slug: input.categorySlug, deletedAt: null },
+    select: { id: true },
+  });
+  if (!category) throw new Error("Category not found");
+
+  const taken = new Set(
+    (
+      await prisma.product.findMany({
+        where: { businessId: venue.businessId },
+        select: { slug: true },
+      })
+    ).map((p) => p.slug),
+  );
+  const slug = uniqueSlug(slugify(input.titleEn || input.titleTr), taken);
+  const max = await prisma.menuItem.aggregate({
+    where: { menuId: venue.menu.id, categoryId: category.id },
+    _max: { sortOrder: true },
+  });
+
+  const product = await prisma.product.create({
+    data: {
+      businessId: venue.businessId,
+      slug,
+      kind: input.kind as ProductKind,
+      tag: input.tag?.trim() || null,
+      translations: { create: titleRows(input) },
+    },
+  });
+  await prisma.menuItem.create({
+    data: {
+      menuId: venue.menu.id,
+      productId: product.id,
+      categoryId: category.id,
+      price: input.price ?? null,
+      available: true,
+      sortOrder: (max._max.sortOrder ?? 0) + 1,
+    },
+  });
+}
+
+/** Update a product's identity + this venue's category/price. */
+export async function updateProduct(
+  productId: string,
+  venueSlug: string,
+  input: ProductInput,
+) {
+  const venue = await prisma.venue.findUnique({
+    where: { slug: venueSlug },
+    select: { businessId: true, menu: { select: { id: true } } },
+  });
+  if (!venue?.menu) throw new Error("Venue menu not found");
+  const category = await prisma.category.findFirst({
+    where: { businessId: venue.businessId, slug: input.categorySlug, deletedAt: null },
+    select: { id: true },
+  });
+  if (!category) throw new Error("Category not found");
+
+  await prisma.product.update({
+    where: { id: productId },
+    data: { kind: input.kind as ProductKind, tag: input.tag?.trim() || null },
+  });
+  const values: [string, string | undefined][] = [
+    ["tr", input.titleTr],
+    ["en", input.titleEn],
+    ["ru", input.titleRu],
+  ];
+  for (const [locale, raw] of values) {
+    const title = (raw ?? "").trim();
+    if (title) {
+      await prisma.productTranslation.upsert({
+        where: { productId_locale: { productId, locale } },
+        update: { title },
+        create: { productId, locale, title },
+      });
+    } else if (locale !== "tr") {
+      await prisma.productTranslation.deleteMany({ where: { productId, locale } });
+    }
+  }
+  await prisma.menuItem.updateMany({
+    where: { menuId: venue.menu.id, productId },
+    data: { categoryId: category.id, price: input.price ?? null },
+  });
+}
+
+/** Soft-delete (trash) a product — hidden from the public menu, recoverable. */
+export async function softDeleteProduct(productId: string) {
+  await prisma.product.update({
+    where: { id: productId },
+    data: { deletedAt: new Date() },
+  });
 }

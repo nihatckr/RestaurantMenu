@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
@@ -38,47 +39,49 @@ export function CategoryManager({
     router.refresh();
   }, [router]);
 
-  return (
-    <section className="w-full max-w-sm rounded-lg border border-muted/20 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-brand text-sm uppercase tracking-[0.15em]">Kategoriler</h2>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-1 px-2 py-1 text-xs"
-          onClick={() => setEditing({ mode: "add" })}
-        >
-          <Plus size={14} aria-hidden /> Ekle
-        </Button>
-      </div>
+  const displayName = (row: CategoryAdminRow) =>
+    (locale === "en" ? row.nameEn : locale === "ru" ? row.nameRu : row.nameTr) ||
+    row.nameTr;
 
-      <ul className="flex flex-col divide-y divide-muted/10">
+  return (
+    <nav aria-label="Menu categories" className="w-full max-w-sm">
+      <ul className="flex flex-col">
         {categories.map((row) => (
-          <li key={row.id} className="flex items-center justify-between py-2">
-            <span className="font-body text-sm">{row.nameTr}</span>
-            <div className="flex items-center gap-3 text-muted">
-              <button
-                type="button"
-                aria-label={`${row.nameTr} düzenle`}
-                onClick={() => setEditing({ mode: "edit", row })}
-                className="transition-colors hover:text-foreground"
-              >
-                <Pencil size={16} aria-hidden />
-              </button>
-              <button
-                type="button"
-                aria-label={`${row.nameTr} sil`}
-                onClick={() => setEditing({ mode: "delete", row })}
-                className="transition-colors hover:text-mono-red"
-              >
-                <Trash2 size={16} aria-hidden />
-              </button>
-            </div>
+          <li key={row.id} className="flex items-center gap-2 py-1">
+            {/* Same category link as guests see, plus inline admin controls. */}
+            <Link
+              href={`/${locale}/${venueSlug}/${row.slug}`}
+              className="type-heading flex-1 py-2 text-sm tracking-[0.6em] text-foreground transition-colors hover:text-muted"
+            >
+              {displayName(row)}
+            </Link>
+            <button
+              type="button"
+              aria-label={`${row.nameTr} düzenle`}
+              onClick={() => setEditing({ mode: "edit", row })}
+              className="text-muted transition-colors hover:text-foreground"
+            >
+              <Pencil size={16} aria-hidden />
+            </button>
+            <button
+              type="button"
+              aria-label={`${row.nameTr} sil`}
+              onClick={() => setEditing({ mode: "delete", row })}
+              className="text-muted transition-colors hover:text-mono-red"
+            >
+              <Trash2 size={16} aria-hidden />
+            </button>
           </li>
         ))}
-        {categories.length === 0 && (
-          <li className="py-2 font-body text-xs text-muted">Henüz kategori yok.</li>
-        )}
       </ul>
+
+      <Button
+        variant="ghost"
+        className="mt-2 flex w-full items-center justify-center gap-1 py-2 text-xs"
+        onClick={() => setEditing({ mode: "add" })}
+      >
+        <Plus size={14} aria-hidden /> Kategori ekle
+      </Button>
 
       {editing?.mode === "add" && (
         <CategoryFormModal
@@ -105,7 +108,7 @@ export function CategoryManager({
           onDone={done}
         />
       )}
-    </section>
+    </nav>
   );
 }
 

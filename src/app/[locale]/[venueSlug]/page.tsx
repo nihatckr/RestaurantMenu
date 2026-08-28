@@ -4,16 +4,10 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { VenueHeader } from "@/components/VenueHeader";
-import { CategoryNav } from "@/components/CategoryNav";
-import { CategoryAdmin } from "./CategoryAdmin";
+import { CategoryNavIsland } from "./CategoryNavIsland";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Spinner } from "@/components/Spinner";
-import {
-  getVenueBySlug,
-  getVenueMenu,
-  listVenueCategories,
-  listVenueSlugs,
-} from "@/lib/data/menu";
+import { getVenueBySlug, getVenueMenu, listVenueSlugs } from "@/lib/data/menu";
 import { buildMenuJsonLd } from "@/lib/jsonld";
 import { LOCALES, isLocale, buildAlternates, type Locale } from "@/lib/i18n";
 import { getMessages } from "@/lib/messages";
@@ -81,10 +75,7 @@ async function VenueLanding({
   const venue = await getVenueBySlug(venueSlug);
   if (!venue) notFound();
 
-  const [categories, menu] = await Promise.all([
-    listVenueCategories(venueSlug, locale),
-    getVenueMenu(venueSlug, locale),
-  ]);
+  const menu = await getVenueMenu(venueSlug, locale);
   const jsonLd = menu ? buildMenuJsonLd(venue.name, menu, locale) : null;
   return (
     <>
@@ -98,11 +89,10 @@ async function VenueLanding({
         <LanguageSwitcher current={locale as Locale} />
       </div>
       <VenueHeader name={venue.name} homeHref={`/${locale}`} />
-      <CategoryNav locale={locale} venueSlug={venueSlug} categories={categories} />
-      {/* Admin-only inline category manager — session-gated island, so guests keep
-          the static shell (renders null for them). */}
-      <Suspense fallback={null}>
-        <CategoryAdmin locale={locale} venueSlug={venueSlug} />
+      {/* One category list — guests see plain links, an admin sees the same list
+          with inline edit/delete/add (session-aware island, Suspense-isolated). */}
+      <Suspense fallback={<Spinner />}>
+        <CategoryNavIsland locale={locale} venueSlug={venueSlug} />
       </Suspense>
       {/* Figma: MONO TERRACE wordmark anchored at the bottom of the landing.
           Links to the venue chooser (the locale root "home"). */}

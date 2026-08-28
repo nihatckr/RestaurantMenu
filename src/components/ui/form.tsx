@@ -17,6 +17,13 @@ export function Textarea({
   return <textarea className={cn(control, "min-h-20 resize-y", className)} {...props} />;
 }
 
+export function Select({
+  className,
+  ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return <select className={cn(control, className)} {...props} />;
+}
+
 // Label + optional error wrapper for a single form control.
 export function Field({
   label,

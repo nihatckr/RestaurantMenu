@@ -171,8 +171,8 @@ test("admin creates and deletes a category inline", async ({ page }) => {
   await expect(page).toHaveURL(/\/tr$/);
   await page.goto("/tr/terrace");
 
-  // Add a category via the modal.
-  await page.getByRole("button", { name: /Ekle/ }).click();
+  // Add a category via the modal (the add control on the category list).
+  await page.getByRole("button", { name: "Kategori ekle" }).click();
   await page.getByLabel("Ad (Türkçe)").fill(name);
   await page.getByRole("button", { name: "Kaydet" }).click();
 
