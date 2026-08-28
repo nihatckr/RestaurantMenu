@@ -50,6 +50,16 @@ export async function uploadImage(file: File, keyPrefix: string): Promise<string
     return url;
   }
 
+  // No blob token: the local-disk fallback below is only durable on a persistent
+  // filesystem (local dev / self-hosted). On Vercel the fs is ephemeral/read-only,
+  // so a "successful" upload would silently vanish on the next request — fail loud
+  // instead, so the owner knows to configure a Blob store.
+  if (process.env.VERCEL) {
+    throw new ImageError(
+      "Görsel deposu yapılandırılmamış. Kalıcı yükleme için Vercel’de bir Blob deposu oluşturup BLOB_READ_WRITE_TOKEN ekleyin.",
+    );
+  }
+
   // Dev/e2e fallback: write under public/uploads and return a same-origin path.
   const rel = path.posix.join("uploads", key);
   const abs = path.join(process.cwd(), "public", rel);
