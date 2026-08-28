@@ -18,19 +18,25 @@ ayrıntılar için `DEPLOY.md` / `OPS.md`.
 
 ## 3. Deploy
 - [ ] Repoyu Vercel'e import et. Build otomatik migration çalıştırır (`vercel-build`).
-- [ ] İlk kurulumda admin'i tohumla: `npm run seed:admin` (ADMIN_PASSWORD'u kullanır).
-- [ ] İçerik tohumu (opsiyonel, sadece boş DB): `npm run seed:demo`.
+- [ ] **Tek kurulum komutu:** `npm run seed:admin`
+      → admin kullanıcısını (ADMIN_PASSWORD) **ve** bir Business kaydını oluşturur
+      (adı `BUSINESS_NAME` env'inden, yoksa "İşletme"). Panelin çalışması için
+      Business şart; bu komut onu garanti eder.
+- [ ] İçerik tohumu **gerekmez** — menüyü panelden kuracaksın. (Sadece hazır demo
+      içerik istersen `npm run seed:demo`; boş DB'ye çalışır.)
 
-## 4. İlk giriş & güvenlik
+## 4. İlk giriş & menüyü kurma
 - [ ] `/tr/login` → şifre ile gir. (Login sayfası hiçbir yerden linklenmez; yer imine ekle.)
 - [ ] **Ayarlar → Güvenlik**'ten şifreyi değiştir. (Varsayılan `1234` hâlâ aktifse
       Ayarlar sayfası üstte kırmızı uyarı gösterir.)
+- [ ] **Ayarlar → Mekanlar → Mekan ekle** ile ilk mekanı oluştur (örn. Terrace).
+- [ ] Mekanın sayfasında **Kategori ekle**, sonra her kategoride **Ürün ekle** ile menüyü kur.
 
 ## 5. İçerik (senin bilgin)
 - [ ] Gerçek **fiyatları** gir (ürün formundan ya da Excel yedeğini düzenleyip içe aktar).
 - [ ] **EN/RU çeviriler + açıklamalar** (boş bırakılırsa Türkçesi gösterilir).
 - [ ] Marka **logosu** ve mekan **wordmark**'larını yükle (Ayarlar → Marka / Mekanlar).
-- [ ] İşletme footer notu (iletişim/adres) — opsiyonel (Ayarlar → İşletme).
+- [ ] İşletme adı + footer notu (iletişim/adres) — Ayarlar → İşletme.
 
 ## 6. QR & masa
 - [ ] **Ayarlar → QR kodları**'ndan her mekanın QR'ını indir, masalara bas.
