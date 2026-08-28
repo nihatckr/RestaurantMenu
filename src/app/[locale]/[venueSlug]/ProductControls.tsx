@@ -9,6 +9,7 @@ import { ReorderButtons } from "@/components/ui/ReorderButtons";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Field, Select } from "@/components/ui/form";
 import { ImageField } from "@/components/ui/ImageField";
+import { DIETARY_TAGS, DIETARY_LABELS } from "@/lib/dietary";
 import type { ProductAdminRow } from "@/lib/data/admin";
 import {
   createProductAction,
@@ -275,6 +276,25 @@ function ProductFormModal({
         <Field label="Kalori (opsiyonel)" hint="kcal — kartta rozet olarak gösterilir." error={state.fieldErrors?.calories}>
           <Input name="calories" type="number" min={0} defaultValue={initial.calories ?? ""} />
         </Field>
+
+        <div className="flex flex-col gap-1">
+          <span className="font-body text-xs text-muted">
+            Diyet / alerjen (opsiyonel)
+          </span>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {DIETARY_TAGS.map((tag) => (
+              <label key={tag} className="flex items-center gap-1.5 font-body text-sm">
+                <input
+                  type="checkbox"
+                  name="dietary"
+                  value={tag}
+                  defaultChecked={initial.dietary?.includes(tag)}
+                />
+                {DIETARY_LABELS[tag].tr}
+              </label>
+            ))}
+          </div>
+        </div>
         <Field
           label="Kategori"
           hint="Ürünün hangi bölümde görüneceği. Değiştirirsen ürün o kategoriye taşınır."

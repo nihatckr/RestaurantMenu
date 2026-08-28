@@ -30,6 +30,18 @@ export function MenuItemCard({ item }: { item: MenuItemView }) {
         {item.calories != null && (
           <p className="type-desc text-xs text-muted">{item.calories} kcal</p>
         )}
+        {item.dietary.length > 0 && (
+          <div className="flex flex-wrap gap-1 pt-0.5">
+            {item.dietary.map((d) => (
+              <span
+                key={d}
+                className="rounded border border-muted/40 px-1 py-px text-[0.5625rem] uppercase tracking-wide text-muted"
+              >
+                {d}
+              </span>
+            ))}
+          </div>
+        )}
       </article>
     );
   }

@@ -5,6 +5,7 @@ import { revalidateMenu } from "@/lib/cache";
 import { resolveUploadedImage, ImageError } from "@/lib/images";
 import { audit } from "@/lib/data/audit";
 import { productSchema, zodFieldErrors } from "@/lib/schemas";
+import { isDietaryTag } from "@/lib/dietary";
 import {
   createProduct,
   updateProduct,
@@ -33,6 +34,7 @@ function parse(formData: FormData) {
     .map((r) => ({ label: r.label, amount: Number(r.amount || 0) }));
 
   const caloriesRaw = formData.get("calories");
+  const dietary = formData.getAll("dietary").map(String).filter(isDietaryTag);
   return productSchema.safeParse({
     titleTr: String(formData.get("titleTr") ?? ""),
     titleEn: String(formData.get("titleEn") ?? ""),
@@ -41,6 +43,7 @@ function parse(formData: FormData) {
     descriptionEn: String(formData.get("descriptionEn") ?? ""),
     descriptionRu: String(formData.get("descriptionRu") ?? ""),
     calories: caloriesRaw ? Number(caloriesRaw) : undefined,
+    dietary,
     categorySlug: String(formData.get("categorySlug") ?? ""),
     kind: String(formData.get("kind") ?? "FOOD"),
     tag: String(formData.get("tag") ?? ""),

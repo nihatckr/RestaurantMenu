@@ -3,6 +3,7 @@ import { cacheTag } from "next/cache";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, localized, pickLocalized } from "@/lib/i18n";
+import { dietaryLabel } from "@/lib/dietary";
 import { MENU_TAG, venueTag } from "@/lib/cache";
 
 // Thin, typed data-access layer (ARCHITECTURE.md). Components/pages call these
@@ -129,7 +130,7 @@ export type MenuItemView = {
   featured: boolean; // spans full width in its category (legacy featured breakfast)
   available: boolean; // per-venue visibility; public reads only ever return true
   calories: number | null; // optional kcal shown on the card
-  dietary: string[]; // diet/allergen tags (vegan, vegetarian, gluten_free, spicy, halal)
+  dietary: string[]; // localized diet/allergen badge labels (Vegan, Glutensiz…)
 };
 
 export type MenuCategoryView = {
@@ -211,7 +212,7 @@ function mapMenu(
       featured: item.featured,
       available: item.available,
       calories: item.product.calories,
-      dietary: item.product.dietary,
+      dietary: item.product.dietary.map((t) => dietaryLabel(t, locale)),
     };
     const bucket = itemsByCategory.get(item.categoryId) ?? [];
     bucket.push(view);

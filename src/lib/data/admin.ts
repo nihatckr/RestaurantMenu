@@ -292,6 +292,7 @@ export type ProductAdminRow = {
   descriptionEn: string;
   descriptionRu: string;
   calories: number | null;
+  dietary: string[]; // raw diet/allergen tags (for the form checkboxes)
   categorySlug: string;
   kind: ProductKind;
   tag: string;
@@ -347,6 +348,7 @@ export async function getProductsAdmin(
                   tag: true,
                   image: true,
                   calories: true,
+                  dietary: true,
                   translations: {
                     select: { locale: true, title: true, description: true },
                   },
@@ -372,6 +374,7 @@ export async function getProductsAdmin(
       descriptionEn: d.en ?? "",
       descriptionRu: d.ru ?? "",
       calories: it.product.calories,
+      dietary: it.product.dietary,
       categorySlug: it.category.slug,
       kind: it.product.kind,
       tag: it.product.tag ?? "",
@@ -434,6 +437,7 @@ export async function createProduct(
       tag: input.tag?.trim() || null,
       image: image ?? null,
       calories: input.calories ?? null,
+      dietary: input.dietary ?? [],
       translations: { create: titleRows(input) },
     },
   });
@@ -489,6 +493,7 @@ export async function updateProduct(
       kind: input.kind as ProductKind,
       tag: input.tag?.trim() || null,
       calories: input.calories ?? null,
+      dietary: input.dietary ?? [],
       ...(image !== undefined ? { image } : {}),
     },
   });

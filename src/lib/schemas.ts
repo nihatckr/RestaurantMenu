@@ -41,6 +41,7 @@ export const productSchema = z.object({
   descriptionEn: z.string().trim().max(300).optional().or(z.literal("")),
   descriptionRu: z.string().trim().max(300).optional().or(z.literal("")),
   calories: z.coerce.number().int().min(0).max(100000).optional(),
+  dietary: z.array(z.string()).max(10).optional(),
   categorySlug: z.string().trim().min(1, "Kategori seçin"),
   kind: z.enum(["FOOD", "DRINK"]),
   tag: z.string().trim().max(40).optional().or(z.literal("")),
